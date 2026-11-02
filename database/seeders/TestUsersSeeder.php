@@ -30,6 +30,12 @@ class TestUsersSeeder extends Seeder
 {
     public function run(): void
     {
+        if (app()->isProduction()) {
+            $this->command?->error('TestUsersSeeder solo carga datos de prueba; no se ejecuta en producción.');
+
+            return;
+        }
+
         $profile = app(ProfileService::class);
         $prov    = app(DeviceProvisioningService::class);
         $builder = app(SpaceBuilderService::class);

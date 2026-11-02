@@ -1,0 +1,6 @@
+# Solo desarrollo local: expone MySQL al host para usar `php artisan` y
+# `npm run dev` fuera de Docker. No usar en producción.
+services:
+  mysql:
+    ports:
+      - "127.0.0.1:${DB_FORWARD_PORT:-3308}:3306"

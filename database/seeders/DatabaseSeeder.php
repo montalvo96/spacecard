@@ -25,6 +25,14 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // Datos de demostración con contraseñas conocidas: nunca en producción.
+        // Para el usuario inicial usa: php artisan spacecard:make-master correo@dominio.com
+        if (app()->isProduction()) {
+            $this->command?->error('DatabaseSeeder solo carga datos de demo; no se ejecuta en producción.');
+
+            return;
+        }
+
         // 1. Crear Administrador de Avaspace
         $admin = User::create([
             'name' => 'Avaspace Admin',
