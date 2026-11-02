@@ -1,0 +1,65 @@
+# Despliegue automático a producción por SSH en cada push a main.
+# El repositorio es público y los logs de Actions también: no imprimir aquí
+# logs de la aplicación ni contenido del .env del servidor.
+
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+# Un despliegue a la vez; nunca se interrumpe uno que ya está en curso
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Configurar SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+
+      - name: Desplegar en el servidor
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+        run: |
+          ssh -i ~/.ssh/deploy_key -p "${SSH_PORT:-22}" \
+            -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            "$SSH_USER@$SSH_HOST" \
+            bash -s -- "$(printf %q "$DEPLOY_PATH")" <<'EOF'
+          set -euo pipefail
+          cd "$1"
+
+          # --ff-only: si el servidor tiene cambios locales, falla en vez de pisarlos
+          git pull --ff-only origin main
+
+          docker compose up -d --build --remove-orphans
+
+          # Las migraciones corren antes de levantar Apache: /up solo responde si salieron bien
+          for _ in $(seq 1 36); do
+              if docker compose exec -T app curl -fsS -o /dev/null http://localhost/up; then
+                  echo "Aplicación en línea"
+                  docker image prune -f
+                  exit 0
+              fi
+              sleep 5
+          done
+
+          echo "La aplicación no respondió en /up. Revisa en el servidor: docker compose logs app" >&2
+          exit 1
+          EOF
