@@ -84,7 +84,7 @@ export default function AdminDashboard({ batches, users, orders, stats, isMaster
     };
 
     const roleBadge = (user) => {
-        if (user.is_master) return { label: 'Maestro', cls: 'bg-fuchsia-100 text-fuchsia-800 dark:bg-fuchsia-950/40 dark:text-fuchsia-300' };
+        if (user.is_master) return { label: 'Maestro', cls: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-950/40 dark:text-indigo-300' };
         if (user.is_admin) return { label: 'Admin', cls: 'bg-blue-100 text-blue-800 dark:bg-blue-950/40 dark:text-blue-300' };
         return { label: 'Usuario', cls: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300' };
     };
@@ -92,38 +92,38 @@ export default function AdminDashboard({ batches, users, orders, stats, isMaster
     return (
         <AuthenticatedLayout
             header={
-                <h2 className="text-xl font-bold leading-tight text-gray-900 dark:text-gray-100 font-title">
+                <h2 className="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
                     Consola de Administración - Avaspace
                 </h2>
             }
         >
             <Head title="Admin Panel - SpaceCard" />
 
-            <div className="py-10">
+            <div className="py-12">
                 <div className="mx-auto max-w-7xl sm:px-6 lg:px-8 space-y-8">
                     
                     {/* Estadísticas de Dispositivos */}
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                        <div className="bg-white p-6 rounded-2xl border border-gray-200/80 shadow-[0_1px_2px_rgba(0,0,0,0.04)] dark:bg-white/[0.03] dark:border-white/[0.08] dark:shadow-none">
+                        <div className="bg-white p-6 shadow-sm sm:rounded-lg dark:bg-gray-800">
                             <span className="text-xs font-semibold text-gray-400 block mb-1">Total Dispositivos</span>
                             <span className="text-2xl font-bold text-gray-900 dark:text-white">{stats.total_devices}</span>
                         </div>
-                        <div className="bg-white p-6 rounded-2xl border border-gray-200/80 shadow-[0_1px_2px_rgba(0,0,0,0.04)] dark:bg-white/[0.03] dark:border-white/[0.08] dark:shadow-none">
+                        <div className="bg-white p-6 shadow-sm sm:rounded-lg dark:bg-gray-800">
                             <span className="text-xs font-semibold text-emerald-600 block mb-1">En Stock (Sin dueño)</span>
                             <span className="text-2xl font-bold text-emerald-600">{stats.stock_devices}</span>
                         </div>
-                        <div className="bg-white p-6 rounded-2xl border border-gray-200/80 shadow-[0_1px_2px_rgba(0,0,0,0.04)] dark:bg-white/[0.03] dark:border-white/[0.08] dark:shadow-none">
-                            <span className="text-xs font-semibold text-violet-600 block mb-1">Reclamados (Activos)</span>
-                            <span className="text-2xl font-bold text-violet-600">{stats.claimed_devices}</span>
+                        <div className="bg-white p-6 shadow-sm sm:rounded-lg dark:bg-gray-800">
+                            <span className="text-xs font-semibold text-indigo-600 block mb-1">Reclamados (Activos)</span>
+                            <span className="text-2xl font-bold text-indigo-600">{stats.claimed_devices}</span>
                         </div>
-                        <div className="bg-white p-6 rounded-2xl border border-gray-200/80 shadow-[0_1px_2px_rgba(0,0,0,0.04)] dark:bg-white/[0.03] dark:border-white/[0.08] dark:shadow-none">
+                        <div className="bg-white p-6 shadow-sm sm:rounded-lg dark:bg-gray-800">
                             <span className="text-xs font-semibold text-red-500 block mb-1">Desactivados</span>
                             <span className="text-2xl font-bold text-red-500">{stats.disabled_devices}</span>
                         </div>
                     </div>
 
                     {/* Selector de Pestañas Administrativas */}
-                    <div className="flex border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 pt-2 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700/50">
+                    <div className="flex flex-wrap gap-x-8 overflow-x-auto bg-white px-6 shadow-sm sm:rounded-lg dark:bg-gray-800">
                         {[
                             { id: 'batches', label: 'Lotes de Manufactura' },
                             { id: 'orders', label: 'Órdenes de Compra' },
@@ -132,10 +132,10 @@ export default function AdminDashboard({ batches, users, orders, stats, isMaster
                             <button
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
-                                className={`px-6 py-4 text-sm font-semibold border-b-2 transition-all ${
+                                className={`inline-flex items-center border-b-2 px-1 py-4 text-sm font-medium leading-5 transition duration-150 ease-in-out focus:outline-none ${
                                     activeTab === tab.id
-                                        ? 'border-violet-600 text-violet-600 dark:text-violet-400'
-                                        : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+                                        ? 'border-indigo-400 text-gray-900 dark:border-indigo-600 dark:text-gray-100'
+                                        : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:border-gray-700 dark:hover:text-gray-300'
                                 }`}
                             >
                                 {tab.label}
@@ -155,7 +155,7 @@ export default function AdminDashboard({ batches, users, orders, stats, isMaster
                         {activeTab === 'batches' && (
                             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                                 {/* Formulario Lote */}
-                                <div className="bg-white p-6 rounded-2xl border border-gray-200/80 shadow-[0_1px_2px_rgba(0,0,0,0.04)] dark:bg-white/[0.03] dark:border-white/[0.08] dark:shadow-none space-y-6 h-fit">
+                                <div className="bg-white p-6 shadow-sm sm:rounded-lg dark:bg-gray-800 space-y-6 h-fit">
                                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                                         Crear Lote Genérico (Stock)
                                     </h3>
@@ -167,7 +167,7 @@ export default function AdminDashboard({ batches, users, orders, stats, isMaster
                                                 value={name}
                                                 onChange={(e) => setName(e.target.value)}
                                                 placeholder="Ej: Lote Genérico Tarjetas NFC"
-                                                className="w-full p-3 text-sm rounded-xl border border-gray-200 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                                className="w-full p-3 text-sm rounded-md border border-gray-200 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                                 required
                                             />
                                         </div>
@@ -177,7 +177,7 @@ export default function AdminDashboard({ batches, users, orders, stats, isMaster
                                                 <select
                                                     value={type}
                                                     onChange={(e) => setType(e.target.value)}
-                                                    className="w-full p-3 text-sm rounded-xl border border-gray-200 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                                    className="w-full p-3 text-sm rounded-md border border-gray-200 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                                 >
                                                     <option value="card">Tarjeta (Card)</option>
                                                     <option value="bracelet">Pulsera (Bracelet)</option>
@@ -194,7 +194,7 @@ export default function AdminDashboard({ batches, users, orders, stats, isMaster
                                                     onChange={(e) => setQuantity(e.target.value)}
                                                     min="1"
                                                     max="1000"
-                                                    className="w-full p-3 text-sm rounded-xl border border-gray-200 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                                    className="w-full p-3 text-sm rounded-md border border-gray-200 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                                     required
                                                 />
                                             </div>
@@ -205,12 +205,12 @@ export default function AdminDashboard({ batches, users, orders, stats, isMaster
                                                 value={notes}
                                                 onChange={(e) => setNotes(e.target.value)}
                                                 rows="3"
-                                                className="w-full p-3 text-sm rounded-xl border border-gray-200 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                                className="w-full p-3 text-sm rounded-md border border-gray-200 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                             ></textarea>
                                         </div>
                                         <button
                                             type="submit"
-                                            className="w-full py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-xl text-sm font-semibold shadow-md shadow-violet-500/20"
+                                            className="w-full py-3 bg-gray-800 hover:bg-gray-700 text-white dark:bg-gray-200 dark:text-gray-800 dark:hover:bg-white rounded-md text-sm font-semibold"
                                         >
                                             Generar Lote
                                         </button>
@@ -219,7 +219,7 @@ export default function AdminDashboard({ batches, users, orders, stats, isMaster
 
                                 {/* Lista de Lotes */}
                                 <div className="lg:col-span-2 space-y-4">
-                                    <div className="bg-white p-6 rounded-2xl border border-gray-200/80 shadow-[0_1px_2px_rgba(0,0,0,0.04)] dark:bg-white/[0.03] dark:border-white/[0.08] dark:shadow-none">
+                                    <div className="bg-white p-6 shadow-sm sm:rounded-lg dark:bg-gray-800">
                                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                                             Lotes Existentes ( Manufactura )
                                         </h3>
@@ -228,7 +228,7 @@ export default function AdminDashboard({ batches, users, orders, stats, isMaster
                                         ) : (
                                             <div className="space-y-4">
                                                 {batches.map((batch) => (
-                                                    <div key={batch.id} className="p-4 bg-gray-50 dark:bg-gray-900/40 border border-gray-100 dark:border-gray-700 rounded-2xl space-y-3">
+                                                    <div key={batch.id} className="p-4 bg-gray-50 dark:bg-gray-900/40 border border-gray-100 dark:border-gray-700 rounded-lg space-y-3">
                                                         <div className="flex justify-between items-start gap-4">
                                                             <div>
                                                                 <h4 className="font-semibold text-sm text-gray-900 dark:text-white">{batch.name}</h4>
@@ -246,7 +246,7 @@ export default function AdminDashboard({ batches, users, orders, stats, isMaster
                                                             <span className="px-2 py-1 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300">
                                                                 📦 Enviadas: <strong>{batch.shipped_count ?? 0}/{batch.devices_count ?? batch.quantity}</strong>
                                                             </span>
-                                                            <span className="px-2 py-1 rounded-lg bg-violet-50 dark:bg-violet-950/30 text-violet-700 dark:text-violet-300">
+                                                            <span className="px-2 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-950/30 text-indigo-700 dark:text-indigo-300">
                                                                 ✅ Reclamadas: <strong>{batch.claimed_count ?? 0}/{batch.devices_count ?? batch.quantity}</strong>
                                                             </span>
                                                         </div>
@@ -255,19 +255,19 @@ export default function AdminDashboard({ batches, users, orders, stats, isMaster
                                                         <div className="flex flex-wrap gap-2">
                                                             <a
                                                                 href={`/admin/batches/${batch.id}/export`}
-                                                                className="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold shadow-md shadow-emerald-500/10"
+                                                                className="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md text-xs font-semibold shadow-md shadow-emerald-500/10"
                                                             >
                                                                 ⬇️ Exportar ZIP (QR + NFC)
                                                             </a>
                                                             <button
                                                                 onClick={() => handleMarkPrinted(batch)}
-                                                                className="px-3 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 rounded-xl text-xs font-semibold"
+                                                                className="px-3 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 rounded-md text-xs font-semibold"
                                                             >
                                                                 🖨️ Marcar impreso
                                                             </button>
                                                             <button
                                                                 onClick={() => handleMarkShipped(batch)}
-                                                                className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold"
+                                                                className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-xs font-semibold"
                                                             >
                                                                 📦 Marcar enviado
                                                             </button>
@@ -283,7 +283,7 @@ export default function AdminDashboard({ batches, users, orders, stats, isMaster
 
                         {/* Pestaña: Órdenes de Compra (Ecommerce) */}
                         {activeTab === 'orders' && (
-                            <div className="bg-white p-6 rounded-2xl border border-gray-200/80 shadow-[0_1px_2px_rgba(0,0,0,0.04)] dark:bg-white/[0.03] dark:border-white/[0.08] dark:shadow-none">
+                            <div className="bg-white p-6 shadow-sm sm:rounded-lg dark:bg-gray-800">
                                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">
                                     Pedidos y Personalizaciones Recibidas
                                 </h3>
@@ -297,7 +297,7 @@ export default function AdminDashboard({ batches, users, orders, stats, isMaster
                                         {orders.map((order) => (
                                             <div 
                                                 key={order.id} 
-                                                className={`p-6 border rounded-2xl flex flex-col lg:flex-row justify-between gap-6 ${
+                                                className={`p-6 border rounded-lg flex flex-col lg:flex-row justify-between gap-6 ${
                                                     order.status === 'paid' 
                                                         ? 'border-amber-200 bg-amber-50/10 dark:border-amber-900/30' 
                                                         : 'border-gray-100 bg-gray-50/10 dark:border-gray-700'
@@ -340,7 +340,7 @@ export default function AdminDashboard({ batches, users, orders, stats, isMaster
                                                         <h5 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Artículos a Fabricar:</h5>
                                                         <div className="space-y-3">
                                                             {order.items.map((item) => (
-                                                                <div key={item.id} className="p-3 bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 flex flex-wrap gap-4 items-center">
+                                                                <div key={item.id} className="p-3 bg-white dark:bg-gray-900 rounded-md border border-gray-100 dark:border-gray-800 flex flex-wrap gap-4 items-center">
                                                                     <div className="text-xs">
                                                                         <span className="font-bold text-gray-900 dark:text-white capitalize">
                                                                             {item.product_type === 'review_plate' ? 'Placa Google' : item.product_type}
@@ -354,7 +354,7 @@ export default function AdminDashboard({ batches, users, orders, stats, isMaster
                                                                             🎴 Catálogo AVASPACE · {item.design_config.preset_name}
                                                                         </span>
                                                                     ) : item.product_type === 'card' ? (
-                                                                        <span className="text-[10px] font-bold px-2 py-1 rounded-md bg-violet-100 text-violet-700 dark:bg-violet-950/40 dark:text-violet-300">
+                                                                        <span className="text-[10px] font-bold px-2 py-1 rounded-md bg-indigo-100 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300">
                                                                             🎨 Diseño personalizado (2 caras)
                                                                         </span>
                                                                     ) : null}
@@ -399,7 +399,7 @@ export default function AdminDashboard({ batches, users, orders, stats, isMaster
                                                     {order.status === 'paid' ? (
                                                         <button
                                                             onClick={() => handleProcessOrder(order.id)}
-                                                            className="py-3 px-5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold shadow-md shadow-amber-500/15"
+                                                            className="py-3 px-5 bg-amber-500 hover:bg-amber-600 text-white rounded-md text-xs font-bold shadow-md shadow-amber-500/15"
                                                         >
                                                             Procesar y Generar Dispositivos
                                                         </button>
@@ -418,13 +418,13 @@ export default function AdminDashboard({ batches, users, orders, stats, isMaster
 
                         {/* Pestaña: Usuarios y Planes */}
                         {activeTab === 'users' && (
-                            <div className="bg-white p-6 rounded-2xl border border-gray-200/80 shadow-[0_1px_2px_rgba(0,0,0,0.04)] dark:bg-white/[0.03] dark:border-white/[0.08] dark:shadow-none">
+                            <div className="bg-white p-6 shadow-sm sm:rounded-lg dark:bg-gray-800">
                                 <div className="flex items-center justify-between mb-4">
                                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                                         Usuarios Registrados {stats.total_users ? `(${stats.total_users})` : ''}
                                     </h3>
                                     {isMaster && (
-                                        <span className="text-[11px] px-2 py-1 rounded-lg bg-fuchsia-50 dark:bg-fuchsia-950/30 text-fuchsia-700 dark:text-fuchsia-300 font-semibold">
+                                        <span className="text-[11px] px-2 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-950/30 text-indigo-700 dark:text-indigo-300 font-semibold">
                                             Vista de Usuario Maestro
                                         </span>
                                     )}
@@ -441,7 +441,7 @@ export default function AdminDashboard({ batches, users, orders, stats, isMaster
                                                 </div>
                                                 <span className="text-xs text-gray-400">{user.email}</span>
                                                 <div className="text-xs text-gray-400 mt-1 flex flex-wrap gap-x-3">
-                                                    <span>Plan: <span className="capitalize font-bold text-violet-600">{user.plan}</span></span>
+                                                    <span>Plan: <span className="capitalize font-bold text-indigo-600">{user.plan}</span></span>
                                                     <span>Tarjetas: <strong>{user.devices_count ?? 0}</strong></span>
                                                     <span>Spaces: <strong>{user.spaces_count ?? 0}</strong></span>
                                                     {user.created_at && <span>Alta: {user.created_at}</span>}
@@ -478,8 +478,8 @@ export default function AdminDashboard({ batches, users, orders, stats, isMaster
 
                     {/* Modal Usuario */}
                     {showUserModal && selectedUser && (
-                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-                            <div className="bg-white dark:bg-gray-800 rounded-2xl max-w-md w-full p-6 shadow-xl border border-gray-100 dark:border-gray-700">
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-500/75 dark:bg-gray-900/75">
+                            <div className="bg-white dark:bg-gray-800 rounded-lg max-w-md w-full p-6 shadow-xl">
                                 <h4 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
                                     Modificar Plan: {selectedUser.name}
                                 </h4>
@@ -491,7 +491,7 @@ export default function AdminDashboard({ batches, users, orders, stats, isMaster
                                         <select
                                             value={plan}
                                             onChange={(e) => setPlan(e.target.value)}
-                                            className="w-full p-3 rounded-xl border border-gray-200 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                            className="w-full p-3 rounded-md border border-gray-200 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                         >
                                             <option value="free">Free (Básico)</option>
                                             <option value="pro">Pro (Premium)</option>
@@ -507,7 +507,7 @@ export default function AdminDashboard({ batches, users, orders, stats, isMaster
                                                 type="date"
                                                 value={planExpiresAt}
                                                 onChange={(e) => setPlanExpiresAt(e.target.value)}
-                                                className="w-full p-3 rounded-xl border border-gray-200 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                                className="w-full p-3 rounded-md border border-gray-200 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                                 required
                                             />
                                         </div>
@@ -517,13 +517,13 @@ export default function AdminDashboard({ batches, users, orders, stats, isMaster
                                         <button
                                             type="button"
                                             onClick={() => setShowUserModal(false)}
-                                            className="w-1/2 py-3 border border-gray-200 dark:border-gray-600 dark:text-gray-300 rounded-xl font-semibold text-sm hover:bg-gray-50 dark:hover:bg-gray-700"
+                                            className="w-1/2 py-3 border border-gray-200 dark:border-gray-600 dark:text-gray-300 rounded-md font-semibold text-sm hover:bg-gray-50 dark:hover:bg-gray-700"
                                         >
                                             Cancelar
                                         </button>
                                         <button
                                             type="submit"
-                                            className="w-1/2 py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-xl font-semibold text-sm shadow-md shadow-violet-500/20"
+                                            className="w-1/2 py-3 bg-gray-800 hover:bg-gray-700 text-white dark:bg-gray-200 dark:text-gray-800 dark:hover:bg-white rounded-md font-semibold text-sm"
                                         >
                                             Actualizar
                                         </button>

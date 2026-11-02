@@ -267,7 +267,7 @@ export default function SpaceEditor({ spaces, userPlan }) {
             <div className="lg:col-span-2 space-y-6">
                 
                 {/* Cabecera / Selector */}
-                <div className="bg-white p-6 rounded-2xl border border-gray-200/80 shadow-[0_1px_2px_rgba(0,0,0,0.04)] dark:bg-white/[0.03] dark:border-white/[0.08] dark:shadow-none">
+                <div className="bg-white p-6 shadow-sm sm:rounded-lg dark:bg-gray-800">
                     <div className="flex justify-between items-center mb-4">
                         <div>
                             <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
@@ -282,13 +282,13 @@ export default function SpaceEditor({ spaces, userPlan }) {
                             <div className="flex gap-2">
                                 <button
                                     onClick={() => setShowAiForm(true)}
-                                    className="px-4 py-2 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:opacity-90 text-white rounded-xl text-xs font-semibold flex items-center gap-1"
+                                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md text-xs font-semibold flex items-center gap-1"
                                 >
                                     ✨ Crear con IA
                                 </button>
                                 <button
                                     onClick={() => setShowCreateForm(true)}
-                                    className="px-4 py-2 border border-violet-300 dark:border-violet-700 text-violet-700 dark:text-violet-300 hover:bg-violet-50 dark:hover:bg-violet-900/20 rounded-xl text-xs font-semibold"
+                                    className="px-4 py-2 border border-indigo-300 dark:border-indigo-700 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-md text-xs font-semibold"
                                 >
                                     + Manual
                                 </button>
@@ -304,7 +304,7 @@ export default function SpaceEditor({ spaces, userPlan }) {
 
                     {/* Formulario de creación con IA */}
                     {showAiForm && (
-                        <form onSubmit={handleGenerateAi} className="space-y-4 p-4 mb-4 rounded-xl border border-violet-200 dark:border-violet-800 bg-violet-50/50 dark:bg-violet-900/10">
+                        <form onSubmit={handleGenerateAi} className="space-y-4 p-4 mb-4 rounded-md border border-indigo-200 dark:border-indigo-800 bg-indigo-50/50 dark:bg-indigo-900/10">
                             <div className="flex items-center gap-2">
                                 <span className="text-lg">✨</span>
                                 <h4 className="text-sm font-bold text-gray-800 dark:text-gray-200">Generar Space con IA</h4>
@@ -342,7 +342,7 @@ export default function SpaceEditor({ spaces, userPlan }) {
                                     Cancelar
                                 </button>
                                 <button type="submit" disabled={aiLoading}
-                                    className="px-4 py-1.5 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white rounded-lg text-xs font-semibold disabled:opacity-60 flex items-center gap-1">
+                                    className="px-4 py-1.5 bg-indigo-600 text-white rounded-lg text-xs font-semibold disabled:opacity-60 flex items-center gap-1">
                                     {aiLoading ? 'Generando…' : '✨ Generar Space'}
                                 </button>
                             </div>
@@ -350,7 +350,7 @@ export default function SpaceEditor({ spaces, userPlan }) {
                     )}
 
                     {showCreateForm ? (
-                        <form onSubmit={handleCreateSpace} className="space-y-4 p-4 bg-gray-50 dark:bg-gray-950/20 rounded-xl border border-gray-100 dark:border-gray-800">
+                        <form onSubmit={handleCreateSpace} className="space-y-4 p-4 bg-gray-50 dark:bg-gray-950/20 rounded-md border border-gray-100 dark:border-gray-800">
                             <h4 className="text-sm font-bold text-gray-800 dark:text-gray-200">Crear Nueva Tarjeta de Presentación</h4>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
@@ -386,7 +386,7 @@ export default function SpaceEditor({ spaces, userPlan }) {
                                 </button>
                                 <button
                                     type="submit"
-                                    className="px-3 py-1.5 bg-violet-600 text-white rounded-lg text-xs font-semibold"
+                                    className="px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-xs font-semibold"
                                 >
                                     Crear
                                 </button>
@@ -399,9 +399,9 @@ export default function SpaceEditor({ spaces, userPlan }) {
                                     <button
                                         key={s.id}
                                         onClick={() => setSelectedSpace(s)}
-                                        className={`px-4 py-2 rounded-xl text-xs font-semibold border transition-all ${
+                                        className={`px-4 py-2 rounded-md text-xs font-semibold border transition-all ${
                                             selectedSpace?.id === s.id
-                                                ? 'bg-violet-600 text-white border-violet-600 shadow-md shadow-violet-500/10'
+                                                ? 'bg-indigo-600 text-white border-indigo-600'
                                                 : 'bg-white border-gray-200 text-gray-700 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300'
                                         }`}
                                     >
@@ -415,7 +415,7 @@ export default function SpaceEditor({ spaces, userPlan }) {
 
                 {/* Formulario Perfil y Diseño */}
                 {selectedSpace && (
-                    <div className="bg-white p-6 rounded-2xl border border-gray-200/80 shadow-[0_1px_2px_rgba(0,0,0,0.04)] dark:bg-white/[0.03] dark:border-white/[0.08] dark:shadow-none space-y-8">
+                    <div className="bg-white p-6 shadow-sm sm:rounded-lg dark:bg-gray-800 space-y-8">
                         <form onSubmit={handleUpdateSpace} className="space-y-6">
                             <h4 className="text-md font-bold text-gray-900 dark:text-white border-b border-gray-100 dark:border-gray-700 pb-2">
                                 Editar Perfil
@@ -430,7 +430,7 @@ export default function SpaceEditor({ spaces, userPlan }) {
                                                 type="text"
                                                 value={slug}
                                                 onChange={(e) => setSlug(e.target.value)}
-                                                className="w-full text-sm p-3 border border-gray-200 rounded-xl dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                                className="w-full text-sm p-3 border border-gray-200 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                             />
                                         </div>
                                         <div>
@@ -439,7 +439,7 @@ export default function SpaceEditor({ spaces, userPlan }) {
                                                 type="text"
                                                 value={displayName}
                                                 onChange={(e) => setDisplayName(e.target.value)}
-                                                className="w-full text-sm p-3 border border-gray-200 rounded-xl dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                                className="w-full text-sm p-3 border border-gray-200 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                             />
                                         </div>
                                     </div>
@@ -451,7 +451,7 @@ export default function SpaceEditor({ spaces, userPlan }) {
                                                 type="text"
                                                 value={headline}
                                                 onChange={(e) => setHeadline(e.target.value)}
-                                                className="w-full text-sm p-3 border border-gray-200 rounded-xl dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                                className="w-full text-sm p-3 border border-gray-200 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                                 placeholder="Ej: Director Creativo"
                                             />
                                         </div>
@@ -461,7 +461,7 @@ export default function SpaceEditor({ spaces, userPlan }) {
                                                 type="text"
                                                 value={company}
                                                 onChange={(e) => setCompany(e.target.value)}
-                                                className="w-full text-sm p-3 border border-gray-200 rounded-xl dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                                className="w-full text-sm p-3 border border-gray-200 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                                 placeholder="Ej: Avaspace"
                                             />
                                         </div>
@@ -473,7 +473,7 @@ export default function SpaceEditor({ spaces, userPlan }) {
                                             value={bio}
                                             onChange={(e) => setBio(e.target.value)}
                                             rows="3"
-                                            className="w-full text-sm p-3 border border-gray-200 rounded-xl dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                            className="w-full text-sm p-3 border border-gray-200 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                         ></textarea>
                                     </div>
                                 </div>
@@ -491,7 +491,7 @@ export default function SpaceEditor({ spaces, userPlan }) {
                                                     setAvatarPreview(URL.createObjectURL(file));
                                                 }
                                             }}
-                                            className="w-full text-xs text-gray-500 p-2 border border-gray-200 rounded-xl"
+                                            className="w-full text-xs text-gray-500 p-2 border border-gray-200 rounded-md"
                                         />
                                     </div>
                                     <div>
@@ -506,7 +506,7 @@ export default function SpaceEditor({ spaces, userPlan }) {
                                                     setCoverPreview(URL.createObjectURL(file));
                                                 }
                                             }}
-                                            className="w-full text-xs text-gray-500 p-2 border border-gray-200 rounded-xl"
+                                            className="w-full text-xs text-gray-500 p-2 border border-gray-200 rounded-md"
                                         />
                                     </div>
                                 </div>
@@ -522,7 +522,7 @@ export default function SpaceEditor({ spaces, userPlan }) {
                                         type="tel"
                                         value={contactPhone}
                                         onChange={(e) => setContactPhone(e.target.value)}
-                                        className="w-full text-sm p-3 border border-gray-200 rounded-xl dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                        className="w-full text-sm p-3 border border-gray-200 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                         placeholder="+52 1 123 456 7890"
                                     />
                                 </div>
@@ -532,7 +532,7 @@ export default function SpaceEditor({ spaces, userPlan }) {
                                         type="email"
                                         value={contactEmail}
                                         onChange={(e) => setContactEmail(e.target.value)}
-                                        className="w-full text-sm p-3 border border-gray-200 rounded-xl dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                        className="w-full text-sm p-3 border border-gray-200 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                         placeholder="hola@empresa.com"
                                     />
                                 </div>
@@ -542,7 +542,7 @@ export default function SpaceEditor({ spaces, userPlan }) {
                                         type="url"
                                         value={contactWebsite}
                                         onChange={(e) => setContactWebsite(e.target.value)}
-                                        className="w-full text-sm p-3 border border-gray-200 rounded-xl dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                        className="w-full text-sm p-3 border border-gray-200 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                         placeholder="https://empresa.com"
                                     />
                                 </div>
@@ -566,11 +566,11 @@ export default function SpaceEditor({ spaces, userPlan }) {
                                             type="button"
                                             disabled={disabled}
                                             onClick={() => applyPresetTheme(theme.id)}
-                                            className={`p-3 rounded-xl border font-semibold text-xs transition-all relative flex flex-col items-center justify-center gap-1 ${
+                                            className={`p-3 rounded-md border font-semibold text-xs transition-all relative flex flex-col items-center justify-center gap-1 ${
                                                 disabled 
                                                     ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed dark:bg-gray-800 dark:border-gray-700' 
                                                     : themeTemplate === theme.id
-                                                    ? 'bg-violet-600 text-white border-violet-600 shadow-md shadow-violet-500/10'
+                                                    ? 'bg-indigo-600 text-white border-indigo-600'
                                                     : 'bg-white border-gray-200 text-gray-700 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 hover:bg-gray-50'
                                             }`}
                                         >
@@ -593,7 +593,7 @@ export default function SpaceEditor({ spaces, userPlan }) {
                                             id="is_public"
                                             checked={isPublic}
                                             onChange={(e) => setIsPublic(e.target.checked)}
-                                            className="h-4 w-4 text-violet-600 border-gray-300 rounded focus:ring-violet-500"
+                                            className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
                                         />
                                         <label htmlFor="is_public" className="ml-2 text-sm text-gray-700 dark:text-gray-300">Space Público</label>
                                     </div>
@@ -604,7 +604,7 @@ export default function SpaceEditor({ spaces, userPlan }) {
                                             disabled={!isPro}
                                             checked={showBranding}
                                             onChange={(e) => setShowBranding(e.target.checked)}
-                                            className="h-4 w-4 text-violet-600 border-gray-300 rounded focus:ring-violet-500 disabled:opacity-50"
+                                            className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 disabled:opacity-50"
                                         />
                                         <label htmlFor="show_branding" className="ml-2 text-sm text-gray-700 dark:text-gray-300 disabled:opacity-50">
                                             Mostrar Branding Avaspace {!isPro && '(Pro)'}
@@ -614,7 +614,7 @@ export default function SpaceEditor({ spaces, userPlan }) {
 
                                 <button
                                     type="submit"
-                                    className="px-6 py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-xl text-sm font-semibold shadow-md shadow-violet-500/20"
+                                    className="px-6 py-3 bg-gray-800 hover:bg-gray-700 text-white dark:bg-gray-200 dark:text-gray-800 dark:hover:bg-white rounded-md text-sm font-semibold"
                                 >
                                     Guardar Perfil y Tema
                                 </button>
@@ -656,7 +656,7 @@ export default function SpaceEditor({ spaces, userPlan }) {
 
                             <div className="space-y-4">
                                 {blocks.map((block, index) => (
-                                    <div key={index} className="flex gap-4 items-center p-4 bg-gray-50 dark:bg-gray-700/30 rounded-2xl border border-gray-100 dark:border-gray-800">
+                                    <div key={index} className="flex gap-4 items-center p-4 bg-gray-50 dark:bg-gray-700/30 rounded-lg border border-gray-100 dark:border-gray-800">
                                         <div className="flex flex-col gap-1">
                                             <button type="button" onClick={() => moveBlock(index, 'up')} className="text-gray-400 hover:text-gray-700">▲</button>
                                             <button type="button" onClick={() => moveBlock(index, 'down')} className="text-gray-400 hover:text-gray-700">▼</button>
@@ -692,7 +692,7 @@ export default function SpaceEditor({ spaces, userPlan }) {
                                         <button
                                             type="button"
                                             onClick={() => removeBlock(index)}
-                                            className="p-2 text-red-500 hover:bg-red-50 rounded-xl"
+                                            className="p-2 text-red-500 hover:bg-red-50 rounded-md"
                                         >
                                             🗑️
                                         </button>
@@ -704,7 +704,7 @@ export default function SpaceEditor({ spaces, userPlan }) {
                                         <button
                                             type="button"
                                             onClick={saveAllBlocks}
-                                            className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-semibold shadow-md shadow-emerald-500/20"
+                                            className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md text-sm font-semibold shadow-md shadow-emerald-500/20"
                                         >
                                             Guardar Estructura de Bloques
                                         </button>

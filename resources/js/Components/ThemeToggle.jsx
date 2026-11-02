@@ -28,7 +28,7 @@ export default function ThemeToggle({ className = '' }) {
             onClick={() => setDark((d) => !d)}
             aria-label={dark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
             title={dark ? 'Modo claro' : 'Modo oscuro'}
-            className={`inline-flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-600 transition hover:bg-gray-100 dark:border-white/10 dark:bg-white/5 dark:text-gray-300 dark:hover:bg-white/10 ${className}`}
+            className={`inline-flex items-center justify-center rounded-md p-2 text-gray-400 transition duration-150 ease-in-out hover:bg-gray-100 hover:text-gray-500 focus:outline-none dark:text-gray-500 dark:hover:bg-gray-900 dark:hover:text-gray-400 ${className}`}
         >
             {dark ? (
                 <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

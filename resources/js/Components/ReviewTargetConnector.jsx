@@ -83,7 +83,7 @@ export default function ReviewTargetConnector({ reviewTargets, flash }) {
     };
 
     return (
-        <div className="bg-white p-6 rounded-2xl border border-gray-200/80 shadow-[0_1px_2px_rgba(0,0,0,0.04)] dark:bg-white/[0.03] dark:border-white/[0.08] dark:shadow-none">
+        <div className="bg-white p-6 shadow-sm sm:rounded-lg dark:bg-gray-800">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
                 Conectar nuevo negocio (Google Reviews)
             </h3>
@@ -101,23 +101,23 @@ export default function ReviewTargetConnector({ reviewTargets, flash }) {
                         placeholder="Escribe el nombre de tu negocio local..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                        className="w-full px-4 py-3 rounded-md border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                         required
                     />
 
                     {loading && (
                         <div className="absolute right-3 top-9 flex items-center">
-                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-violet-500 border-t-transparent"></div>
+                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-indigo-500 border-t-transparent"></div>
                         </div>
                     )}
 
                     {showPredictions && predictions.length > 0 && (
-                        <ul className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto dark:bg-gray-700 dark:border-gray-600">
+                        <ul className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-y-auto dark:bg-gray-700 dark:border-gray-600">
                             {predictions.map((p) => (
                                 <li
                                     key={p.place_id}
                                     onClick={() => handleSelectPrediction(p)}
-                                    className="px-4 py-3 hover:bg-violet-50 dark:hover:bg-violet-950/20 cursor-pointer text-sm text-gray-700 dark:text-gray-200 border-b border-gray-100 dark:border-gray-600 last:border-b-0"
+                                    className="px-4 py-3 hover:bg-indigo-50 dark:hover:bg-indigo-950/20 cursor-pointer text-sm text-gray-700 dark:text-gray-200 border-b border-gray-100 dark:border-gray-600 last:border-b-0"
                                 >
                                     {p.description}
                                 </li>
@@ -127,7 +127,7 @@ export default function ReviewTargetConnector({ reviewTargets, flash }) {
                 </div>
 
                 {placeId && (
-                    <div className="p-4 bg-emerald-50 text-emerald-800 dark:bg-emerald-950/20 dark:text-emerald-300 rounded-xl text-sm border border-emerald-100 dark:border-emerald-900/30">
+                    <div className="p-4 bg-emerald-50 text-emerald-800 dark:bg-emerald-950/20 dark:text-emerald-300 rounded-md text-sm border border-emerald-100 dark:border-emerald-900/30">
                         <strong>Negocio seleccionado:</strong> {businessName} <br/>
                         <span className="text-xs opacity-80">Place ID: {placeId}</span>
                     </div>
@@ -140,7 +140,7 @@ export default function ReviewTargetConnector({ reviewTargets, flash }) {
                             type="checkbox"
                             checked={feedbackEnabled}
                             onChange={(e) => setFeedbackEnabled(e.target.checked)}
-                            className="h-4 w-4 text-violet-600 focus:ring-violet-500 border-gray-300 rounded dark:bg-gray-700 dark:border-gray-600"
+                            className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded dark:bg-gray-700 dark:border-gray-600"
                         />
                     </div>
                     <div className="ml-3 text-sm">
@@ -156,9 +156,9 @@ export default function ReviewTargetConnector({ reviewTargets, flash }) {
                 <button
                     type="submit"
                     disabled={!placeId}
-                    className={`w-full py-3 px-4 rounded-xl text-white font-semibold transition-all ${
+                    className={`w-full py-3 px-4 rounded-md text-white font-semibold transition-all ${
                         placeId
-                            ? 'bg-violet-600 hover:bg-violet-700 shadow-md shadow-violet-500/20'
+                            ? 'bg-indigo-600 hover:bg-indigo-700'
                             : 'bg-gray-300 dark:bg-gray-700 cursor-not-allowed text-gray-500'
                     }`}
                 >
@@ -174,7 +174,7 @@ export default function ReviewTargetConnector({ reviewTargets, flash }) {
                     </h4>
                     <div className="space-y-3">
                         {reviewTargets.map((target) => (
-                            <div key={target.id} className="flex justify-between items-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-100 dark:border-gray-700">
+                            <div key={target.id} className="flex justify-between items-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-md border border-gray-100 dark:border-gray-700">
                                 <div>
                                     <div className="font-medium text-sm text-gray-900 dark:text-white">
                                         {target.business_name}
@@ -183,7 +183,7 @@ export default function ReviewTargetConnector({ reviewTargets, flash }) {
                                         Plataforma: Google Reviews • Buzón privado: {target.feedback_enabled ? 'Activado' : 'Desactivado'}
                                     </div>
                                 </div>
-                                <span className="text-xs px-2 py-1 bg-violet-100 text-violet-800 dark:bg-violet-950/40 dark:text-violet-300 rounded-md font-semibold">
+                                <span className="text-xs px-2 py-1 bg-indigo-100 text-indigo-800 dark:bg-indigo-950/40 dark:text-indigo-300 rounded-md font-semibold">
                                     Conectado
                                 </span>
                             </div>

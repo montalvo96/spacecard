@@ -13,7 +13,7 @@ export default function AnalyticsPanel({ userPlan, analytics, leads }) {
 
     if (!isPro) {
         return (
-            <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 dark:bg-gray-800 dark:border-gray-700 text-center">
+            <div className="bg-white p-8 shadow-sm sm:rounded-lg dark:bg-gray-800 text-center">
                 <span className="text-3xl">📊</span>
                 <h3 className="text-lg font-bold text-gray-900 dark:text-white mt-4 mb-2">
                     Métricas de Escaneos y Leads Avanzados
@@ -21,7 +21,7 @@ export default function AnalyticsPanel({ userPlan, analytics, leads }) {
                 <p className="text-sm text-gray-500 dark:text-gray-400 max-w-md mx-auto mb-6">
                     Descubre cuántas personas escanean tus dispositivos físicos, qué bloques reciben más clics, y desde qué países te visitan en tiempo real.
                 </p>
-                <button className="py-2.5 px-6 bg-violet-600 hover:bg-violet-700 text-white rounded-xl text-xs font-bold shadow-md shadow-violet-500/20">
+                <button className="py-2.5 px-6 bg-gray-800 hover:bg-gray-700 text-white dark:bg-gray-200 dark:text-gray-800 dark:hover:bg-white rounded-md text-xs font-bold">
                     Actualizar a Pro
                 </button>
             </div>
@@ -47,15 +47,15 @@ export default function AnalyticsPanel({ userPlan, analytics, leads }) {
             
             {/* Tarjetas de Resumen */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div className="bg-white p-6 rounded-2xl border border-gray-200/80 shadow-[0_1px_2px_rgba(0,0,0,0.04)] dark:bg-white/[0.03] dark:border-white/[0.08] dark:shadow-none">
-                    <span className="text-xs font-semibold text-violet-600 dark:text-violet-400 uppercase tracking-wider block mb-1">
+                <div className="bg-white p-6 shadow-sm sm:rounded-lg dark:bg-gray-800">
+                    <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider block mb-1">
                         Escaneos Totales (30d)
                     </span>
                     <span className="text-3xl font-extrabold text-gray-900 dark:text-white">
                         {totalScans}
                     </span>
                 </div>
-                <div className="bg-white p-6 rounded-2xl border border-gray-200/80 shadow-[0_1px_2px_rgba(0,0,0,0.04)] dark:bg-white/[0.03] dark:border-white/[0.08] dark:shadow-none">
+                <div className="bg-white p-6 shadow-sm sm:rounded-lg dark:bg-gray-800">
                     <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider block mb-1">
                         Leads / Mensajes Recibidos
                     </span>
@@ -63,7 +63,7 @@ export default function AnalyticsPanel({ userPlan, analytics, leads }) {
                         {totalLeads}
                     </span>
                 </div>
-                <div className="bg-white p-6 rounded-2xl border border-gray-200/80 shadow-[0_1px_2px_rgba(0,0,0,0.04)] dark:bg-white/[0.03] dark:border-white/[0.08] dark:shadow-none md:col-span-2 lg:col-span-1">
+                <div className="bg-white p-6 shadow-sm sm:rounded-lg dark:bg-gray-800 md:col-span-2 lg:col-span-1">
                     <span className="text-xs font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wider block mb-1">
                         Tasa de Conversión (Leads/Taps)
                     </span>
@@ -74,7 +74,7 @@ export default function AnalyticsPanel({ userPlan, analytics, leads }) {
             </div>
 
             {/* Gráfico de Barras CSS Nativo para Escaneos */}
-            <div className="bg-white p-6 rounded-2xl border border-gray-200/80 shadow-[0_1px_2px_rgba(0,0,0,0.04)] dark:bg-white/[0.03] dark:border-white/[0.08] dark:shadow-none">
+            <div className="bg-white p-6 shadow-sm sm:rounded-lg dark:bg-gray-800">
                 <h4 className="text-md font-semibold text-gray-900 dark:text-white mb-6">
                     Actividad de Escaneo por Día (Últimos 30 días)
                 </h4>
@@ -91,7 +91,7 @@ export default function AnalyticsPanel({ userPlan, analytics, leads }) {
                                     <span className="w-24 text-gray-500 font-mono">{item.date}</span>
                                     <div className="flex-grow bg-gray-100 dark:bg-gray-700 rounded-full h-4 overflow-hidden">
                                         <div 
-                                            className="bg-violet-600 h-full rounded-full transition-all duration-500" 
+                                            className="bg-indigo-600 h-full rounded-full transition-all duration-500" 
                                             style={{ width: `${percentage}%` }}
                                         ></div>
                                     </div>
@@ -107,7 +107,7 @@ export default function AnalyticsPanel({ userPlan, analytics, leads }) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 
                 {/* Dispositivos */}
-                <div className="bg-white p-6 rounded-2xl border border-gray-200/80 shadow-[0_1px_2px_rgba(0,0,0,0.04)] dark:bg-white/[0.03] dark:border-white/[0.08] dark:shadow-none">
+                <div className="bg-white p-6 shadow-sm sm:rounded-lg dark:bg-gray-800">
                     <h4 className="text-md font-semibold text-gray-900 dark:text-white mb-4">
                         Familia de Dispositivos (Taps)
                     </h4>
@@ -126,7 +126,7 @@ export default function AnalyticsPanel({ userPlan, analytics, leads }) {
                 </div>
 
                 {/* Países */}
-                <div className="bg-white p-6 rounded-2xl border border-gray-200/80 shadow-[0_1px_2px_rgba(0,0,0,0.04)] dark:bg-white/[0.03] dark:border-white/[0.08] dark:shadow-none">
+                <div className="bg-white p-6 shadow-sm sm:rounded-lg dark:bg-gray-800">
                     <h4 className="text-md font-semibold text-gray-900 dark:text-white mb-4">
                         Países Principales
                     </h4>
@@ -146,7 +146,7 @@ export default function AnalyticsPanel({ userPlan, analytics, leads }) {
             </div>
 
             {/* Buzón de leads y feedback privado */}
-            <div className="bg-white p-6 rounded-2xl border border-gray-200/80 shadow-[0_1px_2px_rgba(0,0,0,0.04)] dark:bg-white/[0.03] dark:border-white/[0.08] dark:shadow-none">
+            <div className="bg-white p-6 shadow-sm sm:rounded-lg dark:bg-gray-800">
                 <h4 className="text-md font-semibold text-gray-900 dark:text-white mb-4">
                     Buzón de Leads y Feedback Privado
                 </h4>
@@ -157,7 +157,7 @@ export default function AnalyticsPanel({ userPlan, analytics, leads }) {
                 ) : (
                     <div className="space-y-4">
                         {leads.map((lead) => (
-                            <div key={lead.id} className="p-4 bg-gray-50 dark:bg-gray-900/60 rounded-xl border border-gray-100 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                            <div key={lead.id} className="p-4 bg-gray-50 dark:bg-gray-900/60 rounded-md border border-gray-100 dark:border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                                 <div className="space-y-1">
                                     <div className="flex items-center gap-2">
                                         <span className="font-bold text-sm text-gray-900 dark:text-white">{lead.name}</span>
@@ -180,7 +180,7 @@ export default function AnalyticsPanel({ userPlan, analytics, leads }) {
             </div>
 
             {/* Listado de escaneos detallados */}
-            <div className="bg-white p-6 rounded-2xl border border-gray-200/80 shadow-[0_1px_2px_rgba(0,0,0,0.04)] dark:bg-white/[0.03] dark:border-white/[0.08] dark:shadow-none">
+            <div className="bg-white p-6 shadow-sm sm:rounded-lg dark:bg-gray-800">
                 <h4 className="text-md font-semibold text-gray-900 dark:text-white mb-4">
                     Últimos 20 Escaneos
                 </h4>
