@@ -2,7 +2,7 @@
 /**
  * Configuración de la aplicación Laravel (Bootstrap).
  *
- * Última modificación: 2026-08-06
+ * Última modificación: 2026-11-02
  * Autor: Antigravity
  */
 
@@ -18,6 +18,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // En producción solo se accede a través del Nginx del host (puerto en 127.0.0.1)
+        $middleware->trustProxies(at: '*');
+
         $middleware->web(append: [
             \App\Http\Middleware\HandleInertiaRequests::class,
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
