@@ -19,5 +19,6 @@ database/*.sqlite
 .idea
 .vscode
 Avaspace diseños
+FBX
 docker-compose*.yml
 Dockerfile

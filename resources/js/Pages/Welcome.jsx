@@ -7,6 +7,7 @@
 
 import { Head, Link } from '@inertiajs/react';
 import ApplicationLogo from '@/Components/ApplicationLogo';
+import Product3DViewer from '@/Components/Product3DViewer';
 import ThemeToggle from '@/Components/ThemeToggle';
 
 const CARD_COLORS = [
@@ -104,7 +105,12 @@ export default function Welcome({ auth, canLogin, canRegister }) {
 
                         <div className="relative flex justify-center">
                             <div className="absolute inset-0 -z-10 m-auto h-72 w-72 rounded-full bg-violet-500/25 blur-[100px]" />
-                            <img src="/img/products/card-black.png" alt="SpaceCard" className="w-full max-w-lg drop-shadow-2xl [transform:perspective(1200px)_rotateY(-8deg)]" />
+                            <Product3DViewer
+                                poster="/img/products/card-black.png"
+                                alt="SpaceCard"
+                                className="max-w-lg"
+                                posterClassName="drop-shadow-2xl [transform:perspective(1200px)_rotateY(-8deg)]"
+                            />
                         </div>
                     </div>
 
