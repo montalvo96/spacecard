@@ -14,14 +14,16 @@ export default function AnalyticsPanel({ userPlan, analytics, leads }) {
     if (!isPro) {
         return (
             <div className="bg-white p-8 shadow-sm sm:rounded-lg dark:bg-gray-800 text-center">
-                <span className="text-3xl">📊</span>
+                <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#FF3B1F]/10 text-[#FF5A3C]">
+                    <span aria-hidden="true" className="ms text-3xl">monitoring</span>
+                </span>
                 <h3 className="text-lg font-bold text-gray-900 dark:text-white mt-4 mb-2">
                     Métricas de Escaneos y Leads Avanzados
                 </h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400 max-w-md mx-auto mb-6">
                     Descubre cuántas personas escanean tus dispositivos físicos, qué bloques reciben más clics, y desde qué países te visitan en tiempo real.
                 </p>
-                <button className="py-2.5 px-6 bg-gray-800 hover:bg-gray-700 text-white dark:bg-gray-200 dark:text-gray-800 dark:hover:bg-white rounded-md text-xs font-bold">
+                <button className="rounded-full bg-[#D42410] px-6 py-3 text-sm font-semibold text-white shadow-[0_10px_30px_rgba(255,40,10,0.3)] transition duration-300 hover:-translate-y-0.5 hover:bg-[#B81E0C]">
                     Actualizar a Pro
                 </button>
             </div>

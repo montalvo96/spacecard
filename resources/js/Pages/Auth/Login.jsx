@@ -1,9 +1,4 @@
-import Checkbox from '@/Components/Checkbox';
-import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
-import PrimaryButton from '@/Components/PrimaryButton';
-import TextInput from '@/Components/TextInput';
-import GuestLayout from '@/Layouts/GuestLayout';
+import AuthLayout, { Field, Icon, SubmitButton } from '@/Layouts/AuthLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
 
 export default function Login({ status, canResetPassword }) {
@@ -22,79 +17,71 @@ export default function Login({ status, canResetPassword }) {
     };
 
     return (
-        <GuestLayout>
-            <Head title="Log in" />
+        <AuthLayout mode="login" title="Bienvenido de nuevo" subtitle="Entra para editar tu perfil y ver tus contactos.">
+            <Head title="Entrar" />
 
             {status && (
-                <div className="mb-4 text-sm font-medium text-green-600">
+                <div className="mb-5 flex items-center gap-2 rounded-2xl border border-emerald-300/20 bg-emerald-300/[0.07] px-4 py-3 text-sm text-emerald-200">
+                    <Icon name="check_circle" className="text-lg text-emerald-300" />
                     {status}
                 </div>
             )}
 
-            <form onSubmit={submit}>
-                <div>
-                    <InputLabel htmlFor="email" value="Email" />
+            <form onSubmit={submit} className="flex flex-col gap-4">
+                <Field
+                    id="email"
+                    type="email"
+                    label="Correo electrónico"
+                    icon="mail"
+                    placeholder="tu@correo.com"
+                    value={data.email}
+                    autoComplete="username"
+                    autoFocus
+                    error={errors.email}
+                    onChange={(e) => setData('email', e.target.value)}
+                />
 
-                    <TextInput
-                        id="email"
-                        type="email"
-                        name="email"
-                        value={data.email}
-                        className="mt-1 block w-full"
-                        autoComplete="username"
-                        isFocused={true}
-                        onChange={(e) => setData('email', e.target.value)}
-                    />
+                <Field
+                    id="password"
+                    type="password"
+                    label="Contraseña"
+                    icon="lock"
+                    placeholder="Tu contraseña"
+                    value={data.password}
+                    autoComplete="current-password"
+                    error={errors.password}
+                    onChange={(e) => setData('password', e.target.value)}
+                />
 
-                    <InputError message={errors.email} className="mt-2" />
-                </div>
-
-                <div className="mt-4">
-                    <InputLabel htmlFor="password" value="Password" />
-
-                    <TextInput
-                        id="password"
-                        type="password"
-                        name="password"
-                        value={data.password}
-                        className="mt-1 block w-full"
-                        autoComplete="current-password"
-                        onChange={(e) => setData('password', e.target.value)}
-                    />
-
-                    <InputError message={errors.password} className="mt-2" />
-                </div>
-
-                <div className="mt-4 block">
-                    <label className="flex items-center">
-                        <Checkbox
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                    <label className="flex cursor-pointer items-center gap-2.5 py-1 text-sm text-neutral-400">
+                        <input
+                            type="checkbox"
                             name="remember"
                             checked={data.remember}
-                            onChange={(e) =>
-                                setData('remember', e.target.checked)
-                            }
+                            onChange={(e) => setData('remember', e.target.checked)}
+                            className="h-[18px] w-[18px] rounded-md border-white/20 bg-white/5 text-[#D42410] focus:ring-[#FF5A3C] focus:ring-offset-0"
                         />
-                        <span className="ms-2 text-sm text-gray-600 dark:text-gray-400">
-                            Remember me
-                        </span>
+                        Recordarme
                     </label>
-                </div>
-
-                <div className="mt-4 flex items-center justify-end">
                     {canResetPassword && (
-                        <Link
-                            href={route('password.request')}
-                            className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:text-gray-400 dark:hover:text-gray-100 dark:focus:ring-offset-gray-800"
-                        >
-                            Forgot your password?
+                        <Link href={route('password.request')} className="py-1 text-sm font-medium text-[#FF5A3C] transition hover:text-white">
+                            ¿Olvidaste tu contraseña?
                         </Link>
                     )}
-
-                    <PrimaryButton className="ms-4" disabled={processing}>
-                        Log in
-                    </PrimaryButton>
                 </div>
+
+                <div className="mt-2">
+                    <SubmitButton processing={processing}>Entrar</SubmitButton>
+                </div>
+
+                <p className="text-center text-sm text-neutral-400">
+                    ¿No tienes cuenta?{' '}
+                    <Link href={route('register')} className="font-medium text-[#FF5A3C] transition hover:text-white">
+                        Crea una gratis
+                    </Link>
+                </p>
             </form>
-        </GuestLayout>
+        </AuthLayout>
     );
 }

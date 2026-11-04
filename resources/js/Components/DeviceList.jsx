@@ -228,7 +228,7 @@ export default function DeviceList({ devices, spaces, reviewTargets }) {
                                 </button>
                                 <button
                                     type="submit"
-                                    className="w-1/2 py-3 bg-gray-800 hover:bg-gray-700 text-white dark:bg-gray-200 dark:text-gray-800 dark:hover:bg-white rounded-md font-semibold text-sm"
+                                    className="w-1/2 py-3 bg-[#D42410] hover:bg-[#B81E0C] text-white rounded-full shadow-[0_8px_24px_rgba(255,40,10,0.3)] transition font-semibold text-sm"
                                 >
                                     Guardar
                                 </button>

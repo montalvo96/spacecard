@@ -15,10 +15,44 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                sans: ['Figtree', ...defaultTheme.fontFamily.sans],
+                sans: ['Inter', ...defaultTheme.fontFamily.sans],
+                inter: ['Inter', ...defaultTheme.fontFamily.sans],
+                display: ['"Inter Tight"', ...defaultTheme.fontFamily.sans],
+            },
+            // Esquinas más amplias en las tarjetas de Breeze (rounded-lg), como la landing.
+            borderRadius: {
+                lg: '1.375rem',
             },
             colors: {
-                // Color de marca amigable (índigo/violeta) — accesible en dark y light.
+                // Identidad visual actual (negro + rojo, como la landing): los
+                // componentes del panel usan gray/indigo de Breeze, así que se
+                // remapean aquí en vez de reescribir cada clase.
+                gray: {
+                    50: '#FAFAFA',
+                    100: '#F5F5F5',
+                    200: '#E5E5E5',
+                    300: '#D4D4D4',
+                    400: '#A3A3A3',
+                    500: '#8A8A8A',
+                    600: '#525252',
+                    700: '#2A2A2A',
+                    800: '#141414',
+                    900: '#0E0E0E',
+                    950: '#070707',
+                },
+                indigo: {
+                    50: '#FFF1EE',
+                    100: '#FFE0DA',
+                    200: '#FFC2B6',
+                    300: '#FF9A85',
+                    400: '#FF5A3C',
+                    500: '#E8361D',
+                    600: '#D42410',
+                    700: '#B81E0C',
+                    800: '#8F1809',
+                    900: '#5C1006',
+                    950: '#330903',
+                },
                 brand: {
                     50: '#eef2ff',
                     100: '#e0e7ff',

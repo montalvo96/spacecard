@@ -11,23 +11,27 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>SpaceShop | Diseña y compra tu tarjeta NFC</title>
     
-    <!-- Google Fonts -->
+    <!-- Google Fonts: tipografía e iconos (Material Symbols) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..600,0..1,0&display=block" rel="stylesheet">
 
-    <!-- CSS Premium en Vanilla CSS -->
+    <!-- Estilo alineado con la landing: negro, acento rojo, paneles translúcidos -->
     <style>
         :root {
-            --primary: #8b5cf6;
-            --primary-hover: #7c3aed;
-            --bg-dark: #09090b;
-            --card-dark: #18181b;
-            --border-color: #27272a;
-            --text-light: #f4f4f5;
-            --text-muted: #a1a1aa;
-            --font-title: 'Outfit', sans-serif;
+            --primary: #D42410;
+            --primary-hover: #B81E0C;
+            --primary-text: #FF5A3C;
+            --primary-glow: rgba(255, 40, 10, 0.35);
+            --bg-dark: #070707;
+            --card-dark: #111111;
+            --border-color: rgba(255, 255, 255, 0.10);
+            --text-light: #F5F5F5;
+            --text-muted: #A3A3A3;
+            --font-title: 'Inter Tight', sans-serif;
             --font-body: 'Inter', sans-serif;
+            --ease: cubic-bezier(0.22, 1, 0.36, 1);
         }
 
         * {
@@ -41,19 +45,88 @@
             color: var(--text-light);
             font-family: var(--font-body);
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
             overflow-x: hidden;
         }
 
+        /* Iconos Material Symbols */
+        .ms {
+            font-family: 'Material Symbols Rounded';
+            font-weight: normal;
+            font-style: normal;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            direction: ltr;
+            font-feature-settings: 'liga';
+            -webkit-font-smoothing: antialiased;
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .ms-fill { font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24; }
+
+        /* ---- Animaciones orgánicas (ligeras: solo transform y opacity) ---- */
+        @keyframes sc-rise {
+            from { opacity: 0; transform: translate3d(0, 24px, 0); }
+            to { opacity: 1; transform: none; }
+        }
+        @keyframes sc-swap {
+            from { opacity: 0; transform: translate3d(0, 10px, 0) scale(0.98); }
+            to { opacity: 1; transform: none; }
+        }
+        @keyframes sc-flip {
+            from { opacity: 0.2; transform: perspective(900px) rotateY(80deg) scale(0.96); }
+            to { opacity: 1; transform: perspective(900px) rotateY(0) scale(1); }
+        }
+        @keyframes sc-blob {
+            0%, 100% { transform: translate3d(-50%, -50%, 0) scale(1); }
+            33% { transform: translate3d(-46%, -54%, 0) scale(1.08); }
+            66% { transform: translate3d(-54%, -47%, 0) scale(0.95); }
+        }
+        @keyframes sc-bob {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        @keyframes sc-pop {
+            0% { transform: scale(1); }
+            40% { transform: scale(1.35); }
+            100% { transform: scale(1); }
+        }
+        .sc-rise { animation: sc-rise 1s var(--ease) both; }
+        .sc-swap { animation: sc-swap 0.7s var(--ease) both; }
+        .sc-flip { animation: sc-flip 0.8s var(--ease) both; }
+        .sc-bob { animation: sc-bob 6s ease-in-out infinite; }
+        .sc-pop { animation: sc-pop 0.5s var(--ease); }
+
+        .sc-reveal {
+            opacity: 0;
+            transform: translateY(24px);
+            transition: opacity 0.9s var(--ease), transform 0.9s var(--ease);
+        }
+        .sc-reveal.is-in { opacity: 1; transform: none; }
+
+        @media (prefers-reduced-motion: reduce) {
+            .sc-rise, .sc-swap, .sc-flip, .sc-bob, .sc-pop, .preview-glow { animation: none !important; }
+            .sc-reveal { opacity: 1; transform: none; transition: none; }
+        }
+
+        /* Contenedor general, como la landing */
+        .frame {
+            max-width: 1360px;
+            margin: 0 auto;
+            min-height: 100vh;
+        }
+
         header {
-            padding: 24px 5%;
+            padding: 18px 28px;
             display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid var(--border-color);
-            background-color: rgba(9, 9, 11, 0.8);
-            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+            background-color: rgba(7, 7, 7, 0.95);
             position: sticky;
             top: 0;
             z-index: 100;
@@ -61,158 +134,109 @@
 
         .logo {
             font-family: var(--font-title);
-            font-size: 22px;
-            font-weight: 800;
+            font-size: 19px;
+            font-weight: 600;
+            letter-spacing: -0.02em;
             color: #ffffff;
             text-decoration: none;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
+        .logo-mark {
+            width: 34px;
+            height: 34px;
+            border-radius: 999px;
+            background: var(--primary);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.5s var(--ease);
+        }
+        .logo:hover .logo-mark { transform: rotate(20deg) scale(1.1); }
+        .logo .accent { color: var(--primary-text); }
 
-        .logo span {
-            background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        .header-meta {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            border: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.03);
+            font-size: 13px;
+            color: var(--text-muted);
         }
+        .header-meta a { color: var(--primary-text); text-decoration: none; font-weight: 600; }
+        .header-meta a:hover { color: #fff; }
 
         .container {
-            max-width: 1200px;
-            margin: 40px auto;
+            max-width: 1240px;
+            margin: 32px auto 40px;
             padding: 0 24px;
             width: 100%;
             display: grid;
             grid-template-columns: 1fr;
-            gap: 40px;
-            flex-grow: 1;
+            gap: 24px;
         }
 
         @media(min-width: 992px) {
             .container {
                 grid-template-columns: 1.2fr 1fr;
+                align-items: start;
             }
         }
 
-        /* Mockup en vivo (Columna izquierda) */
+        /* Vista previa (columna izquierda) */
         .preview-column {
             position: sticky;
-            top: 100px;
+            top: 96px;
             height: fit-content;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            background-color: var(--card-dark);
+            background: linear-gradient(180deg, #1A1A1A, #0E0E0E);
             border: 1px solid var(--border-color);
-            border-radius: 24px;
-            padding: 40px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border-radius: 26px;
+            padding: 40px 28px;
+            overflow: hidden;
+            isolation: isolate;
+        }
+        @media (max-width: 991px) {
+            .preview-column { position: relative; top: 0; }
+        }
+
+        /* Luz orgánica detrás del producto */
+        .preview-glow {
+            position: absolute;
+            left: 50%;
+            top: 52%;
+            width: 520px;
+            height: 520px;
+            max-width: 120%;
+            background: radial-gradient(closest-side, rgba(255, 40, 10, 0.40), rgba(255, 40, 10, 0.10) 55%, transparent);
+            will-change: transform;
+            z-index: -1;
+            pointer-events: none;
+            animation: sc-blob 18s ease-in-out infinite;
         }
 
         .preview-title {
-            font-family: var(--font-title);
-            font-size: 14px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: var(--text-muted);
-            margin-bottom: 30px;
-        }
-
-        /* Diseños físicos Mockups */
-        .mockup-container {
-            width: 100%;
-            max-width: 380px;
-            aspect-ratio: 1.586/1; /* Tarjeta proporción */
-            border-radius: 20px;
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            padding: 24px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            background: linear-gradient(135deg, #18181b 0%, #09090b 100%);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        /* Mockup Tarjeta */
-        .mockup-card {
-            background-size: cover;
-            background-position: center;
-        }
-
-        .mockup-nfc-chip {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            display: flex;
+            display: inline-flex;
             align-items: center;
-            justify-content: center;
-            align-self: flex-start;
-        }
-
-        .mockup-nfc-chip svg {
-            width: 16px;
-            height: 16px;
-            fill: #ffffff;
-        }
-
-        .mockup-logo-placeholder {
-            max-width: 90px;
-            max-height: 45px;
-            object-fit: contain;
-            align-self: center;
-            opacity: 0.9;
-        }
-
-        .mockup-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            font-family: var(--font-title);
-            font-size: 11px;
+            gap: 8px;
+            padding: 6px 14px 6px 10px;
+            border-radius: 999px;
+            border: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.05);
+            font-size: 12px;
             font-weight: 500;
-            letter-spacing: 0.5px;
-            opacity: 0.7;
+            color: #E5E5E5;
+            margin-bottom: 28px;
         }
-
-        /* Mockup Pulsera (Bracelet) */
-        .mockup-bracelet-view {
-            display: none;
-            width: 160px;
-            height: 160px;
-            border-radius: 50%;
-            border: 18px solid #ffffff;
-            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.2), 0 10px 20px rgba(0,0,0,0.3);
-            position: relative;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-        }
-
-        .mockup-bracelet-chip {
-            width: 34px;
-            height: 34px;
-            background-color: #1e1b4b;
-            border-radius: 50%;
-            position: absolute;
-            top: -16px;
-            left: calc(50% - 17px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 2px solid #ffffff;
-        }
-
-        .mockup-bracelet-chip svg {
-            width: 15px;
-            height: 15px;
-            fill: #ffffff;
-        }
+        .preview-title .ms { font-size: 16px; color: var(--primary-text); }
 
         /* Mockup Placa Reviews Google */
         .mockup-plate-view {
@@ -224,7 +248,7 @@
             color: #1e293b;
             border-radius: 20px;
             padding: 24px;
-            box-shadow: 0 20px 45px rgba(0,0,0,0.4);
+            box-shadow: 0 30px 60px rgba(255, 40, 10, 0.18), 0 20px 45px rgba(0,0,0,0.5);
             border: 3px solid #f1f5f9;
             flex-direction: column;
             justify-content: space-between;
@@ -269,11 +293,8 @@
         .google-logo span:nth-child(5) { color: #34A853; }
         .google-logo span:nth-child(6) { color: #EA4335; }
 
-        .plate-stars {
-            color: #fbbf24;
-            font-size: 20px;
-            letter-spacing: 2px;
-        }
+        .plate-stars { color: #fbbf24; display: flex; gap: 2px; }
+        .plate-stars .ms { font-size: 22px; }
 
         .plate-cta {
             font-size: 13px;
@@ -294,15 +315,9 @@
             align-items: center;
             justify-content: center;
             margin: 12px 0;
-            position: relative;
-        }
-
-        .plate-qr-placeholder::after {
-            content: 'QR';
-            font-weight: 700;
-            font-size: 12px;
             color: #94a3b8;
         }
+        .plate-qr-placeholder .ms { font-size: 56px; }
 
         .plate-client-logo {
             max-width: 70px;
@@ -312,21 +327,46 @@
             margin-top: 10px;
         }
 
-        /* Formulario de Compra (Columna derecha) */
+        /* Formulario (columna derecha) */
         .form-column {
             background-color: var(--card-dark);
             border: 1px solid var(--border-color);
-            border-radius: 24px;
+            border-radius: 26px;
             padding: 32px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        @media (max-width: 640px) {
+            .form-column { padding: 22px; }
+        }
+
+        .form-kicker {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            border-radius: 999px;
+            background: #ffffff;
+            color: #141414;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .form-kicker::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 999px;
+            background: var(--primary);
+            animation: sc-pop 2s var(--ease) infinite;
         }
 
         .form-title {
             font-family: var(--font-title);
-            font-size: 24px;
-            font-weight: 700;
-            margin-bottom: 24px;
+            font-size: clamp(32px, 3.4vw, 44px);
+            line-height: 1;
+            font-weight: 400;
+            letter-spacing: -0.04em;
+            margin: 18px 0 28px;
         }
+        .form-title span { color: var(--primary-text); }
 
         .form-group {
             margin-bottom: 20px;
@@ -334,101 +374,121 @@
 
         .form-label {
             display: block;
-            text-size: 12px;
+            font-size: 11px;
             font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 0.8px;
+            letter-spacing: 0.08em;
             color: var(--text-muted);
             margin-bottom: 8px;
         }
 
         .form-input, select, textarea {
             width: 100%;
-            padding: 12px 16px;
-            background-color: #09090b;
+            padding: 13px 16px;
+            background-color: #0A0A0A;
             border: 1px solid var(--border-color);
-            border-radius: 12px;
+            border-radius: 14px;
             color: #ffffff;
             font-family: var(--font-body);
             font-size: 14px;
-            transition: all 0.2s;
+            transition: border-color 0.3s var(--ease), box-shadow 0.3s var(--ease), background-color 0.3s var(--ease);
         }
+
+        .form-input:hover, select:hover, textarea:hover { border-color: rgba(255, 255, 255, 0.2); }
 
         .form-input:focus, select:focus, textarea:focus {
             outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.15);
+            border-color: var(--primary-text);
+            box-shadow: 0 0 0 4px rgba(255, 59, 31, 0.15);
+            background-color: #0E0E0E;
         }
 
-        /* Selector de Tipo de Producto */
+        /* Selector de tipo de producto */
         .product-selector {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
             margin-bottom: 24px;
         }
 
         .product-option-card {
-            border: 2px solid var(--border-color);
-            background-color: #09090b;
-            border-radius: 16px;
-            padding: 16px;
+            border: 1px solid var(--border-color);
+            background-color: #0A0A0A;
+            color: var(--text-light);
+            font-family: var(--font-body);
+            border-radius: 18px;
+            padding: 16px 10px;
             text-align: center;
             cursor: pointer;
-            transition: all 0.25s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            transition: border-color 0.4s var(--ease), background-color 0.4s var(--ease), transform 0.4s var(--ease);
+        }
+        .product-option-card .ms {
+            font-size: 26px;
+            color: var(--primary-text);
+            transition: transform 0.5s var(--ease);
         }
 
         .product-option-card:hover {
-            border-color: #4b5563;
+            border-color: rgba(255, 255, 255, 0.22);
+            transform: translateY(-2px);
         }
+        .product-option-card:hover .ms { transform: rotate(-10deg) scale(1.1); }
 
         .product-option-card.active {
-            border-color: var(--primary);
-            background-color: rgba(139, 92, 246, 0.05);
+            border-color: rgba(255, 59, 31, 0.6);
+            background-color: rgba(255, 59, 31, 0.10);
         }
 
         .product-opt-title {
             font-family: var(--font-title);
-            font-size: 13px;
-            font-weight: 700;
-            margin-bottom: 4px;
+            font-size: 14px;
+            font-weight: 600;
             color: #ffffff;
         }
 
         .product-opt-price {
-            font-size: 12px;
+            font-family: var(--font-title);
+            font-size: 13px;
             color: var(--text-muted);
-            font-weight: 500;
         }
 
-        /* Secciones dinámicas de configuración */
+        /* Secciones de configuración */
         .config-section {
-            border-top: 1px solid var(--border-color);
-            padding-top: 20px;
-            margin-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.07);
+            padding-top: 22px;
+            margin-top: 22px;
         }
 
         .config-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
             font-family: var(--font-title);
-            font-size: 15px;
-            font-weight: 600;
+            font-size: 18px;
+            font-weight: 500;
+            letter-spacing: -0.01em;
             margin-bottom: 16px;
         }
+        .config-title .ms { font-size: 22px; color: var(--primary-text); }
 
-        /* Paleta de Colores Hex */
+        /* Colores */
         .color-inputs {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 16px;
+            gap: 12px;
         }
 
         .color-picker-wrapper {
             display: flex;
             align-items: center;
             gap: 10px;
-            background-color: #09090b;
+            background-color: #0A0A0A;
             border: 1px solid var(--border-color);
-            border-radius: 12px;
+            border-radius: 14px;
             padding: 8px 12px;
         }
 
@@ -446,7 +506,7 @@
 
         .color-picker::-webkit-color-swatch {
             border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 6px;
+            border-radius: 999px;
         }
 
         .color-picker-text {
@@ -456,22 +516,32 @@
             font-weight: 600;
         }
 
-        /* Zona de Carga de Logo */
+        /* Carga de logo */
         .file-upload-zone {
-            border: 2px dashed var(--border-color);
+            border: 1.5px dashed rgba(255, 255, 255, 0.16);
             border-radius: 16px;
-            padding: 24px;
+            padding: 22px;
             text-align: center;
             cursor: pointer;
-            background-color: #09090b;
-            transition: all 0.2s;
+            background-color: #0A0A0A;
+            transition: border-color 0.3s var(--ease), background-color 0.3s var(--ease);
             position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+        .file-upload-zone > .ms {
+            font-size: 28px;
+            color: var(--primary-text);
+            transition: transform 0.5s var(--ease);
         }
 
         .file-upload-zone:hover {
-            border-color: var(--primary);
-            background-color: rgba(139, 92, 246, 0.02);
+            border-color: var(--primary-text);
+            background-color: rgba(255, 59, 31, 0.05);
         }
+        .file-upload-zone:hover > .ms { transform: translateY(-4px); }
 
         .file-upload-text {
             font-size: 13px;
@@ -479,7 +549,7 @@
         }
 
         .file-upload-text strong {
-            color: var(--primary);
+            color: var(--primary-text);
         }
 
         .file-input {
@@ -490,10 +560,10 @@
             width: 100%;
         }
 
-        /* Selector de colores fijos de pulsera */
+        /* Colores de pulsera */
         .bracelet-color-selector {
             display: flex;
-            gap: 16px;
+            gap: 14px;
             margin-bottom: 12px;
         }
 
@@ -502,13 +572,13 @@
             height: 44px;
             border-radius: 50%;
             cursor: pointer;
-            border: 3px solid transparent;
-            transition: all 0.2s;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.4s var(--ease), box-shadow 0.4s var(--ease);
         }
+        .bracelet-color-btn:hover { transform: scale(1.08); }
 
         .bracelet-color-btn.active {
-            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--bg-dark), 0 0 0 5px #F5F5F5;
             transform: scale(1.08);
         }
 
@@ -516,44 +586,52 @@
         .btn-red { background-color: #ef4444; }
         .btn-black { background-color: #18181b; }
 
-        /* Botón de Checkout */
+        /* Botón de checkout */
         .btn-checkout {
             width: 100%;
-            padding: 16px;
-            background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%);
+            padding: 17px;
+            background: var(--primary);
             color: #ffffff;
-            font-family: var(--font-title);
-            font-weight: 700;
-            font-size: 16px;
+            font-family: var(--font-body);
+            font-weight: 600;
+            font-size: 15px;
             border: none;
-            border-radius: 14px;
+            border-radius: 999px;
             cursor: pointer;
-            transition: all 0.25s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: background-color 0.3s var(--ease), transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
             margin-top: 10px;
-            box-shadow: 0 10px 20px rgba(139, 92, 246, 0.25);
+            box-shadow: 0 10px 30px var(--primary-glow);
         }
+        .btn-checkout .ms { transition: transform 0.3s var(--ease); }
 
         .btn-checkout:hover {
-            opacity: 0.95;
-            transform: translateY(-1px);
-            box-shadow: 0 15px 25px rgba(139, 92, 246, 0.35);
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 16px 40px rgba(255, 40, 10, 0.5);
         }
+        .btn-checkout:hover .ms { transform: translateX(4px); }
+
         /* ===================== DISEÑADOR DE TARJETA (2 CARAS) ===================== */
         .designer-stage { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 16px; }
         .side-toggle { display: inline-flex; background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); border-radius: 999px; padding: 4px; }
         .side-toggle.inline { margin-top: 6px; }
-        .side-btn { border: none; background: transparent; color: var(--text-muted); font-size: 12px; font-weight: 600; padding: 7px 18px; border-radius: 999px; cursor: pointer; transition: all .2s; }
-        .side-btn.active { background: #8b5cf6; color: #fff; box-shadow: 0 4px 14px rgba(139,92,246,.35); }
+        .side-btn { border: none; background: transparent; color: var(--text-muted); font-family: var(--font-body); font-size: 12px; font-weight: 600; padding: 8px 18px; border-radius: 999px; cursor: pointer; transition: background-color .4s var(--ease), color .4s var(--ease); }
+        .side-btn:hover { color: #fff; }
+        .side-btn.active { background: var(--primary); color: #fff; box-shadow: 0 4px 14px var(--primary-glow); }
 
         .card-canvas {
             position: relative; width: 100%; max-width: 380px; aspect-ratio: 1.586 / 1;
             border-radius: 20px; overflow: hidden; user-select: none; touch-action: none;
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,.6), inset 0 0 0 1px rgba(255,255,255,.06);
-            background: linear-gradient(135deg, #8b5cf6, #0c0b14);
+            box-shadow: 0 30px 60px -12px rgba(255,40,10,.25), 0 25px 50px -12px rgba(0,0,0,.7), inset 0 0 0 1px rgba(255,255,255,.06);
+            background: linear-gradient(135deg, #D42410, #070707);
         }
         .card-canvas::after { /* barniz sutil */ content:''; position:absolute; inset:0; background: radial-gradient(120% 120% at 0% 0%, rgba(255,255,255,.12), transparent 45%); pointer-events:none; }
-        .card-chip { position:absolute; top:16px; right:16px; width:26px; height:26px; opacity:.8; }
-        .card-chip svg { width:100%; height:100%; fill:#fff; }
+        .card-chip { position:absolute; top:14px; right:14px; opacity:.8; color:#fff; transition: opacity .4s var(--ease); }
+        .card-chip .ms { font-size: 24px; }
         .card-brand { position:absolute; bottom:12px; left:16px; font-size:9px; letter-spacing:1px; font-weight:700; color:rgba(255,255,255,.75); }
 
         .card-el { position:absolute; transform: translate(-50%,-50%); cursor: grab; }
@@ -565,84 +643,97 @@
         .qr-box { width:100%; height:100%; background:#fff; border-radius:8px; display:flex; align-items:center; justify-content:center; }
         .qr-box svg { width:82%; height:82%; }
         .info-block { display:flex; flex-direction:column; gap:1px; pointer-events:none; }
-        .info-block .i-name { font-family:var(--font-title); font-weight:800; line-height:1.1; }
+        .info-block .i-name { font-family:var(--font-title); font-weight:700; line-height:1.1; }
         .info-block .i-title { opacity:.9; }
         .info-block .i-line { opacity:.8; }
-        .designer-hint { font-size:11px; color:var(--text-muted); text-align:center; margin:0; }
+        .designer-hint { display:flex; align-items:center; justify-content:center; gap:6px; font-size:12px; color:var(--text-muted); text-align:center; margin:0; }
+        .designer-hint .ms { font-size: 18px; color: var(--primary-text); }
 
         /* Controles del diseñador */
         .ctrl-group { margin-bottom: 18px; }
-        .seg { display:inline-flex; background:rgba(255,255,255,.04); border:1px solid var(--border-color); border-radius:10px; padding:3px; margin-top:6px; }
-        .seg-btn { border:none; background:transparent; color:var(--text-muted); font-size:11px; font-weight:600; padding:6px 14px; border-radius:8px; cursor:pointer; }
-        .seg-btn.active { background:#8b5cf6; color:#fff; }
-        .el-card { border:1px solid var(--border-color); border-radius:14px; padding:14px; margin-bottom:14px; background:rgba(255,255,255,.02); }
-        .el-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
-        .el-head span { font-size:13px; font-weight:700; color:var(--text-light); }
-        .el-row { display:flex; align-items:center; gap:10px; margin-top:10px; font-size:11px; color:var(--text-muted); }
+        .seg { display:inline-flex; background:rgba(255,255,255,.04); border:1px solid var(--border-color); border-radius:999px; padding:4px; margin-top:6px; }
+        .seg-btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; border:none; background:transparent; color:var(--text-muted); font-family:var(--font-body); font-size:12px; font-weight:600; padding:8px 14px; border-radius:999px; cursor:pointer; transition: background-color .4s var(--ease), color .4s var(--ease); }
+        .seg-btn .ms { font-size: 18px; }
+        .seg-btn:hover { color:#fff; }
+        .seg-btn.active { background:var(--primary); color:#fff; }
+        .el-card { border:1px solid var(--border-color); border-radius:18px; padding:16px; margin-bottom:12px; background:rgba(255,255,255,.02); transition: border-color .4s var(--ease); }
+        .el-card:hover { border-color: rgba(255,255,255,.18); }
+        .el-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+        .el-head span { display:inline-flex; align-items:center; gap:8px; font-size:14px; font-weight:600; color:var(--text-light); }
+        .el-head .ms { font-size: 20px; color: var(--primary-text); }
+        .el-row { display:flex; align-items:center; gap:10px; margin-top:10px; font-size:12px; color:var(--text-muted); }
         .el-row select, .el-row input[type=range] { flex:1; }
-        .el-select { background:var(--card-dark); border:1px solid var(--border-color); color:var(--text-light); border-radius:8px; padding:6px 8px; font-size:12px; }
-        input[type=range] { accent-color:#8b5cf6; }
-        .switch { position:relative; display:inline-block; width:38px; height:22px; }
+        .el-select { background:#0A0A0A; border:1px solid var(--border-color); color:var(--text-light); border-radius:10px; padding:7px 10px; font-size:12px; }
+        input[type=range] { accent-color: var(--primary); }
+        .switch { position:relative; display:inline-block; width:40px; height:24px; }
         .switch input { opacity:0; width:0; height:0; }
-        .switch .slider { position:absolute; inset:0; background:#3f3f46; border-radius:999px; transition:.2s; }
-        .switch .slider::before { content:''; position:absolute; height:16px; width:16px; left:3px; top:3px; background:#fff; border-radius:50%; transition:.2s; }
-        .switch input:checked + .slider { background:#8b5cf6; }
+        .switch .slider { position:absolute; inset:0; background:#2A2A2A; border-radius:999px; transition: background-color .4s var(--ease); cursor:pointer; }
+        .switch .slider::before { content:''; position:absolute; height:18px; width:18px; left:3px; top:3px; background:#fff; border-radius:50%; transition: transform .5s var(--ease); }
+        .switch input:checked + .slider { background: var(--primary); }
         .switch input:checked + .slider::before { transform: translateX(16px); }
-        .mini-input { width:100%; background:var(--card-dark); border:1px solid var(--border-color); color:var(--text-light); border-radius:8px; padding:8px 10px; font-size:12px; margin-top:6px; }
+        .switch input:focus-visible + .slider { box-shadow: 0 0 0 3px rgba(255,59,31,.35); }
+        .mini-input { width:100%; background:#0A0A0A; border:1px solid var(--border-color); color:var(--text-light); border-radius:10px; padding:10px 12px; font-size:13px; margin-top:6px; transition: border-color .3s var(--ease); }
+        .mini-input:focus { outline:none; border-color: var(--primary-text); }
         .mini-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
 
-        /* Diseños predeterminados */
+        /* Diseños de catálogo */
         .preset-strip { display:flex; gap:8px; overflow-x:auto; padding:8px 2px; margin-top:6px; }
-        .preset-thumb { flex:0 0 auto; width:64px; padding:0; border:2px solid transparent; border-radius:12px; background:transparent; cursor:pointer; overflow:hidden; transition:.15s; }
+        .preset-thumb { flex:0 0 auto; width:64px; padding:0; border:2px solid transparent; border-radius:12px; background:transparent; cursor:pointer; overflow:hidden; transition: transform .4s var(--ease), border-color .4s var(--ease); }
         .preset-thumb img { width:100%; display:block; }
-        .preset-thumb:hover { transform:translateY(-2px); }
-        .preset-thumb.active { border-color:#8b5cf6; box-shadow:0 4px 14px rgba(139,92,246,.35); }
-        .preset-note { margin-top:10px; padding:10px 12px; border-radius:10px; background:rgba(34,197,94,.08); border:1px solid rgba(34,197,94,.2); color:#86efac; font-size:12px; line-height:1.5; }
+        .preset-thumb:hover { transform:translateY(-3px); }
+        .preset-thumb.active { border-color: var(--primary-text); box-shadow:0 6px 18px var(--primary-glow); }
+        .preset-note { display:flex; gap:8px; align-items:flex-start; margin-top:12px; padding:12px 14px; border-radius:14px; background:rgba(110,231,183,.07); border:1px solid rgba(110,231,183,.2); color:#A7F3D0; font-size:12px; line-height:1.5; }
+        .preset-note .ms { font-size: 18px; color: #6EE7B7; }
 
         /* Carrito */
-        .btn-add-cart { width:100%; padding:13px; border:1.5px dashed #8b5cf6; background:rgba(139,92,246,.08); color:#a78bfa; font-weight:700; font-size:14px; border-radius:12px; cursor:pointer; margin:8px 0 18px; transition:.2s; }
-        .btn-add-cart:hover { background:rgba(139,92,246,.16); }
-        .cart-panel { border:1px solid var(--border-color); border-radius:14px; padding:16px; margin-bottom:22px; background:rgba(255,255,255,.02); }
-        .cart-count { background:#8b5cf6; color:#fff; font-size:12px; min-width:22px; height:22px; padding:0 6px; border-radius:999px; display:inline-flex; align-items:center; justify-content:center; }
-        .cart-empty { font-size:12px; color:var(--text-muted); margin:6px 0 0; }
-        .cart-item { display:flex; align-items:center; gap:12px; padding:10px 0; border-top:1px solid var(--border-color); }
+        .btn-add-cart { display:flex; align-items:center; justify-content:center; gap:8px; width:100%; padding:14px; border:1.5px dashed rgba(255,59,31,.55); background:rgba(255,59,31,.06); color:var(--primary-text); font-family:var(--font-body); font-weight:600; font-size:14px; border-radius:999px; cursor:pointer; margin:8px 0 18px; transition: background-color .3s var(--ease), border-color .3s var(--ease); }
+        .btn-add-cart .ms { transition: transform .5s var(--ease); }
+        .btn-add-cart:hover { background:rgba(255,59,31,.14); border-color: var(--primary-text); }
+        .btn-add-cart:hover .ms { transform: rotate(90deg); }
+        .cart-panel { border:1px solid var(--border-color); border-radius:18px; padding:18px; margin-bottom:22px; background:rgba(255,255,255,.02); transition: box-shadow .35s var(--ease); }
+        .cart-count { background:var(--primary); color:#fff; font-size:12px; min-width:24px; height:24px; padding:0 7px; border-radius:999px; display:inline-flex; align-items:center; justify-content:center; }
+        .cart-empty { font-size:13px; color:var(--text-muted); margin:6px 0 0; }
+        .cart-item { display:flex; align-items:center; gap:12px; padding:12px 0; border-top:1px solid rgba(255,255,255,.07); animation: sc-swap .6s var(--ease) both; }
         .cart-item:first-child { border-top:none; }
-        .cart-thumb { width:44px; height:28px; border-radius:6px; flex-shrink:0; background:linear-gradient(135deg,#8b5cf6,#0c0b14); display:flex; align-items:center; justify-content:center; overflow:hidden; }
+        .cart-thumb { width:46px; height:30px; border-radius:7px; flex-shrink:0; background:linear-gradient(135deg,#D42410,#070707); display:flex; align-items:center; justify-content:center; overflow:hidden; color:#fff; }
+        .cart-thumb .ms { font-size: 18px; }
         .cart-thumb img { width:100%; height:100%; object-fit:contain; }
         .cart-info { flex:1; min-width:0; }
         .cart-info .ci-name { font-size:13px; font-weight:600; color:var(--text-light); }
         .cart-info .ci-meta { font-size:11px; color:var(--text-muted); }
-        .cart-price { font-size:13px; font-weight:700; color:var(--text-light); }
-        .cart-remove { background:none; border:none; color:#f43f5e; cursor:pointer; font-size:16px; line-height:1; padding:4px; }
-        .cart-total-row { display:flex; justify-content:space-between; align-items:center; margin-top:12px; padding-top:12px; border-top:1px solid var(--border-color); font-weight:800; font-size:15px; color:var(--text-light); }
+        .cart-price { font-family: var(--font-title); font-size:14px; font-weight:600; color:var(--text-light); }
+        .cart-remove { width:36px; height:36px; display:inline-flex; align-items:center; justify-content:center; background:none; border:none; border-radius:999px; color:var(--text-muted); cursor:pointer; transition: background-color .3s var(--ease), color .3s var(--ease); }
+        .cart-remove:hover { background: rgba(255,59,31,.12); color: var(--primary-text); }
+        .cart-remove .ms { font-size: 20px; }
+        .cart-total-row { display:flex; justify-content:space-between; align-items:center; margin-top:12px; padding-top:12px; border-top:1px solid rgba(255,255,255,.07); font-family: var(--font-title); font-weight:600; font-size:18px; color:var(--text-light); }
         .btn-checkout:disabled { opacity:.5; cursor:not-allowed; }
     </style>
 </head>
 <body>
 
-    <header style="display:flex;align-items:center;justify-content:space-between;">
-        <a href="/" class="logo" style="display:flex;align-items:center;gap:10px;">
-            <svg width="26" height="26" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <defs><linearGradient id="scMarkShop" x1="20" y1="8" x2="80" y2="92" gradientUnits="userSpaceOnUse">
-                    <stop stop-color="#ff3b3b"/><stop offset="1" stop-color="#c40d1a"/></linearGradient></defs>
-                <path d="M58 8 L22 50 H44 L38 92 L78 46 H54 L58 8 Z" fill="url(#scMarkShop)"/>
-            </svg>
-            <span style="font-weight:800;">Space</span><span style="font-weight:800;color:var(--text-light)">Shop</span>
+    <div class="frame">
+    <header class="sc-rise">
+        <a href="/" class="logo">
+            <span class="logo-mark"><span class="ms ms-fill" aria-hidden="true" style="font-size:20px;">bolt</span></span>
+            <span>Space<span class="accent">Shop</span></span>
         </a>
-        <div style="font-size:13px;color:var(--text-muted);">
+        <div class="header-meta">
             @auth
-                Comprando como <strong style="color:var(--text-light);">{{ auth()->user()->name }}</strong> · la tarjeta se vinculará a tu cuenta
+                <span class="ms" aria-hidden="true" style="font-size:18px;color:var(--primary-text);">verified_user</span>
+                <span>Comprando como <strong style="color:var(--text-light);">{{ auth()->user()->name }}</strong> · se vinculará a tu cuenta</span>
             @else
-                <a href="{{ route('login') }}" style="color:#8b5cf6;text-decoration:none;">Inicia sesión</a> para vincular la compra a tu cuenta (opcional)
+                <span class="ms" aria-hidden="true" style="font-size:18px;color:var(--primary-text);">login</span>
+                <span><a href="{{ route('login') }}">Inicia sesión</a> para vincular la compra a tu cuenta (opcional)</span>
             @endauth
         </div>
     </header>
 
     <div class="container">
-        
+
         <!-- Vista previa Mockup (Columna izquierda) -->
-        <div class="preview-column">
-            <h4 class="preview-title">Vista Previa Impresión</h4>
+        <div class="preview-column sc-rise" style="animation-delay:120ms;">
+            <div class="preview-glow" aria-hidden="true"></div>
+            <h4 class="preview-title"><span class="ms" aria-hidden="true">visibility</span>Vista previa de impresión</h4>
             
             <!-- Diseñador de Tarjeta (SpaceCard) - 2 caras -->
             <div id="mockup-card-view" class="designer-stage">
@@ -652,9 +743,7 @@
                 </div>
 
                 <div id="card-canvas" class="card-canvas">
-                    <div id="card-chip" class="card-chip">
-                        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
-                    </div>
+                    <div id="card-chip" class="card-chip"><span class="ms" aria-hidden="true">contactless</span></div>
 
                     <!-- Elemento: Logo -->
                     <div id="el-logo" class="card-el" data-el="logo">
@@ -677,16 +766,16 @@
                     <div id="card-brand" class="card-brand">SPACECARD® NFC</div>
                 </div>
 
-                <p class="designer-hint">✋ Arrastra el logo, la info y el QR para colocarlos · cambia de cara arriba</p>
+                <p class="designer-hint"><span class="ms" aria-hidden="true">drag_pan</span>Arrastra el logo, la info y el QR para colocarlos · cambia de cara arriba</p>
 
                 <!-- Vista previa del diseño de catálogo (modo prediseñada) -->
-                <img id="preset-preview" src="/img/products/card-black.png" alt="Diseño AVASPACE" style="display:none; width:100%; max-width:440px; filter: drop-shadow(0 20px 40px rgba(0,0,0,.6));">
+                <img id="preset-preview" class="sc-bob" src="/img/products/card-black.png" alt="Diseño AVASPACE" style="display:none; width:100%; max-width:440px; filter: drop-shadow(0 30px 50px rgba(255,40,10,.3));">
                 <p id="preset-preview-note" class="designer-hint" style="display:none;">Diseño de catálogo AVASPACE · frente y reverso · se imprime tal cual con tu QR único</p>
             </div>
 
             <!-- Pulsera SpaceBand (imagen real de producto) -->
             <div id="mockup-bracelet-view" class="bracelet-real" style="display:none; flex-direction:column; align-items:center; gap:14px; width:100%;">
-                <img src="/img/products/bracelets.png" alt="SpaceBand NFC" style="width:100%; max-width:420px; filter: drop-shadow(0 20px 40px rgba(0,0,0,.6));">
+                <img class="sc-bob" src="/img/products/bracelets.png" alt="SpaceBand NFC" style="width:100%; max-width:420px; filter: drop-shadow(0 30px 50px rgba(255,40,10,.3));">
                 <p style="font-size:12px; color:var(--text-muted); text-align:center;">
                     SpaceBand® NFC · disponible en <strong style="color:#ef4444;">rojo</strong>, <strong style="color:var(--text-light);">negro</strong> y <strong style="color:#e5e7eb;">blanco</strong><br>
                     Color seleccionado: <strong id="bracelet-color-label" style="color:var(--text-light);">Blanco</strong>
@@ -704,9 +793,11 @@
                     <div class="google-logo">
                         <span>G</span><span>o</span><span>o</span><span>g</span><span>l</span><span>e</span>
                     </div>
-                    <div class="plate-stars">★★★★★</div>
+                    <div class="plate-stars" aria-label="5 estrellas">
+                        <span class="ms ms-fill" aria-hidden="true">star</span><span class="ms ms-fill" aria-hidden="true">star</span><span class="ms ms-fill" aria-hidden="true">star</span><span class="ms ms-fill" aria-hidden="true">star</span><span class="ms ms-fill" aria-hidden="true">star</span>
+                    </div>
                     <div class="plate-cta">¡Escanea y escribe tu reseña!</div>
-                    <div class="plate-qr-placeholder"></div>
+                    <div class="plate-qr-placeholder"><span class="ms" aria-hidden="true">qr_code_2</span></div>
                     
                     <img id="mockup-plate-logo-img" src="" class="plate-client-logo" style="display: none;" alt="Logo Cliente" />
                     <div id="mockup-plate-logo-dummy" class="plate-client-logo" style="font-family: var(--font-title); font-size:10px; font-weight:700; color:#94a3b8; opacity:0.6;">
@@ -718,14 +809,15 @@
         </div>
 
         <!-- Formulario (Columna derecha) -->
-        <div class="form-column">
-            <h2 class="form-title">Configura tu Dispositivo</h2>
-            
+        <div class="form-column sc-rise" style="animation-delay:240ms;">
+            <span class="form-kicker">SpaceShop</span>
+            <h2 class="form-title">Configura tu<br><span>dispositivo</span></h2>
+
             <form action="{{ route('shop.checkout') }}" method="POST" enctype="multipart/form-data" id="checkout-form" onsubmit="return prepareCheckout()">
                 @csrf
                 <input type="hidden" name="product_type" id="product_type" value="card">
-                <input type="hidden" id="color_primary" value="#8b5cf6">
-                <input type="hidden" id="color_secondary" value="#0c0b14">
+                <input type="hidden" id="color_primary" value="#D42410">
+                <input type="hidden" id="color_secondary" value="#070707">
                 <input type="hidden" id="design_config" value="">
                 <input type="hidden" name="cart" id="cart_input" value="">
 
@@ -733,18 +825,21 @@
                 <div class="form-group">
                     <label class="form-label">Elige tu Producto</label>
                     <div class="product-selector">
-                        <div class="product-option-card active" onclick="selectProduct('card')">
-                            <div class="product-opt-title">SpaceCard</div>
-                            <div class="product-opt-price">${{ $prices['card'] }}</div>
-                        </div>
-                        <div class="product-option-card" onclick="selectProduct('bracelet')">
-                            <div class="product-opt-title">Pulsera NFC</div>
-                            <div class="product-opt-price">${{ $prices['bracelet'] }}</div>
-                        </div>
-                        <div class="product-option-card" onclick="selectProduct('review_plate')">
-                            <div class="product-opt-title">Placa Google</div>
-                            <div class="product-opt-price">${{ $prices['review_plate'] }}</div>
-                        </div>
+                        <button type="button" class="product-option-card active" aria-pressed="true" onclick="selectProduct('card')">
+                            <span class="ms" aria-hidden="true">credit_card</span>
+                            <span class="product-opt-title">SpaceCard</span>
+                            <span class="product-opt-price">${{ $prices['card'] }}</span>
+                        </button>
+                        <button type="button" class="product-option-card" aria-pressed="false" onclick="selectProduct('bracelet')">
+                            <span class="ms" aria-hidden="true">watch</span>
+                            <span class="product-opt-title">Pulsera NFC</span>
+                            <span class="product-opt-price">${{ $prices['bracelet'] }}</span>
+                        </button>
+                        <button type="button" class="product-option-card" aria-pressed="false" onclick="selectProduct('review_plate')">
+                            <span class="ms" aria-hidden="true">reviews</span>
+                            <span class="product-opt-title">Placa Google</span>
+                            <span class="product-opt-price">${{ $prices['review_plate'] }}</span>
+                        </button>
                     </div>
                 </div>
 
@@ -756,12 +851,12 @@
 
                 <!-- Configuración dinámica de la Tarjeta (SpaceCard) - Diseñador 2 caras -->
                 <div id="config-card-section" class="config-section">
-                    <h4 class="config-title">Tu tarjeta</h4>
+                    <h4 class="config-title"><span class="ms" aria-hidden="true">style</span>Tu tarjeta</h4>
 
                     <!-- Modo de diseño -->
                     <div class="seg" id="card-mode-seg" style="width:100%; display:flex;">
-                        <button type="button" id="mode-preset" class="seg-btn" style="flex:1;" onclick="setCardMode('preset')">🎴 Prediseñada</button>
-                        <button type="button" id="mode-custom" class="seg-btn active" style="flex:1;" onclick="setCardMode('custom')">🎨 Personalizada</button>
+                        <button type="button" id="mode-preset" class="seg-btn" style="flex:1;" onclick="setCardMode('preset')"><span class="ms" aria-hidden="true">auto_awesome_mosaic</span>Prediseñada</button>
+                        <button type="button" id="mode-custom" class="seg-btn active" style="flex:1;" onclick="setCardMode('custom')"><span class="ms" aria-hidden="true">palette</span>Personalizada</button>
                     </div>
 
                     <!-- MODO PREDISEÑADA (catálogo AVASPACE) -->
@@ -776,7 +871,8 @@
                             <button type="button" class="preset-thumb" data-preset="green"  onclick="pickPreset('green','Verde','#16a34a')"><img src="/img/products/thumbs/card-green.png" alt="Verde"></button>
                         </div>
                         <div class="preset-note">
-                            ✓ Se imprime <strong>tal cual</strong> el diseño AVASPACE, con tu <strong>código QR único</strong> ya integrado. No requiere edición.
+                            <span class="ms" aria-hidden="true">check_circle</span>
+                            <span>Se imprime <strong>tal cual</strong> el diseño AVASPACE, con tu <strong>código QR único</strong> ya integrado. No requiere edición.</span>
                         </div>
                     </div>
 
@@ -785,7 +881,7 @@
 
                     <!-- Cara activa -->
                     <div class="ctrl-group">
-                        <label class="form-label">Editando la cara: <strong id="active-side-label" style="color:#8b5cf6;">Frente</strong></label>
+                        <label class="form-label">Editando la cara: <strong id="active-side-label" style="color:var(--primary-text);">Frente</strong></label>
                         <div class="side-toggle inline">
                             <button type="button" id="side-front-2" class="side-btn active" onclick="setSide('front')">Frente</button>
                             <button type="button" id="side-back-2" class="side-btn" onclick="setSide('back')">Reverso</button>
@@ -801,12 +897,12 @@
                         </div>
                         <div class="color-inputs" style="margin-top:10px;">
                             <div class="color-picker-wrapper">
-                                <input type="color" id="bgC1" class="color-picker" value="#8b5cf6" oninput="onBgColor()">
-                                <span id="bgC1_label" class="color-picker-text">#8B5CF6</span>
+                                <input type="color" id="bgC1" class="color-picker" value="#d42410" oninput="onBgColor()">
+                                <span id="bgC1_label" class="color-picker-text">#D42410</span>
                             </div>
                             <div id="bgC2-wrap" class="color-picker-wrapper">
-                                <input type="color" id="bgC2" class="color-picker" value="#0c0b14" oninput="onBgColor()">
-                                <span id="bgC2_label" class="color-picker-text">#0C0B14</span>
+                                <input type="color" id="bgC2" class="color-picker" value="#070707" oninput="onBgColor()">
+                                <span id="bgC2_label" class="color-picker-text">#070707</span>
                             </div>
                         </div>
                         <div id="angle-wrap" class="el-row">
@@ -816,12 +912,13 @@
                     </div>
 
                     <!-- Elemento: Logo -->
-                    <div class="el-card">
+                    <div class="el-card sc-reveal">
                         <div class="el-head">
-                            <span>🖼️ Logo</span>
-                            <label class="switch"><input type="checkbox" id="logo-on" checked onchange="toggleEl('logo', this.checked)"><span class="slider"></span></label>
+                            <span><span class="ms" aria-hidden="true">image</span>Logo</span>
+                            <label class="switch"><input type="checkbox" id="logo-on" aria-label="Mostrar logo" checked onchange="toggleEl('logo', this.checked)"><span class="slider"></span></label>
                         </div>
                         <div class="file-upload-zone">
+                            <span class="ms" aria-hidden="true">cloud_upload</span>
                             <span class="file-upload-text">Sube tu logo · <strong>clic para buscar</strong></span>
                             <input type="file" name="logo" id="logo_input" class="file-input" accept="image/*" onchange="previewLogo(this)">
                         </div>
@@ -835,10 +932,10 @@
                     </div>
 
                     <!-- Elemento: Información de negocio -->
-                    <div class="el-card">
+                    <div class="el-card sc-reveal">
                         <div class="el-head">
-                            <span>💼 Información de negocio</span>
-                            <label class="switch"><input type="checkbox" id="info-on" checked onchange="toggleEl('info', this.checked)"><span class="slider"></span></label>
+                            <span><span class="ms" aria-hidden="true">business_center</span>Información de negocio</span>
+                            <label class="switch"><input type="checkbox" id="info-on" aria-label="Mostrar información" checked onchange="toggleEl('info', this.checked)"><span class="slider"></span></label>
                         </div>
                         <input type="text" class="mini-input" id="info-name" placeholder="Nombre" oninput="updateInfo()">
                         <input type="text" class="mini-input" id="info-title" placeholder="Puesto / profesión" oninput="updateInfo()">
@@ -855,18 +952,18 @@
                         <div class="el-row"><span>Tamaño</span><input type="range" id="info-size" min="60" max="160" value="100" oninput="setElSize('info', this.value)"></div>
                         <div class="el-row"><span>Alineación</span>
                             <div class="seg" style="margin:0;">
-                                <button type="button" class="seg-btn" data-align="left" onclick="setInfoAlign('left')">◧</button>
-                                <button type="button" class="seg-btn active" data-align="center" onclick="setInfoAlign('center')">▣</button>
-                                <button type="button" class="seg-btn" data-align="right" onclick="setInfoAlign('right')">◨</button>
+                                <button type="button" class="seg-btn" data-align="left" aria-label="Alinear a la izquierda" onclick="setInfoAlign('left')"><span class="ms" aria-hidden="true">format_align_left</span></button>
+                                <button type="button" class="seg-btn active" data-align="center" aria-label="Centrar" onclick="setInfoAlign('center')"><span class="ms" aria-hidden="true">format_align_center</span></button>
+                                <button type="button" class="seg-btn" data-align="right" aria-label="Alinear a la derecha" onclick="setInfoAlign('right')"><span class="ms" aria-hidden="true">format_align_right</span></button>
                             </div>
                         </div>
                     </div>
 
                     <!-- Elemento: QR -->
-                    <div class="el-card">
+                    <div class="el-card sc-reveal">
                         <div class="el-head">
-                            <span>▦ Código QR</span>
-                            <label class="switch"><input type="checkbox" id="qr-on" checked onchange="toggleEl('qr', this.checked)"><span class="slider"></span></label>
+                            <span><span class="ms" aria-hidden="true">qr_code_2</span>Código QR</span>
+                            <label class="switch"><input type="checkbox" id="qr-on" aria-label="Mostrar código QR" checked onchange="toggleEl('qr', this.checked)"><span class="slider"></span></label>
                         </div>
                         <div class="el-row"><span>Cara</span>
                             <select id="qr-side" class="el-select" onchange="setElSide('qr', this.value)">
@@ -882,14 +979,14 @@
 
                 <!-- Configuración dinámica de la Pulsera (Bracelet) -->
                 <div id="config-bracelet-section" class="config-section" style="display: none;">
-                    <h4 class="config-title">Color de la Pulsera</h4>
+                    <h4 class="config-title"><span class="ms" aria-hidden="true">watch</span>Color de la pulsera</h4>
                     <input type="hidden" name="color_primary_bracelet" id="color_primary_bracelet" value="white">
                     <div class="form-group">
                         <label class="form-label">Elige un color físico</label>
                         <div class="bracelet-color-selector">
-                            <div id="btn-white" class="bracelet-color-btn btn-white active" onclick="selectBraceletColor('white')"></div>
-                            <div id="btn-red" class="bracelet-color-btn btn-red" onclick="selectBraceletColor('red')"></div>
-                            <div id="btn-black" class="bracelet-color-btn btn-black" onclick="selectBraceletColor('black')"></div>
+                            <button type="button" id="btn-white" class="bracelet-color-btn btn-white active" aria-label="Blanco" onclick="selectBraceletColor('white')"></button>
+                            <button type="button" id="btn-red" class="bracelet-color-btn btn-red" aria-label="Rojo" onclick="selectBraceletColor('red')"></button>
+                            <button type="button" id="btn-black" class="bracelet-color-btn btn-black" aria-label="Negro" onclick="selectBraceletColor('black')"></button>
                         </div>
                         <span class="file-upload-text" style="display:block; margin-top:8px;">Las pulseras de fábrica se ofrecen en colores lisos de silicona.</span>
                     </div>
@@ -897,10 +994,11 @@
 
                 <!-- Configuración dinámica de la Placa Google -->
                 <div id="config-plate-section" class="config-section" style="display: none;">
-                    <h4 class="config-title">Personalización de la Placa</h4>
+                    <h4 class="config-title"><span class="ms" aria-hidden="true">reviews</span>Personalización de la placa</h4>
                     <div class="form-group">
-                        <label class="form-label">Tu logotipo en la Placa</label>
+                        <label class="form-label">Tu logotipo en la placa</label>
                         <div class="file-upload-zone">
+                            <span class="ms" aria-hidden="true">cloud_upload</span>
                             <span class="file-upload-text">Sube tu logo para grabarlo al pie de la placa <strong>haz clic aquí</strong></span>
                             <input type="file" name="logo_plate" id="logo_plate_input" class="file-input" accept="image/*" onchange="previewLogo(this, 'plate')">
                         </div>
@@ -908,12 +1006,12 @@
                 </div>
 
                 <!-- Agregar al carrito -->
-                <button type="button" class="btn-add-cart" onclick="addToCart()">＋ Agregar al carrito</button>
+                <button type="button" class="btn-add-cart" onclick="addToCart()"><span class="ms" aria-hidden="true">add</span>Agregar al carrito</button>
 
                 <!-- Carrito -->
-                <div class="cart-panel" id="cart-panel">
+                <div class="cart-panel sc-reveal" id="cart-panel">
                     <h4 class="config-title" style="display:flex;justify-content:space-between;align-items:center;">
-                        <span>🛒 Tu carrito</span>
+                        <span style="display:inline-flex;align-items:center;gap:8px;"><span class="ms" aria-hidden="true">shopping_bag</span>Tu carrito</span>
                         <span id="cart-count" class="cart-count">0</span>
                     </h4>
                     <div id="cart-items">
@@ -926,8 +1024,8 @@
                 </div>
 
                 <!-- Información de Envío y Cliente -->
-                <div class="config-section">
-                    <h4 class="config-title">Datos de Entrega y Facturación</h4>
+                <div class="config-section sc-reveal">
+                    <h4 class="config-title"><span class="ms" aria-hidden="true">local_shipping</span>Datos de entrega y facturación</h4>
                     
                     <div class="form-group">
                         <label class="form-label" for="customer_name">Nombre completo</label>
@@ -945,11 +1043,12 @@
                     </div>
                 </div>
 
-                <button type="submit" class="btn-checkout" id="btn-checkout">Finalizar compra · <span id="checkout-total">$29.99</span></button>
+                <button type="submit" class="btn-checkout" id="btn-checkout">Finalizar compra · <span id="checkout-total">$29.99</span><span class="ms" aria-hidden="true">arrow_forward</span></button>
             </form>
         </div>
 
     </div>
+    </div><!-- /frame -->
 
     <!-- Scripts interactivos de Mockups -->
     <script>
@@ -959,8 +1058,8 @@
             preset: { name: 'black', label: 'Negro', color: '#0c0b14' },
             side: 'front',
             bg: {
-                front: { type: 'gradient', c1: '#8b5cf6', c2: '#0c0b14', angle: 135 },
-                back:  { type: 'solid',    c1: '#0c0b14', c2: '#0c0b14', angle: 135 },
+                front: { type: 'gradient', c1: '#d42410', c2: '#070707', angle: 135 },
+                back:  { type: 'solid',    c1: '#070707', c2: '#070707', angle: 135 },
             },
             el: {
                 logo: { on: true, side: 'front', x: 50, y: 30, size: 30, hasImg: false },
@@ -972,11 +1071,24 @@
 
         function $(id) { return document.getElementById(id); }
 
+        // Reinicia una animación CSS (para transiciones al cambiar de producto o cara).
+        function replay(el, cls) {
+            if (!el) return;
+            el.classList.remove(cls);
+            void el.offsetWidth;
+            el.classList.add(cls);
+            el.addEventListener('animationend', () => el.classList.remove(cls), { once: true });
+        }
+
         /* ---- Producto ---- */
         function selectProduct(type) {
             $('product_type').value = type;
-            document.querySelectorAll('.product-option-card').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.product-option-card').forEach(c => {
+                c.classList.remove('active');
+                c.setAttribute('aria-pressed', 'false');
+            });
             event.currentTarget.classList.add('active');
+            event.currentTarget.setAttribute('aria-pressed', 'true');
 
             ['config-card-section','config-bracelet-section','config-plate-section',
              'mockup-card-view','mockup-bracelet-view','mockup-plate-view'].forEach(id => $(id).style.display = 'none');
@@ -993,6 +1105,10 @@
                 $('config-plate-section').style.display = 'block';
                 $('mockup-plate-view').style.display = 'flex';
             }
+            const views = { card: 'mockup-card-view', bracelet: 'mockup-bracelet-view', review_plate: 'mockup-plate-view' };
+            const sections = { card: 'config-card-section', bracelet: 'config-bracelet-section', review_plate: 'config-plate-section' };
+            replay($(views[type]), 'sc-swap');
+            replay($(sections[type]), 'sc-swap');
             renderCart();
         }
 
@@ -1056,6 +1172,7 @@
 
         /* ---- Cara activa ---- */
         function setSide(s) {
+            if (D.side !== s) replay($('card-canvas'), 'sc-flip');
             D.side = s;
             $('active-side-label').innerText = s === 'front' ? 'Frente' : 'Reverso';
             $('side-front').classList.toggle('active', s==='front');   $('side-back').classList.toggle('active', s==='back');
@@ -1099,6 +1216,7 @@
             D.preset = { name: name, label: label, color: color };
             document.querySelectorAll('.preset-thumb').forEach(t => t.classList.toggle('active', t.dataset.preset === name));
             $('preset-preview').src = `/img/products/card-${name}.png`;
+            replay($('preset-preview'), 'sc-swap');
         }
 
         function onBgColor(){
@@ -1232,8 +1350,9 @@
             // feedback y reseteo de cantidad
             $('quantity').value = 1;
             const panel = $('cart-panel');
-            panel.style.boxShadow = '0 0 0 2px #8b5cf6';
-            setTimeout(() => panel.style.boxShadow = 'none', 350);
+            panel.style.boxShadow = '0 0 0 2px #FF5A3C, 0 10px 40px rgba(255,40,10,.25)';
+            setTimeout(() => panel.style.boxShadow = 'none', 450);
+            replay($('cart-count'), 'sc-pop');
         }
 
         function removeCartItem(i) { cart.splice(i, 1); renderCart(); }
@@ -1259,7 +1378,7 @@
                     const line = PRICES[it.product_type] * it.quantity;
                     const thumb = it._thumb
                         ? `<img src="${it._thumb}">`
-                        : `<span style="font-size:9px;color:#fff;opacity:.8">${it.product_type === 'bracelet' ? '⌚' : (it.product_type === 'review_plate' ? '★' : 'NFC')}</span>`;
+                        : `<span class="ms" aria-hidden="true">${it.product_type === 'bracelet' ? 'watch' : (it.product_type === 'review_plate' ? 'star' : 'contactless')}</span>`;
                     return `<div class="cart-item">
                         <div class="cart-thumb" style="background:${it._bg}">${thumb}</div>
                         <div class="cart-info">
@@ -1267,7 +1386,7 @@
                             <div class="ci-meta">Cantidad: ${it.quantity} · $${PRICES[it.product_type].toFixed(2)} c/u</div>
                         </div>
                         <span class="cart-price">$${line.toFixed(2)}</span>
-                        <button type="button" class="cart-remove" onclick="removeCartItem(${i})" title="Quitar">✕</button>
+                        <button type="button" class="cart-remove" onclick="removeCartItem(${i})" title="Quitar" aria-label="Quitar del carrito"><span class="ms" aria-hidden="true">close</span></button>
                     </div>`;
                 }).join('');
                 $('cart-total-row').style.display = 'flex';
@@ -1310,7 +1429,16 @@
             render();
         }
         window.addEventListener('resize', () => { if ($('product_type').value === 'card') render(); });
-        window.onload = function(){ initDesigner(); renderCart(); };
+        // Aparición suave de los bloques del formulario al hacer scroll.
+        function initReveal() {
+            const items = document.querySelectorAll('.sc-reveal');
+            if (!('IntersectionObserver' in window)) { items.forEach(el => el.classList.add('is-in')); return; }
+            const io = new IntersectionObserver(entries => entries.forEach(e => {
+                if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); }
+            }), { threshold: 0.12, rootMargin: '0px 0px -30px 0px' });
+            items.forEach(el => io.observe(el));
+        }
+        window.onload = function(){ initDesigner(); renderCart(); initReveal(); };
     </script>
 </body>
 </html>

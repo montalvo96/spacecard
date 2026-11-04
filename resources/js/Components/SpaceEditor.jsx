@@ -284,7 +284,7 @@ export default function SpaceEditor({ spaces, userPlan }) {
                                     onClick={() => setShowAiForm(true)}
                                     className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md text-xs font-semibold flex items-center gap-1"
                                 >
-                                    ✨ Crear con IA
+                                    <span aria-hidden="true" className="ms text-lg">auto_awesome</span> Crear con IA
                                 </button>
                                 <button
                                     onClick={() => setShowCreateForm(true)}
@@ -306,7 +306,7 @@ export default function SpaceEditor({ spaces, userPlan }) {
                     {showAiForm && (
                         <form onSubmit={handleGenerateAi} className="space-y-4 p-4 mb-4 rounded-md border border-indigo-200 dark:border-indigo-800 bg-indigo-50/50 dark:bg-indigo-900/10">
                             <div className="flex items-center gap-2">
-                                <span className="text-lg">✨</span>
+                                <span aria-hidden="true" className="ms text-xl text-[#FF5A3C]">auto_awesome</span>
                                 <h4 className="text-sm font-bold text-gray-800 dark:text-gray-200">Generar Space con IA</h4>
                             </div>
                             {!aiEnabled && (
@@ -343,7 +343,7 @@ export default function SpaceEditor({ spaces, userPlan }) {
                                 </button>
                                 <button type="submit" disabled={aiLoading}
                                     className="px-4 py-1.5 bg-indigo-600 text-white rounded-lg text-xs font-semibold disabled:opacity-60 flex items-center gap-1">
-                                    {aiLoading ? 'Generando…' : '✨ Generar Space'}
+                                    {aiLoading ? 'Generando…' : 'Generar Space'}
                                 </button>
                             </div>
                         </form>
@@ -614,7 +614,7 @@ export default function SpaceEditor({ spaces, userPlan }) {
 
                                 <button
                                     type="submit"
-                                    className="px-6 py-3 bg-gray-800 hover:bg-gray-700 text-white dark:bg-gray-200 dark:text-gray-800 dark:hover:bg-white rounded-md text-sm font-semibold"
+                                    className="px-6 py-3 bg-[#D42410] hover:bg-[#B81E0C] text-white rounded-full shadow-[0_8px_24px_rgba(255,40,10,0.3)] transition text-sm font-semibold"
                                 >
                                     Guardar Perfil y Tema
                                 </button>
@@ -658,8 +658,8 @@ export default function SpaceEditor({ spaces, userPlan }) {
                                 {blocks.map((block, index) => (
                                     <div key={index} className="flex gap-4 items-center p-4 bg-gray-50 dark:bg-gray-700/30 rounded-lg border border-gray-100 dark:border-gray-800">
                                         <div className="flex flex-col gap-1">
-                                            <button type="button" onClick={() => moveBlock(index, 'up')} className="text-gray-400 hover:text-gray-700">▲</button>
-                                            <button type="button" onClick={() => moveBlock(index, 'down')} className="text-gray-400 hover:text-gray-700">▼</button>
+                                            <button type="button" onClick={() => moveBlock(index, 'up')} aria-label="Subir bloque" className="text-gray-400 hover:text-white"><span aria-hidden="true" className="ms text-lg">keyboard_arrow_up</span></button>
+                                            <button type="button" onClick={() => moveBlock(index, 'down')} aria-label="Bajar bloque" className="text-gray-400 hover:text-white"><span aria-hidden="true" className="ms text-lg">keyboard_arrow_down</span></button>
                                         </div>
 
                                         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 flex-grow">
@@ -692,9 +692,9 @@ export default function SpaceEditor({ spaces, userPlan }) {
                                         <button
                                             type="button"
                                             onClick={() => removeBlock(index)}
-                                            className="p-2 text-red-500 hover:bg-red-50 rounded-md"
+                                            aria-label="Eliminar bloque" className="p-2 text-[#FF5A3C] hover:bg-[#FF3B1F]/10 rounded-full transition"
                                         >
-                                            🗑️
+                                            <span aria-hidden="true" className="ms text-lg">delete</span>
                                         </button>
                                     </div>
                                 ))}
@@ -834,7 +834,7 @@ export default function SpaceEditor({ spaces, userPlan }) {
                                             style={style}
                                         >
                                             <span>{block.label}</span>
-                                            <span className="opacity-40">➔</span>
+                                            <span aria-hidden="true" className="ms text-base opacity-40">arrow_forward</span>
                                         </div>
                                     );
                                 })}

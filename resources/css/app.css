@@ -1,3 +1,108 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Iconos Material Symbols (Google Fonts): <span className="ms">bolt</span> */
+.ms {
+    font-family: 'Material Symbols Rounded';
+    font-weight: normal;
+    font-style: normal;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    direction: ltr;
+    font-feature-settings: 'liga';
+    -webkit-font-smoothing: antialiased;
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+.ms-fill {
+    font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+}
+
+/* Campos del login/registro: el autocompletado del navegador pinta un fondo
+   claro y texto negro; lo forzamos al estilo oscuro del campo. */
+.sc-input:-webkit-autofill,
+.sc-input:-webkit-autofill:hover,
+.sc-input:-webkit-autofill:focus,
+.sc-input:-webkit-autofill:active {
+    -webkit-text-fill-color: #ffffff;
+    caret-color: #ffffff;
+    -webkit-box-shadow: 0 0 0 1000px #161616 inset;
+    box-shadow: 0 0 0 1000px #161616 inset;
+    transition: background-color 9999s ease-out 0s;
+}
+.sc-input:autofill {
+    background-color: transparent;
+    color: #ffffff;
+}
+
+/* ---- Animaciones orgánicas (ligeras) ----
+   Solo animan transform y opacity, que el navegador compone en la GPU sin
+   repintar. Nada de filter/blur ni border-radius animados: eran lo que trababa. */
+
+/* Mancha de luz que deriva y respira lentamente */
+@keyframes sc-blob {
+    0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+    33% { transform: translate3d(3%, -4%, 0) scale(1.08); }
+    66% { transform: translate3d(-3%, 3%, 0) scale(0.95); }
+}
+.sc-blob { animation: sc-blob 18s ease-in-out infinite; will-change: transform; }
+
+/* Flotar respirando (la tarjeta conserva su inclinación) */
+@keyframes sc-float {
+    0%, 100% { transform: translate3d(0, 0, 0) rotate(-12deg); }
+    50% { transform: translate3d(0, -16px, 0) rotate(-9deg); }
+}
+.sc-float { animation: sc-float 7s ease-in-out infinite; will-change: transform; }
+
+@keyframes sc-bob {
+    0%, 100% { transform: translate3d(0, 0, 0); }
+    50% { transform: translate3d(0, -8px, 0); }
+}
+.sc-bob { animation: sc-bob 6s ease-in-out infinite; will-change: transform; }
+
+/* Entrada: sube y aparece */
+@keyframes sc-rise {
+    from { opacity: 0; transform: translate3d(0, 24px, 0); }
+    to { opacity: 1; transform: none; }
+}
+.sc-rise { animation: sc-rise 0.8s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+/* Cambio de contenido (color de tarjeta, producto, pestaña) */
+@keyframes sc-swap {
+    from { opacity: 0; transform: translate3d(0, 10px, 0) scale(0.98); }
+    to { opacity: 1; transform: none; }
+}
+.sc-swap { animation: sc-swap 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+/* Ondas de contacto (NFC) */
+@keyframes sc-ripple {
+    from { transform: scale(0.6); opacity: 0.7; }
+    to { transform: scale(2.4); opacity: 0; }
+}
+.sc-ripple { animation: sc-ripple 2.4s cubic-bezier(0.22, 1, 0.36, 1) infinite; }
+
+/* Cinta continua */
+@keyframes sc-marquee {
+    to { transform: translate3d(-50%, 0, 0); }
+}
+.sc-marquee { animation: sc-marquee 32s linear infinite; will-change: transform; }
+.sc-marquee:hover { animation-play-state: paused; }
+
+/* Aparecer al hacer scroll (la clase is-in la pone un IntersectionObserver) */
+.sc-reveal {
+    opacity: 0;
+    transform: translate3d(0, 28px, 0);
+    transition: opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1), transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+    transition-delay: var(--d, 0ms);
+}
+.sc-reveal.is-in { opacity: 1; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+    .sc-blob, .sc-float, .sc-bob, .sc-rise, .sc-swap, .sc-ripple, .sc-marquee { animation: none; }
+    .sc-float { transform: rotate(-12deg); }
+    .sc-reveal { opacity: 1; transform: none; transition: none; }
+}
