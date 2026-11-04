@@ -280,17 +280,20 @@ export default function SpaceEditor({ spaces, userPlan }) {
                         </div>
                         {!showCreateForm && !showAiForm && canCreate && (
                             <div className="flex gap-2">
+                                {/* Generación con IA desactivada hasta configurar ANTHROPIC_API_KEY.
+                                    Para reactivarla, descomenta este botón (el formulario de abajo sigue intacto).
                                 <button
                                     onClick={() => setShowAiForm(true)}
                                     className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md text-xs font-semibold flex items-center gap-1"
                                 >
                                     <span aria-hidden="true" className="ms text-lg">auto_awesome</span> Crear con IA
                                 </button>
+                                */}
                                 <button
                                     onClick={() => setShowCreateForm(true)}
-                                    className="px-4 py-2 border border-indigo-300 dark:border-indigo-700 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-md text-xs font-semibold"
+                                    className="flex items-center gap-1 rounded-full bg-indigo-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-indigo-700"
                                 >
-                                    + Manual
+                                    <span aria-hidden="true" className="ms text-lg">add</span> Crear Space
                                 </button>
                             </div>
                         )}
