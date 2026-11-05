@@ -6,6 +6,7 @@
 
 import { useRef, useState } from 'react';
 import { Link } from '@inertiajs/react';
+import BrandLogo from '@/Components/BrandLogo';
 
 export function Icon({ name, fill = false, className = '' }) {
     return <span aria-hidden="true" className={`ms ${fill ? 'ms-fill' : ''} ${className}`}>{name}</span>;
@@ -102,11 +103,8 @@ export default function AuthLayout({ mode, title, subtitle, children }) {
             <div className="sc-rise relative grid w-full max-w-[1100px] overflow-hidden rounded-[32px] border border-white/10 bg-[#0E0E0E]/90 shadow-[0_40px_120px_rgba(0,0,0,0.6)] lg:grid-cols-[1fr_1.05fr]">
                 {/* Formulario */}
                 <div className="flex flex-col px-6 py-8 sm:px-12 sm:py-10">
-                    <Link href="/" className="group flex items-center gap-2.5 self-start">
-                        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#D42410] text-white transition duration-500 group-hover:rotate-[20deg] group-hover:scale-110">
-                            <Icon name="bolt" fill className="text-xl" />
-                        </span>
-                        <span className="font-display text-lg font-semibold tracking-tight">SpaceCard</span>
+                    <Link href="/" className="self-start">
+                        <BrandLogo />
                     </Link>
 
                     <div className="mx-auto flex w-full max-w-[380px] flex-1 flex-col justify-center py-10">

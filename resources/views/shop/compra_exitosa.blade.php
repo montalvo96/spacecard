@@ -10,6 +10,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>¡Pedido Confirmado! | SpaceCard Shop</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 
     <!-- Google Fonts: tipografía e iconos (Material Symbols) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">

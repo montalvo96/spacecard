@@ -9,6 +9,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { Head, Link } from '@inertiajs/react';
+import BrandLogo from '@/Components/BrandLogo';
 
 const CARD_COLORS = [
     { id: 'negro', name: 'Negro', hex: '#1E1E26', src: '/img/products/card-black.png' },
@@ -157,11 +158,8 @@ export default function Welcome({ auth, canLogin, canRegister }) {
                 <div className="mx-auto max-w-[1360px]">
                     {/* NAV */}
                     <header className="sc-rise flex flex-wrap items-center justify-between gap-3.5 px-5 py-4 sm:px-7">
-                        <Link href="/" className="group flex items-center gap-2.5">
-                            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#D42410] text-white transition duration-500 group-hover:rotate-[20deg] group-hover:scale-110">
-                                <Icon name="bolt" fill className="text-xl" />
-                            </span>
-                            <span className="font-display text-lg font-semibold tracking-tight">SpaceCard</span>
+                        <Link href="/">
+                            <BrandLogo />
                         </Link>
                         <nav aria-label="Principal" className="order-last flex w-full flex-wrap justify-center gap-0.5 rounded-full border border-white/10 bg-white/[0.03] p-1 md:order-none md:w-auto">
                             <a href="#inicio" className="rounded-full bg-[#D42410] px-4 py-2 text-[13px] font-semibold text-white">Inicio</a>
@@ -542,9 +540,8 @@ export default function Welcome({ auth, canLogin, canRegister }) {
 
                     {/* FOOTER */}
                     <footer className="flex flex-wrap items-center justify-between gap-3 px-5 pb-7 pt-5 text-[13px] text-neutral-400 sm:px-7">
-                        <span className="flex items-center gap-2">
-                            <Icon name="bolt" fill className="text-xl text-[#FF5A3C]" />
-                            <span className="font-semibold text-neutral-100">SpaceCard</span>
+                        <span className="flex items-center gap-3">
+                            <BrandLogo />
                             · AVASPACE®
                         </span>
                         <span className="flex flex-wrap gap-x-5 gap-y-1">

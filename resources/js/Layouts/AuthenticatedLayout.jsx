@@ -3,6 +3,7 @@
  * landing: negro, acento rojo, navegación en píldora e iconos Material Symbols.
  */
 
+import BrandLogo from '@/Components/BrandLogo';
 import Dropdown from '@/Components/Dropdown';
 import { Link, usePage } from '@inertiajs/react';
 import { useState } from 'react';
@@ -29,11 +30,8 @@ export default function AuthenticatedLayout({ header, children }) {
 
             <nav className="sticky top-0 z-40 border-b border-white/[0.07] bg-[#070707]/95">
                 <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-                    <Link href="/" className="group flex items-center gap-2.5">
-                        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#D42410] text-white transition duration-500 group-hover:rotate-[20deg] group-hover:scale-110">
-                            <Icon name="bolt" fill className="text-xl" />
-                        </span>
-                        <span className="font-display text-lg font-semibold tracking-tight">SpaceCard</span>
+                    <Link href="/">
+                        <BrandLogo />
                     </Link>
 
                     <div className="hidden items-center gap-0.5 rounded-full border border-white/10 bg-white/[0.03] p-1 sm:flex">

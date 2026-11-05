@@ -5,6 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
         <title inertia>{{ config('app.name', 'Laravel') }}</title>
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 
         {{-- La identidad visual es solo oscura (negro + rojo): se fuerza el tema dark --}}
         <script>document.documentElement.classList.add('dark');</script>

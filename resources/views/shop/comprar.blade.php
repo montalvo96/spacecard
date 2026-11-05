@@ -10,6 +10,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>SpaceShop | Diseña y compra tu tarjeta NFC</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     
     <!-- Google Fonts: tipografía e iconos (Material Symbols) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -99,16 +100,8 @@
         .sc-bob { animation: sc-bob 6s ease-in-out infinite; }
         .sc-pop { animation: sc-pop 0.5s var(--ease); }
 
-        .sc-reveal {
-            opacity: 0;
-            transform: translateY(24px);
-            transition: opacity 0.9s var(--ease), transform 0.9s var(--ease);
-        }
-        .sc-reveal.is-in { opacity: 1; transform: none; }
-
         @media (prefers-reduced-motion: reduce) {
             .sc-rise, .sc-swap, .sc-flip, .sc-bob, .sc-pop, .preview-glow { animation: none !important; }
-            .sc-reveal { opacity: 1; transform: none; transition: none; }
         }
 
         /* Contenedor general, como la landing */
@@ -143,19 +136,12 @@
             align-items: center;
             gap: 10px;
         }
-        .logo-mark {
-            width: 34px;
-            height: 34px;
-            border-radius: 999px;
-            background: var(--primary);
-            color: #fff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.5s var(--ease);
+        .logo .accent {
+            font-family: var(--font-title);
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--primary-text);
         }
-        .logo:hover .logo-mark { transform: rotate(20deg) scale(1.1); }
-        .logo .accent { color: var(--primary-text); }
 
         .header-meta {
             display: inline-flex;
@@ -635,6 +621,9 @@
         .card-brand { position:absolute; bottom:12px; left:16px; font-size:9px; letter-spacing:1px; font-weight:700; color:rgba(255,255,255,.75); }
 
         .card-el { position:absolute; transform: translate(-50%,-50%); cursor: grab; }
+        /* Hasta que el diseñador coloca los elementos, no se muestran (si no,
+           el QR, el logo y la info aparecen amontonados en una esquina). */
+        .card-canvas:not(.is-ready) .card-el { visibility: hidden; }
         .card-el:active { cursor: grabbing; }
         .card-el.selected { outline: 2px dashed rgba(255,255,255,.8); outline-offset: 4px; border-radius: 6px; }
         .card-el.hidden-el { display:none; }
@@ -714,8 +703,8 @@
     <div class="frame">
     <header class="sc-rise">
         <a href="/" class="logo">
-            <span class="logo-mark"><span class="ms ms-fill" aria-hidden="true" style="font-size:20px;">bolt</span></span>
-            <span>Space<span class="accent">Shop</span></span>
+            <img src="/img/spacecard-logo.svg" alt="SpaceCard" width="748" height="176" style="height:34px;width:auto;display:block;">
+            <span class="accent">Shop</span>
         </a>
         <div class="header-meta">
             @auth
@@ -912,7 +901,7 @@
                     </div>
 
                     <!-- Elemento: Logo -->
-                    <div class="el-card sc-reveal">
+                    <div class="el-card">
                         <div class="el-head">
                             <span><span class="ms" aria-hidden="true">image</span>Logo</span>
                             <label class="switch"><input type="checkbox" id="logo-on" aria-label="Mostrar logo" checked onchange="toggleEl('logo', this.checked)"><span class="slider"></span></label>
@@ -932,7 +921,7 @@
                     </div>
 
                     <!-- Elemento: Información de negocio -->
-                    <div class="el-card sc-reveal">
+                    <div class="el-card">
                         <div class="el-head">
                             <span><span class="ms" aria-hidden="true">business_center</span>Información de negocio</span>
                             <label class="switch"><input type="checkbox" id="info-on" aria-label="Mostrar información" checked onchange="toggleEl('info', this.checked)"><span class="slider"></span></label>
@@ -960,7 +949,7 @@
                     </div>
 
                     <!-- Elemento: QR -->
-                    <div class="el-card sc-reveal">
+                    <div class="el-card">
                         <div class="el-head">
                             <span><span class="ms" aria-hidden="true">qr_code_2</span>Código QR</span>
                             <label class="switch"><input type="checkbox" id="qr-on" aria-label="Mostrar código QR" checked onchange="toggleEl('qr', this.checked)"><span class="slider"></span></label>
@@ -1009,7 +998,7 @@
                 <button type="button" class="btn-add-cart" onclick="addToCart()"><span class="ms" aria-hidden="true">add</span>Agregar al carrito</button>
 
                 <!-- Carrito -->
-                <div class="cart-panel sc-reveal" id="cart-panel">
+                <div class="cart-panel" id="cart-panel">
                     <h4 class="config-title" style="display:flex;justify-content:space-between;align-items:center;">
                         <span style="display:inline-flex;align-items:center;gap:8px;"><span class="ms" aria-hidden="true">shopping_bag</span>Tu carrito</span>
                         <span id="cart-count" class="cart-count">0</span>
@@ -1024,7 +1013,7 @@
                 </div>
 
                 <!-- Información de Envío y Cliente -->
-                <div class="config-section sc-reveal">
+                <div class="config-section">
                     <h4 class="config-title"><span class="ms" aria-hidden="true">local_shipping</span>Datos de entrega y facturación</h4>
                     
                     <div class="form-group">
@@ -1427,18 +1416,16 @@
                 elDom.onpointercancel = endDrag;
             });
             render();
+            $('card-canvas').classList.add('is-ready');
         }
         window.addEventListener('resize', () => { if ($('product_type').value === 'card') render(); });
-        // Aparición suave de los bloques del formulario al hacer scroll.
-        function initReveal() {
-            const items = document.querySelectorAll('.sc-reveal');
-            if (!('IntersectionObserver' in window)) { items.forEach(el => el.classList.add('is-in')); return; }
-            const io = new IntersectionObserver(entries => entries.forEach(e => {
-                if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); }
-            }), { threshold: 0.12, rootMargin: '0px 0px -30px 0px' });
-            items.forEach(el => io.observe(el));
-        }
-        window.onload = function(){ initDesigner(); renderCart(); initReveal(); };
+
+        // Se inicializa en cuanto existe el HTML, sin esperar a que terminen de
+        // descargar imágenes y fuentes (window.onload hacía que el diseñador
+        // apareciera desordenado durante varios segundos).
+        function initPage(){ initDesigner(); renderCart(); }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initPage);
+        else initPage();
     </script>
 </body>
 </html>
