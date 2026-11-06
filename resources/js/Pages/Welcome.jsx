@@ -1,50 +1,40 @@
 /**
- * Landing de SpaceCard — fondo negro con acento rojo, paneles translúcidos
- * y titulares grandes. Iconos: Material Symbols de Google Fonts (clase .ms).
- * Animaciones (sc-*) definidas en resources/css/app.css; respetan
+ * Landing de SpaceCard: secciones blancas, franjas negras y acentos rojos,
+ * con las fotos reales de producto y la roseta de tarjetas (CardFan).
+ * Iconos: Material Symbols (clase .ms). Animaciones sc-* en app.css; respetan
  * prefers-reduced-motion.
- *
- * Autor: SpaceCard 2.0
  */
 
 import { useEffect, useRef, useState } from 'react';
 import { Head, Link } from '@inertiajs/react';
 import BrandLogo from '@/Components/BrandLogo';
+import CardFan from '@/Components/CardFan';
 
-const CARD_COLORS = [
-    { id: 'negro', name: 'Negro', hex: '#1E1E26', src: '/img/products/card-black.png' },
-    { id: 'rojo', name: 'Rojo', hex: '#D6283B', src: '/img/products/card-red.png' },
-    { id: 'rosa', name: 'Rosa', hex: '#F29AB8', src: '/img/products/card-pink.png' },
-    { id: 'purpura', name: 'Púrpura', hex: '#7A4FD6', src: '/img/products/card-purple.png' },
-    { id: 'azul', name: 'Azul', hex: '#2F6FE0', src: '/img/products/card-blue.png' },
-    { id: 'verde', name: 'Verde', hex: '#2FA36B', src: '/img/products/card-green.png' },
+const FEATURES = [
+    { icon: 'contactless', title: 'Comparte con un toque', desc: 'Acerca tu tarjeta a cualquier teléfono o deja que escaneen el QR.' },
+    { icon: 'edit_square', title: 'Perfil editable', desc: 'Cambia tus datos, enlaces y redes cuando quieras desde tu panel.' },
+    { icon: 'group_add', title: 'Captura contactos', desc: 'Quien te conoce te deja sus datos, directo a tu panel.' },
+    { icon: 'monitoring', title: 'Analíticas', desc: 'Mide escaneos, ubicaciones y dispositivos de tu networking.' },
+    { icon: 'wallet', title: 'Apple y Google Wallet', desc: 'Tu contacto, guardado en la cartera digital del teléfono.' },
+    { icon: 'reviews', title: 'Reseñas de Google', desc: 'Con la placa, tus clientes califican tu negocio al instante.' },
 ];
 
-const HERO_STATS = [
-    { label: 'Colores', value: 6, icon: 'palette' },
-    { label: 'Caras a tu gusto', value: 2, icon: 'flip' },
-    { label: 'Apps necesarias', value: 0, icon: 'block' },
-];
-
-const STEPS = [
-    { icon: 'palette', title: 'Diseña tu tarjeta', desc: 'Elige color y personaliza sus dos caras.' },
-    { icon: 'badge', title: 'Arma tu perfil', desc: 'Datos, enlaces y redes desde tu panel.' },
-    { icon: 'contactless', title: 'Acerca y comparte', desc: 'Un toque al teléfono o escanean el QR.' },
-];
-
-const INCLUDES = [
-    { icon: 'contact_page', label: 'Contacto vCard' },
-    { icon: 'wallet', label: 'Apple Wallet' },
-    { icon: 'account_balance_wallet', label: 'Google Wallet' },
-    { icon: 'qr_code_2', label: 'Código QR' },
-    { icon: 'monitoring', label: 'Analíticas' },
-    { icon: 'star', label: 'Reseñas de Google' },
+const STATS = [
+    { icon: 'palette', value: '6', label: 'Colores' },
+    { icon: 'flip', value: '2', label: 'Caras personalizables' },
+    { icon: 'block', value: '0', label: 'Apps necesarias' },
 ];
 
 const PRODUCTS = [
-    { id: 'card', icon: 'credit_card', name: 'SpaceCard', tag: 'Tarjeta NFC', price: '$29.99', img: '/img/products/card-black.png', desc: 'La tarjeta de presentación inteligente. Diseño premium de 2 caras, 6 colores.', chips: ['NFC + QR', '2 caras personalizables', '6 colores'] },
-    { id: 'band', icon: 'watch', name: 'SpaceBand', tag: 'Pulsera NFC', price: '$19.99', img: '/img/products/bracelets.png', desc: 'Networking en tu muñeca. Silicona premium en rojo, negro y blanco.', chips: ['NFC', 'Silicona premium', 'Rojo · Negro · Blanco'] },
-    { id: 'plate', icon: 'reviews', name: 'Placa Google', tag: 'Reseñas', price: '$39.99', img: '/img/products/card-blue.png', desc: 'Multiplica tus reseñas de Google. Los clientes escanean y califican al instante.', chips: ['Reseñas de Google', 'NFC + QR', 'Para tu negocio'] },
+    { name: 'SpaceCard', tag: 'Tarjeta NFC', price: '$29.99', img: '/img/products/card-black.png' },
+    { name: 'SpaceBand', tag: 'Pulsera NFC', price: '$19.99', img: '/img/products/bracelets.png' },
+    { name: 'Placa Google', tag: 'Reseñas', price: '$39.99', img: '/img/products/card-blue.png' },
+];
+
+const STEPS = [
+    { title: 'Diseña tu tarjeta', desc: 'Elige color y personaliza sus dos caras en SpaceShop.' },
+    { title: 'Arma tu perfil', desc: 'Agrega tus datos, enlaces y redes desde tu panel.' },
+    { title: 'Acerca y comparte', desc: 'Un toque al teléfono o escanean el QR. Sin apps.' },
 ];
 
 const FAQS = [
@@ -54,19 +44,37 @@ const FAQS = [
     { q: '¿Tengo que pagar una suscripción?', a: 'No es obligatoria. Compras tu dispositivo y tu perfil queda activo.' },
 ];
 
-const reducedMotion = () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-function Icon({ name, fill = false, className = '' }) {
-    return <span aria-hidden="true" className={`ms ${fill ? 'ms-fill' : ''} ${className}`}>{name}</span>;
+function Icon({ name, className = '' }) {
+    return <span aria-hidden="true" className={`ms ${className}`}>{name}</span>;
 }
 
-function Chip({ children }) {
-    return (
-        <span className="inline-flex items-center gap-1.5 self-start rounded-full bg-white px-3 py-1 text-xs font-semibold text-neutral-900">
-            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#D42410]" />
-            {children}
-        </span>
+/**
+ * Cinta de texto infinita: dos mitades idénticas, cada una con las palabras
+ * repetidas varias veces (más ancha que cualquier pantalla). La animación
+ * desplaza exactamente una mitad y vuelve a empezar, así nunca queda hueco.
+ */
+function Marquee({ words, icon, className = '', reverse = false, repeat = 4 }) {
+    const half = Array.from({ length: repeat }).flatMap(() => words);
+    const group = (hidden) => (
+        <div className="flex shrink-0 items-center gap-10 pr-10" aria-hidden={hidden || undefined}>
+            {half.map((w, i) => (
+                <span key={i} className={`flex shrink-0 items-center gap-10 ${className}`}>
+                    {w}{icon}
+                </span>
+            ))}
+        </div>
     );
+    return (
+        // La duración crece con las repeticiones para que la velocidad sea la misma de antes.
+        <div className={`sc-marquee flex w-max ${reverse ? '[animation-direction:reverse]' : ''}`} style={{ animationDuration: `${repeat * 32}s` }}>
+            {group(false)}
+            {group(true)}
+        </div>
+    );
+}
+
+function Kicker({ children, light = false }) {
+    return <p className={`text-xs font-bold uppercase tracking-[0.18em] ${light ? 'text-[#FF5A3C]' : 'text-[#D42410]'}`}>{children}</p>;
 }
 
 /** Marca con .is-in cada .sc-reveal cuando entra en pantalla. */
@@ -75,7 +83,7 @@ function useReveal() {
         const items = document.querySelectorAll('.sc-reveal');
         if (!('IntersectionObserver' in window)) {
             items.forEach((el) => el.classList.add('is-in'));
-            return;
+            return undefined;
         }
         const io = new IntersectionObserver(
             (entries) => entries.forEach((e) => {
@@ -84,23 +92,25 @@ function useReveal() {
                     io.unobserve(e.target);
                 }
             }),
-            { threshold: 0.15, rootMargin: '0px 0px -40px 0px' },
+            { threshold: 0.15 },
         );
         items.forEach((el) => io.observe(el));
         return () => io.disconnect();
     }, []);
 }
 
+const reducedMotion = () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
 /** Cuenta desde 0 hasta `to` con desaceleración suave. */
 function CountUp({ to, delay = 0 }) {
     const [n, setN] = useState(reducedMotion() ? to : 0);
     useEffect(() => {
-        if (reducedMotion() || to === 0) return;
+        if (reducedMotion() || to === 0) return undefined;
         let raf;
         const timer = setTimeout(() => {
             const start = performance.now();
             const tick = (t) => {
-                const p = Math.min((t - start) / 1200, 1);
+                const p = Math.min((t - start) / 1100, 1);
                 setN(Math.round(to * (1 - Math.pow(1 - p, 3))));
                 if (p < 1) raf = requestAnimationFrame(tick);
             };
@@ -116,17 +126,41 @@ function CountUp({ to, delay = 0 }) {
 
 export default function Welcome({ auth, canLogin, canRegister }) {
     const user = auth?.user;
-    const [colorId, setColorId] = useState('rojo');
-    const [productId, setProductId] = useState('card');
     const [openFaq, setOpenFaq] = useState(null);
     const heroRef = useRef(null);
+    const progressRef = useRef(null);
     const frame = useRef(0);
-
     useReveal();
 
-    // Posición del cursor en el hero (-0.5…0.5) como variables CSS: inclina la
-    // tarjeta y arrastra la luz con retardo, sin re-renderizar. Como mucho una
-    // actualización por cuadro.
+    // Scroll: --hp (salida del hero, para el parallax) y la barra de progreso.
+    // Un listener, como mucho un cálculo por cuadro; solo transform.
+    useEffect(() => {
+        if (reducedMotion()) return undefined;
+        let raf = 0;
+        const update = () => {
+            raf = 0;
+            const max = document.documentElement.scrollHeight - window.innerHeight;
+            progressRef.current?.style.setProperty('transform', `scaleX(${max > 0 ? (window.scrollY / max).toFixed(4) : 0})`);
+            const hero = heroRef.current;
+            if (hero) {
+                const p = Math.min(Math.max(window.scrollY / hero.offsetHeight, 0), 1);
+                hero.style.setProperty('--hp', p.toFixed(3));
+            }
+        };
+        const onScroll = () => {
+            if (!raf) raf = requestAnimationFrame(update);
+        };
+        update();
+        window.addEventListener('scroll', onScroll, { passive: true });
+        window.addEventListener('resize', onScroll);
+        return () => {
+            cancelAnimationFrame(raf);
+            window.removeEventListener('scroll', onScroll);
+            window.removeEventListener('resize', onScroll);
+        };
+    }, []);
+
+    // Cursor en el hero (-0.5…0.5): inclina la tarjeta y mueve las formas.
     const onHeroMove = (e) => {
         if (reducedMotion() || frame.current) return;
         const { clientX, clientY } = e;
@@ -143,415 +177,336 @@ export default function Welcome({ auth, canLogin, canRegister }) {
         heroRef.current.style.setProperty('--mx', 0);
         heroRef.current.style.setProperty('--my', 0);
     };
-
-    const color = CARD_COLORS.find((c) => c.id === colorId);
-    const product = PRODUCTS.find((p) => p.id === productId);
-    const accountHref = user ? route('dashboard') : route('register');
-    const accountLabel = user ? 'Mi panel' : 'Crear cuenta';
     const ease = 'cubic-bezier(0.22,1,0.36,1)';
+
+    const accountHref = user ? route('dashboard') : route('register');
 
     return (
         <>
             <Head title="SpaceCard · Tu tarjeta de presentación inteligente" />
 
-            <div className="min-h-screen overflow-x-clip bg-[#070707] font-inter text-[15px] leading-relaxed text-neutral-100 antialiased">
-                <div className="mx-auto max-w-[1360px]">
-                    {/* NAV */}
-                    <header className="sc-rise flex flex-wrap items-center justify-between gap-3.5 px-5 py-4 sm:px-7">
-                        <Link href="/">
-                            <BrandLogo />
-                        </Link>
-                        <nav aria-label="Principal" className="order-last flex w-full flex-wrap justify-center gap-0.5 rounded-full border border-white/10 bg-white/[0.03] p-1 md:order-none md:w-auto">
-                            <a href="#inicio" className="rounded-full bg-[#D42410] px-4 py-2 text-[13px] font-semibold text-white">Inicio</a>
-                            <a href="#como" className="rounded-full px-4 py-2 text-[13px] font-medium text-neutral-300 transition hover:bg-white/5 hover:text-white">Cómo funciona</a>
-                            <a href="#productos" className="rounded-full px-4 py-2 text-[13px] font-medium text-neutral-300 transition hover:bg-white/5 hover:text-white">Tienda</a>
-                            <a href="#preguntas" className="rounded-full px-4 py-2 text-[13px] font-medium text-neutral-300 transition hover:bg-white/5 hover:text-white">Preguntas</a>
-                        </nav>
+            <div className="min-h-screen overflow-x-clip bg-white font-inter text-[15px] leading-relaxed text-neutral-900 antialiased">
+                {/* NAV */}
+                <header className="sticky top-0 z-40 border-b border-black/[0.06] bg-white/95">
+                    <nav aria-label="Principal" className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-5 py-4 sm:px-8">
+                        <Link href="/"><BrandLogo className="h-7" /></Link>
+                        <div className="hidden items-center gap-7 text-sm font-medium text-neutral-600 md:flex">
+                            <a href="#inicio" className="relative text-neutral-900 after:absolute after:-bottom-1.5 after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-[#D42410]">Inicio</a>
+                            <a href="#incluye" className="transition hover:text-neutral-900">Qué incluye</a>
+                            <a href="#productos" className="transition hover:text-neutral-900">Productos</a>
+                            <a href="#preguntas" className="transition hover:text-neutral-900">Preguntas</a>
+                        </div>
                         <div className="flex items-center gap-2">
-                            {!user && canLogin && (
-                                <Link href={route('login')} className="px-3.5 py-2.5 text-[13px] font-medium text-neutral-300 transition hover:text-white">Entrar</Link>
-                            )}
+                            {!user && canLogin && <Link href={route('login')} className="px-3 py-2 text-sm font-medium text-neutral-600 transition hover:text-neutral-900">Entrar</Link>}
                             {(user || canRegister) && (
-                                <Link href={accountHref} className="group inline-flex items-center gap-1.5 rounded-full bg-[#D42410] px-4 py-2.5 text-[13px] font-semibold text-white transition hover:bg-[#B81E0C]">
-                                    {accountLabel}
-                                    <Icon name="north_east" className="text-lg transition duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                                <Link href={accountHref} className="group inline-flex items-center gap-1.5 rounded-full bg-[#D42410] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_8px_20px_rgba(212,36,16,0.3)] transition hover:-translate-y-0.5 hover:bg-[#B81E0C]">
+                                    {user ? 'Mi panel' : 'Comenzar'}
+                                    <Icon name="arrow_forward" className="text-lg transition group-hover:translate-x-0.5" />
                                 </Link>
                             )}
                         </div>
-                    </header>
+                    </nav>
+                    {/* Progreso de lectura */}
+                    <div aria-hidden="true" className="absolute inset-x-0 bottom-0 h-[2px]">
+                        <div ref={progressRef} className="h-full origin-left bg-[#D42410]" style={{ transform: 'scaleX(0)' }} />
+                    </div>
+                </header>
 
-                    {/* HERO */}
-                    <section
-                        id="inicio"
-                        ref={heroRef}
-                        onMouseMove={onHeroMove}
-                        onMouseLeave={onHeroLeave}
-                        className="relative px-5 pb-16 pt-10 [--mx:0] [--my:0] sm:px-7"
-                    >
-                        {/* Luz orgánica: sigue al cursor con retardo y cambia de forma */}
-                        <div
-                            aria-hidden="true"
-                            className="pointer-events-none absolute left-1/2 top-10 h-[640px] w-[640px] max-w-full"
-                            style={{
-                                transform: 'translate(calc(-35% + var(--mx) * 140px), calc(var(--my) * 90px))',
-                                transition: `transform 1.6s ${ease}`,
-                            }}
-                        >
-                            <div className="sc-blob h-full w-full bg-[radial-gradient(closest-side,rgba(255,40,10,0.45),rgba(255,40,10,0.12)_55%,transparent)]" />
+                {/* HERO */}
+                <section
+                    id="inicio"
+                    ref={heroRef}
+                    onMouseMove={onHeroMove}
+                    onMouseLeave={onHeroLeave}
+                    className="relative overflow-hidden bg-gradient-to-r from-white from-45% to-[#F4F4F5] [--hp:0] [--mx:0] [--my:0]"
+                >
+                    <div className="mx-auto grid max-w-7xl items-center gap-10 px-5 py-14 sm:px-8 lg:grid-cols-2 lg:py-20">
+                        <div style={{ transform: 'translate3d(0, calc(var(--hp) * 60px), 0)' }}>
+                            <div className="sc-rise"><Kicker>Bienvenido a SpaceCard</Kicker></div>
+                            <h1 className="mt-4 font-display text-[clamp(44px,6vw,84px)] font-bold leading-[0.98] tracking-[-0.04em]">
+                                <span className="sc-rise block" style={{ animationDelay: '80ms' }}>Tu tarjeta de</span>
+                                <span className="sc-rise block" style={{ animationDelay: '180ms' }}>presentación,</span>
+                                {/* Palabra clave resaltada en un bloque rojo inclinado, como la etiqueta del logo */}
+                                <span className="sc-rise my-1 block" style={{ animationDelay: '280ms' }}>
+                                    <span className="relative inline-block px-3 text-white">
+                                        <span aria-hidden="true" className="sc-in-left absolute inset-0 -skew-x-12 rounded-md bg-[#D42410] shadow-[0_14px_30px_rgba(212,36,16,0.35)]" style={{ animationDelay: '380ms' }} />
+                                        <span className="relative">reinventada</span>
+                                    </span>
+                                </span>
+                                <span className="sc-rise block" style={{ animationDelay: '380ms' }}>en un toque</span>
+                            </h1>
+                            <p className="sc-rise mt-5 max-w-md text-neutral-600" style={{ animationDelay: '480ms' }}>
+                                Una tarjeta física premium conectada a un perfil digital que editas cuando quieras. Sin apps, sin fricción.
+                            </p>
+                            <div className="sc-rise mt-7 flex flex-wrap gap-3" style={{ animationDelay: '580ms' }}>
+                                <Link href={route('shop.comprar')} className="group inline-flex items-center gap-2 rounded-full bg-[#D42410] px-6 py-3.5 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(212,36,16,0.3)] transition hover:-translate-y-0.5 hover:bg-[#B81E0C]">
+                                    Diseña la tuya
+                                    <Icon name="arrow_forward" className="text-lg transition group-hover:translate-x-1" />
+                                </Link>
+                                <a href="#como" className="inline-flex items-center gap-2 rounded-full border border-black/15 bg-white px-6 py-3.5 text-sm font-semibold transition hover:-translate-y-0.5 hover:border-black/30">
+                                    <Icon name="contactless" className="text-lg text-[#D42410]" />
+                                    Ver cómo funciona
+                                </a>
+                            </div>
+                            <ul className="mt-10 flex flex-wrap gap-x-8 gap-y-4">
+                                {STATS.map((s, i) => (
+                                    <li key={s.label} className={`sc-rise group flex items-center gap-3 ${i ? 'sm:border-l sm:border-black/10 sm:pl-8' : ''}`} style={{ animationDelay: `${680 + i * 110}ms` }}>
+                                        <span className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-[#D42410]/25 text-[#D42410] transition duration-500 group-hover:rotate-12 group-hover:border-[#D42410] group-hover:bg-[#D42410] group-hover:text-white">
+                                            <Icon name={s.icon} className="text-xl" />
+                                        </span>
+                                        <span className="leading-tight">
+                                            <span className="block font-display text-2xl font-bold tabular-nums"><CountUp to={Number(s.value)} delay={750 + i * 110} /></span>
+                                            <span className="text-xs text-neutral-500">{s.label}</span>
+                                        </span>
+                                    </li>
+                                ))}
+                            </ul>
                         </div>
 
-                        <div className="relative flex flex-wrap items-start gap-8">
-                            {/* Texto */}
-                            <div className="min-w-0 flex-[1_1_440px]">
-                                <span className="sc-rise inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 py-1.5 pl-2.5 pr-3.5 text-xs font-medium text-neutral-200" style={{ animationDelay: '100ms' }}>
-                                    <span className="relative flex h-4 w-4 items-center justify-center">
-                                        <span className="sc-ripple absolute inset-0 rounded-full border border-[#FF5A3C]" />
-                                        <span className="sc-ripple absolute inset-0 rounded-full border border-[#FF5A3C]" style={{ animationDelay: '1.2s' }} />
-                                        <Icon name="contactless" className="relative text-base text-[#FF5A3C]" />
-                                    </span>
-                                    NFC · QR · Sin apps
-                                </span>
-                                <h1 className="mt-5 font-display text-[clamp(48px,6.4vw,92px)] font-normal leading-[0.95] tracking-[-0.045em]">
-                                    <span className="sc-rise block" style={{ animationDelay: '200ms' }}>Tu tarjeta,</span>
-                                    <span className="sc-rise block" style={{ animationDelay: '330ms' }}>tu perfil,</span>
-                                    <span className="sc-rise block text-[#FF5A3C]" style={{ animationDelay: '460ms' }}>reinventados</span>
-                                </h1>
-                                <p className="sc-rise mt-6 max-w-[420px] text-neutral-400" style={{ animationDelay: '600ms' }}>
-                                    Una tarjeta física premium conectada a un perfil digital que editas cuando quieras. Comparte todo sobre ti con un solo toque.
-                                </p>
-                                <div className="sc-rise mt-7 flex flex-wrap gap-2.5" style={{ animationDelay: '720ms' }}>
-                                    <Link href={route('shop.comprar')} className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-5 py-3 text-sm font-medium transition duration-300 hover:-translate-y-0.5 hover:bg-white/10">
-                                        Ver tienda
-                                    </Link>
-                                    <Link href={route('shop.comprar')} className="group inline-flex items-center gap-1.5 rounded-full bg-[#D42410] px-5 py-3 text-sm font-semibold text-white shadow-[0_10px_30px_rgba(255,40,10,0.35)] transition duration-300 hover:-translate-y-0.5 hover:bg-[#B81E0C] hover:shadow-[0_16px_40px_rgba(255,40,10,0.5)]">
-                                        Diseña la tuya
-                                        <Icon name="arrow_forward" className="text-lg transition duration-300 group-hover:translate-x-1" />
-                                    </Link>
-                                </div>
-                                <div className="mt-9 grid max-w-[520px] grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-2.5">
-                                    {HERO_STATS.map((s, i) => (
-                                        <div
-                                            key={s.label}
-                                            className="sc-rise rounded-[18px] border border-white/10 bg-white/[0.04] px-4 py-3.5 transition duration-500 hover:-translate-y-1 hover:border-[#FF3B1F]/40 hover:bg-white/[0.06]"
-                                            style={{ animationDelay: `${850 + i * 110}ms` }}
-                                        >
-                                            <div className="flex items-center justify-between text-[11px] text-neutral-400">
-                                                {s.label}
-                                                <Icon name={s.icon} className="text-lg text-[#FF5A3C]" />
-                                            </div>
-                                            <div className="mt-4 font-display text-4xl tabular-nums tracking-tight">
-                                                <CountUp to={s.value} delay={900 + i * 110} />
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
+                        {/* Visual: tarjeta real flotando, con sus etiquetas pegadas */}
+                        <div className="relative mx-auto w-full max-w-[560px]">
+                            {/* Brillo rojo detrás de la tarjeta */}
+                            <div aria-hidden="true" className="absolute inset-[8%]">
+                                <div className="sc-blob h-full w-full bg-[radial-gradient(closest-side,rgba(255,40,10,0.28),transparent)]" />
                             </div>
-
-                            {/* Tarjeta: se inclina hacia el cursor, flota y cambia de color con transición */}
-                            <div className="sc-rise flex min-w-0 flex-[1_1_380px] flex-col items-center gap-5 pt-10" style={{ animationDelay: '400ms' }}>
+                            {/* Tarjeta: se inclina hacia el cursor; tarjeta y etiquetas flotan juntas */}
+                            <div className="sc-rise relative [perspective:1000px]" style={{ animationDelay: '250ms' }}>
                                 <div
-                                    className="w-full max-w-[460px] [perspective:1000px]"
                                     style={{
-                                        transform: 'rotateY(calc(var(--mx) * 22deg)) rotateX(calc(var(--my) * -16deg))',
+                                        transform: 'rotateY(calc(var(--mx) * 20deg)) rotateX(calc(var(--my) * -14deg)) translate3d(0, calc(var(--hp) * -40px), 0)',
                                         transition: `transform 0.9s ${ease}`,
                                     }}
                                 >
-                                    <div className="sc-float">
-                                        <img
-                                            key={color.id}
-                                            src={color.src}
-                                            alt={`SpaceCard color ${color.name}`}
-                                            className="sc-swap h-auto w-full drop-shadow-[0_40px_60px_rgba(255,40,10,0.35)]"
-                                        />
-                                    </div>
-                                </div>
-                                <div role="group" aria-label="Elige el color de tu tarjeta" className="flex flex-wrap justify-center gap-1 rounded-full border border-white/10 bg-black/50 p-1">
-                                    {CARD_COLORS.map((c) => {
-                                        const active = c.id === colorId;
-                                        return (
-                                            <button
-                                                key={c.id}
-                                                type="button"
-                                                aria-label={c.name}
-                                                aria-pressed={active}
-                                                onClick={() => setColorId(c.id)}
-                                                className="group flex h-11 w-11 items-center justify-center rounded-full"
-                                            >
-                                                <span
-                                                    className={`h-[26px] w-[26px] rounded-full transition duration-500 group-hover:scale-110 ${active ? 'scale-110 ring-2 ring-neutral-100 ring-offset-[3px] ring-offset-black' : 'ring-1 ring-inset ring-white/20'}`}
-                                                    style={{ background: c.hex, transitionTimingFunction: ease }}
-                                                />
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                                <div className="text-xs text-neutral-400">
-                                    Color: <strong key={color.id} className="sc-swap inline-block font-semibold text-neutral-100">{color.name}</strong>
-                                </div>
-                            </div>
+                                    <div className="sc-hover-card relative">
+                                        <img src="/img/products/card-black.png" alt="SpaceCard negra, frente y reverso" className="relative w-full drop-shadow-[0_34px_44px_rgba(0,0,0,0.3)]" />
 
-                            {/* Tarjetas flotantes */}
-                            <div className="flex min-w-[220px] flex-[0_1_250px] flex-col gap-3">
-                                <div className="sc-rise" style={{ animationDelay: '650ms' }}>
-                                    <div className="sc-bob rounded-[22px] border border-white/10 bg-neutral-900/75 p-4">
-                                        <div className="flex items-center justify-between text-[11px] text-neutral-400">
-                                            Tu perfil
-                                            <Icon name="open_in_new" className="text-lg" />
-                                        </div>
-                                        <div className="mt-3 flex flex-col items-center rounded-[14px] bg-[#F5F3F2] p-3.5 text-center text-neutral-900">
-                                            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[#D42410] text-white">
-                                                <Icon name="person" fill className="text-[26px]" />
-                                            </span>
-                                            <span className="mt-1.5 font-display text-sm font-semibold">[Tu nombre]</span>
-                                            <span className="text-[11px] text-neutral-600">[Tu cargo · Empresa]</span>
-                                            <span className="mt-2.5 flex gap-1.5">
-                                                {['call', 'mail', 'language', 'location_on'].map((i) => (
-                                                    <Icon key={i} name={i} className="rounded-lg bg-[#E9E5E3] p-1.5 text-lg transition duration-300 hover:-translate-y-0.5 hover:bg-[#D42410] hover:text-white" />
-                                                ))}
-                                            </span>
-                                        </div>
-                                        <p className="mt-3 text-xs text-neutral-400">Lo que ven al acercar tu tarjeta. Lo editas desde tu panel.</p>
-                                    </div>
-                                </div>
-                                <div className="sc-rise" style={{ animationDelay: '800ms' }}>
-                                    <div className="sc-bob rounded-[22px] border border-white/10 bg-neutral-900/75 p-4" style={{ animationDelay: '-3s' }}>
-                                        <div className="text-[11px] text-neutral-400">Compatible con</div>
-                                        <div className="mt-2.5 grid grid-cols-2 gap-2 text-xs text-neutral-200">
-                                            {[['phone_iphone', 'iPhone'], ['phone_android', 'Android'], ['nfc', 'NFC'], ['qr_code_2', 'QR']].map(([i, l]) => (
-                                                <span key={l} className="flex items-center gap-1.5">
-                                                    <Icon name={i} className="text-lg text-[#FF5A3C]" />
-                                                    {l}
+                                        {/* Etiquetas sobre los bordes de las tarjetas: viajan con ellas y además se mecen solas */}
+                                        {[
+                                            { icon: 'contactless', label: 'NFC', pos: 'left-[10%] top-[30%]', box: 'bg-[#D42410] text-white shadow-[0_14px_34px_rgba(212,36,16,0.5)]', dot: 'bg-white/20 text-white', ripple: true, d: '0s' },
+                                            { icon: 'qr_code_2', label: 'Código QR', pos: 'right-[4%] top-[30%]', box: 'bg-[#D42410] text-white shadow-[0_14px_34px_rgba(212,36,16,0.5)]', dot: 'bg-white/20 text-white', ripple: true, d: '0s' },
+                                            // Centrada con flex (no con translate) para no chocar con la animación de entrada
+                                            { icon: 'block', label: 'Sin apps', pos: 'inset-x-0 bottom-[0.5%] flex justify-center', box: 'bg-[#D42410] text-white shadow-[0_14px_34px_rgba(212,36,16,0.5)]', dot: 'bg-white/20 text-white', ripple: true, d: '-3.2s' },
+                                        ].map((t, i) => (
+                                            <span key={t.label} className={`sc-rise absolute z-20 ${t.pos}`} style={{ animationDelay: `${800 + i * 160}ms` }}>
+                                                <span className={`sc-bob inline-flex items-center gap-2 rounded-full py-1.5 pl-1.5 pr-4 text-sm font-bold ${t.box}`} style={{ animationDelay: t.d }}>
+                                                    <span className={`relative flex h-8 w-8 items-center justify-center rounded-full ${t.dot}`}>
+                                                        {t.ripple && <span aria-hidden="true" className="sc-ripple absolute inset-0 rounded-full border-2 border-white/70" />}
+                                                        <Icon name={t.icon} className="relative text-lg" />
+                                                    </span>
+                                                    {t.label}
                                                 </span>
-                                            ))}
-                                        </div>
-                                        <Link href={accountHref} className="mt-3.5 flex items-center justify-center rounded-full bg-[#D42410] py-2.5 text-xs font-semibold text-white transition hover:bg-[#B81E0C]">
-                                            {user ? 'Ir a mi panel' : 'Crear cuenta gratis'}
-                                        </Link>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Declaración */}
-                        <div className="relative mt-[72px] flex flex-wrap items-start justify-between gap-6">
-                            <span className="sc-reveal inline-flex items-center gap-1.5 rounded-full border border-white/10 px-3.5 py-1.5 text-xs text-neutral-300">
-                                <Icon name="add" className="text-base" />
-                                Sobre SpaceCard
-                            </span>
-                            <p className="sc-reveal min-w-0 flex-[0_1_760px] font-display text-[clamp(26px,3.2vw,42px)] leading-[1.15] tracking-[-0.025em]" style={{ '--d': '120ms' }}>
-                                Creamos <span className="text-[#FF5A3C]">tarjetas inteligentes</span> que conectan a las personas, con un{' '}
-                                <span className="text-[#FF5A3C]">perfil digital</span> que siempre está al día y te ayuda a{' '}
-                                <span className="text-[#FF5A3C]">convertir saludos</span> en contactos reales.
-                            </p>
-                        </div>
-                    </section>
-
-                    {/* CÓMO FUNCIONA */}
-                    <section id="como" className="flex flex-wrap gap-3.5 px-5 pb-[72px] sm:px-7">
-                        <div className="sc-reveal flex min-w-0 flex-[999_1_520px] flex-col items-center rounded-[26px] border border-white/10 bg-gradient-to-b from-[#1A1A1A] to-[#0E0E0E] p-7 text-center">
-                            <span className="inline-flex items-center gap-1.5 text-xs text-neutral-400">
-                                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#FF5A3C]" />
-                                Así de fácil
-                            </span>
-                            <h2 className="mt-2 font-display text-3xl tracking-tight">
-                                Acerca, <span className="text-[#FF5A3C]">comparte</span>, conecta
-                            </h2>
-                            <div className="mt-5 grid w-full grid-cols-[repeat(auto-fit,minmax(170px,1fr))] gap-2.5 text-left">
-                                {STEPS.map((s, i) => (
-                                    <div
-                                        key={s.title}
-                                        className="sc-reveal group rounded-[18px] border border-[#FF3B1F]/30 bg-[#FF3B1F]/10 p-[18px] transition-[border-color,background-color,translate] duration-500 hover:-translate-y-1 hover:border-[#FF3B1F]/60 hover:bg-[#FF3B1F]/15"
-                                        style={{ '--d': `${200 + i * 140}ms` }}
-                                    >
-                                        <Icon name={s.icon} className="text-[28px] text-[#FF5A3C] transition duration-500 group-hover:-rotate-12 group-hover:scale-110" />
-                                        <div className="mt-4 text-[11px] text-neutral-400">0{i + 1}</div>
-                                        <h3 className="mt-0.5 text-base font-semibold">{s.title}</h3>
-                                        <p className="mt-1.5 text-[13px] text-neutral-400">{s.desc}</p>
-                                    </div>
-                                ))}
-                            </div>
-                            <Link href={route('shop.comprar')} className="group mt-5 inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-[#1F1F1F] px-5 py-2.5 text-[13px] font-semibold transition duration-300 hover:-translate-y-0.5 hover:bg-[#2A2A2A]">
-                                Empezar ahora
-                                <Icon name="arrow_forward" className="text-lg transition duration-300 group-hover:translate-x-1" />
-                            </Link>
-                        </div>
-                        <div className="flex min-w-0 flex-[1_1_340px] flex-col gap-3.5">
-                            <div className="sc-reveal rounded-[26px] border border-white/10 bg-[#111111] p-6 transition-[border-color] duration-500 hover:border-white/20" style={{ '--d': '150ms' }}>
-                                <p className="text-[13px] text-neutral-400">Tarjeta, pulsera o placa de reseñas. Todos apuntan a tu mismo perfil inteligente.</p>
-                                <div className="mt-4 flex items-end justify-between gap-2.5">
-                                    <span className="text-xs text-neutral-400">Desde</span>
-                                    <span className="font-display text-[64px] font-light leading-none tracking-[-0.05em]">$19.99</span>
-                                </div>
-                            </div>
-                            <div className="sc-reveal flex flex-col gap-3.5 rounded-[26px] border border-white/10 bg-[#111111] p-6 transition-[border-color] duration-500 hover:border-white/20" style={{ '--d': '280ms' }}>
-                                <div className="flex items-center justify-between">
-                                    <span className="text-[13px] font-semibold">Nuevo contacto</span>
-                                    <Icon name="group_add" className="text-[22px] text-[#FF5A3C]" />
-                                </div>
-                                <div className="flex items-center gap-3 rounded-2xl bg-white/5 p-3">
-                                    <span className="relative flex h-10 w-10 items-center justify-center rounded-full bg-[#2A2A2A] text-neutral-300">
-                                        <Icon name="person" className="text-[22px]" />
-                                        <span className="absolute -right-0.5 -top-0.5 h-3 w-3 animate-ping rounded-full bg-[#FF5A3C]/70" />
-                                        <span className="absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full border-2 border-[#111111] bg-[#FF5A3C]" />
-                                    </span>
-                                    <span className="flex flex-col text-[13px]">
-                                        <strong className="font-semibold">[Nombre del contacto]</strong>
-                                        <span className="text-neutral-400">Te dejó sus datos al escanear</span>
-                                    </span>
-                                </div>
-                                <p className="text-[13px] text-neutral-400">Cada saludo se convierte en un lead, directo a tu panel.</p>
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* INCLUYE: cinta continua */}
-                    <section className="flex items-center gap-8 border-y border-white/[0.07] py-5 pl-5 sm:pl-7">
-                        <span className="shrink-0 text-xs leading-tight text-neutral-400">Todo lo que<br />incluye tu perfil</span>
-                        <div className="min-w-0 flex-1 overflow-hidden [mask-image:linear-gradient(90deg,transparent,#000_8%,#000_92%,transparent)]">
-                            <div className="sc-marquee flex w-max gap-10 pr-10">
-                                {[...INCLUDES, ...INCLUDES].map((f, i) => (
-                                    <span key={i} aria-hidden={i >= INCLUDES.length} className="inline-flex shrink-0 items-center gap-2 font-display text-[17px] text-neutral-400 transition hover:text-white">
-                                        <Icon name={f.icon} className="text-[22px]" />
-                                        {f.label}
-                                    </span>
-                                ))}
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* PRODUCTOS */}
-                    <section id="productos" className="px-5 py-14 sm:px-7">
-                        <div className="sc-reveal flex flex-wrap gap-10 rounded-[30px] border border-white/[0.08] bg-[#121212] p-6 sm:p-10">
-                            <div className="flex min-w-0 flex-[1_1_360px] flex-col">
-                                <Chip>Productos</Chip>
-                                <h2 className="mt-6 font-display text-[clamp(36px,4.4vw,60px)] leading-none tracking-[-0.04em]">
-                                    Un ecosistema,<br />muchas formas
-                                </h2>
-                                <p className="mt-4 max-w-[380px] text-sm text-neutral-400">
-                                    Elige el dispositivo que mejor va contigo. Todos apuntan a tu mismo perfil inteligente.
-                                </p>
-                                <div role="tablist" aria-label="Productos" className="mt-7 flex flex-col gap-2">
-                                    {PRODUCTS.map((p) => {
-                                        const active = p.id === productId;
-                                        return (
-                                            <button
-                                                key={p.id}
-                                                type="button"
-                                                role="tab"
-                                                aria-selected={active}
-                                                onClick={() => setProductId(p.id)}
-                                                className={`group relative flex min-h-14 items-center justify-between gap-3 overflow-hidden rounded-2xl border px-[18px] py-3 text-left font-medium transition-all duration-500 ${active ? 'border-white/20 bg-white/[0.08] pl-6' : 'border-white/[0.08] hover:bg-white/[0.04] hover:pl-6'}`}
-                                            >
-                                                <span className={`absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r-full bg-[#D42410] transition-all duration-500 ${active ? 'opacity-100' : 'h-0 opacity-0'}`} />
-                                                <span className="flex items-center gap-2.5">
-                                                    <Icon name={p.icon} className="text-[22px] text-[#FF5A3C]" />
-                                                    {p.name}
-                                                </span>
-                                                <span className="font-display text-neutral-400">{p.price}</span>
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-                            <div role="tabpanel" className="flex min-w-0 flex-[1_1_420px] flex-col rounded-[26px] border border-white/10 bg-gradient-to-b from-[#202020] to-[#141414] p-7">
-                                <div key={product.id} className="sc-swap flex flex-1 flex-col">
-                                    <div className="flex items-start justify-between gap-3">
-                                        <h3 className="font-display text-[32px] leading-[1.05] tracking-[-0.03em]">
-                                            {product.name}<br /><span className="text-neutral-400">{product.tag}</span>
-                                        </h3>
-                                        <span className="text-xs text-neutral-400">0{PRODUCTS.indexOf(product) + 1}</span>
-                                    </div>
-                                    <div className="relative mt-4 flex h-[220px] items-center justify-center">
-                                        <div aria-hidden="true" className="sc-blob absolute inset-6 bg-[radial-gradient(closest-side,rgba(255,40,10,0.35),transparent)]" />
-                                        <img src={product.img} alt={product.name} className="sc-bob relative max-h-full max-w-[90%] object-contain" />
-                                    </div>
-                                    <p className="mt-4 text-sm text-neutral-300">{product.desc}</p>
-                                    <div className="mt-4 flex flex-wrap gap-2">
-                                        {product.chips.map((chip, i) => (
-                                            <span key={chip} className="sc-swap rounded-full border border-white/10 bg-white/[0.07] px-3 py-1.5 text-xs text-neutral-200" style={{ animationDelay: `${150 + i * 80}ms` }}>
-                                                {chip}
                                             </span>
                                         ))}
                                     </div>
-                                    <div className="mt-auto flex flex-wrap items-center justify-between gap-3 pt-6">
-                                        <span className="font-display text-4xl font-light tracking-tight">{product.price}</span>
-                                        <Link href={route('shop.comprar')} className="group inline-flex items-center gap-1.5 rounded-full bg-[#D42410] px-5 py-3 text-sm font-semibold text-white transition duration-300 hover:-translate-y-0.5 hover:bg-[#B81E0C]">
-                                            Personalizar
-                                            <Icon name="tune" className="text-lg transition duration-500 group-hover:rotate-180" />
-                                        </Link>
-                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </section>
+                    </div>
+                </section>
 
-                    {/* PREGUNTAS */}
-                    <section id="preguntas" className="flex flex-wrap gap-8 px-5 pb-16 pt-6 sm:px-7">
-                        <div className="min-w-0 flex-[1_1_300px]">
-                            <Chip>Preguntas</Chip>
-                            <h2 className="mt-5 font-display text-[clamp(32px,3.6vw,48px)] leading-[1.02] tracking-[-0.04em]">
-                                Lo que todos<br /><span className="text-[#FF5A3C]">nos preguntan</span>
+                {/* CINTAS CRUZADAS: mensaje en movimiento */}
+                <section aria-hidden="true" className="relative -my-6 h-36 overflow-hidden">
+                    <div className="absolute inset-x-[-5%] top-1/2 -translate-y-1/2 rotate-[2deg] bg-neutral-900 py-3">
+                        <Marquee
+                            reverse
+                            words={['Un toque', 'Sin apps', 'NFC + QR', 'Perfil editable', 'Seis colores']}
+                            className="font-display text-lg font-bold uppercase tracking-wide text-white/80"
+                            icon={<Icon name="contactless" className="text-xl text-[#FF5A3C]" />}
+                        />
+                    </div>
+                    <div className="absolute inset-x-[-5%] top-1/2 -translate-y-1/2 -rotate-[2deg] bg-[#D42410] py-3 shadow-[0_14px_30px_rgba(212,36,16,0.3)]">
+                        <Marquee
+                            words={['Tu tarjeta', 'Tu perfil', 'Tu red', 'Tu marca', 'SpaceCard']}
+                            className="font-display text-2xl font-bold uppercase tracking-wide text-white"
+                            icon={<Icon name="bolt" className="text-2xl text-white/70" />}
+                        />
+                    </div>
+                </section>
+
+                {/* QUÉ INCLUYE */}
+                <section id="incluye" className="mx-auto grid max-w-7xl gap-10 px-5 py-20 sm:px-8 lg:grid-cols-[0.8fr_1.6fr]">
+                    <div className="sc-reveal">
+                        <Kicker>Qué incluye</Kicker>
+                        <h2 className="mt-3 font-display text-[clamp(30px,3.4vw,44px)] font-bold leading-[1.08] tracking-[-0.03em]">Todo lo que necesitas en una sola tarjeta</h2>
+                        <p className="mt-4 max-w-sm text-neutral-600">Tu tarjeta física y tu perfil digital trabajan juntos para que cada saludo cuente.</p>
+                        <a href="#productos" className="group mt-7 inline-flex items-center gap-2 rounded-full bg-[#D42410] px-6 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-[#B81E0C]">
+                            Ver productos
+                            <Icon name="arrow_forward" className="text-lg transition group-hover:translate-x-1" />
+                        </a>
+                    </div>
+                    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                        {FEATURES.map((f, i) => (
+                            <div key={f.title} className="sc-reveal group rounded-2xl border border-black/[0.07] bg-white p-6 shadow-[0_4px_20px_rgba(0,0,0,0.04)] transition duration-500 hover:-translate-y-1 hover:border-[#D42410]/30 hover:shadow-[0_16px_40px_rgba(212,36,16,0.1)]" style={{ '--d': `${i * 70}ms` }}>
+                                <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#D42410]/[0.08] text-[#D42410] transition duration-500 group-hover:bg-[#D42410] group-hover:text-white">
+                                    <Icon name={f.icon} className="text-2xl" />
+                                </span>
+                                <h3 className="mt-5 font-semibold">{f.title}</h3>
+                                <p className="mt-1.5 text-sm text-neutral-500">{f.desc}</p>
+                                <Icon name="arrow_forward" className="mt-4 block text-right text-lg text-[#D42410] transition duration-300 group-hover:translate-x-1" />
+                            </div>
+                        ))}
+                    </div>
+                </section>
+
+                {/* FRANJA NEGRA */}
+                <section className="relative overflow-hidden bg-[#0B0B0B] text-white">
+                    <div aria-hidden="true" className="sc-reveal sc-from-left absolute -left-10 top-0 h-full w-40">
+                        <div className="h-full w-full bg-[#D42410] opacity-90 [clip-path:polygon(0_0,100%_0,30%_100%,0_100%)]" />
+                    </div>
+                    <div aria-hidden="true" className="sc-reveal sc-from-right absolute -right-6 top-0 h-28 w-56" style={{ '--d': '150ms' }}>
+                        <div className="sc-drift h-full w-full bg-[#D42410] [clip-path:polygon(30%_0,100%_0,100%_100%)]" />
+                    </div>
+                    {/* Al estilo Cash App: titular, roseta de tarjetas y ventajas */}
+                    <div className="relative mx-auto grid max-w-7xl items-center gap-10 px-5 py-20 sm:px-8 lg:grid-cols-[1fr_1.3fr_1fr] lg:py-24">
+                        <div className="sc-reveal sc-from-left text-center lg:pl-10 lg:text-left">
+                            <Kicker light>SpaceCard</Kicker>
+                            <h2 className="mt-3 font-display text-[clamp(34px,4vw,56px)] font-bold leading-[1.02] tracking-[-0.04em]">
+                                La tarjeta que <span className="text-[#FF5A3C]">trabaja por ti</span>
                             </h2>
                         </div>
-                        <div className="flex min-w-0 flex-[2_1_520px] flex-col gap-2.5">
+                        <div className="relative">
+                            <div aria-hidden="true" className="absolute inset-[6%]">
+                                <div className="sc-blob h-full w-full bg-[radial-gradient(closest-side,rgba(255,40,10,0.35),transparent)]" />
+                            </div>
+                            <CardFan className="relative mx-auto max-w-[520px]" />
+                        </div>
+                        <div className="sc-reveal sc-from-right" style={{ '--d': '150ms' }}>
+                            <ul className="mx-auto max-w-sm space-y-3 lg:mx-0">
+                                {['NFC y QR: funciona con cualquier teléfono', 'Sin apps para quien la recibe', 'Diseño premium de 2 caras', 'Seis colores para elegir', 'Perfil editable cuando quieras'].map((t) => (
+                                    <li key={t} className="flex items-center gap-3 text-[17px] font-medium">
+                                        <span className="h-2 w-2 shrink-0 rounded-full bg-[#FF5A3C]" />
+                                        {t}
+                                    </li>
+                                ))}
+                            </ul>
+                            <Link href={route('shop.comprar')} className="group mt-8 inline-flex items-center gap-2 rounded-full border border-white/40 px-6 py-3 text-sm font-semibold transition hover:-translate-y-0.5 hover:border-white hover:bg-white hover:text-neutral-900">
+                                Conoce SpaceCard
+                                <Icon name="arrow_forward" className="text-lg transition group-hover:translate-x-1" />
+                            </Link>
+                        </div>
+                    </div>
+                </section>
+
+                {/* PRODUCTOS */}
+                <section id="productos" className="bg-[#FAFAFA]">
+                    <div className="mx-auto max-w-7xl px-5 py-20 sm:px-8">
+                        <div className="sc-reveal flex flex-wrap items-end justify-between gap-4">
+                            <div>
+                                <Kicker>Nuestros productos</Kicker>
+                                <h2 className="mt-3 font-display text-[clamp(30px,3.4vw,44px)] font-bold leading-[1.08] tracking-[-0.03em]">Elige tu dispositivo</h2>
+                                <p className="mt-2 text-neutral-600">Todos apuntan a tu mismo perfil inteligente.</p>
+                            </div>
+                            <Link href={route('shop.comprar')} className="group inline-flex items-center gap-1.5 text-sm font-semibold text-[#D42410]">
+                                Ir a la tienda
+                                <Icon name="arrow_forward" className="text-lg transition group-hover:translate-x-1" />
+                            </Link>
+                        </div>
+                        <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                            {PRODUCTS.map((p, i) => (
+                                <Link key={p.name} href={route('shop.comprar')} className="sc-reveal group overflow-hidden rounded-2xl border border-black/[0.07] bg-white shadow-[0_4px_20px_rgba(0,0,0,0.04)] transition duration-500 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.1)]" style={{ '--d': `${i * 90}ms` }}>
+                                    <div className="relative flex h-56 items-center justify-center overflow-hidden bg-[#111111] p-6">
+                                        <div aria-hidden="true" className="absolute inset-0 bg-[radial-gradient(closest-side,rgba(255,40,10,0.28),transparent)]" />
+                                        <img src={p.img} alt={p.name} loading="lazy" className="relative max-h-full object-contain transition duration-700 group-hover:scale-105" />
+                                    </div>
+                                    <div className="flex items-center justify-between gap-3 p-5">
+                                        <div>
+                                            <h3 className="font-semibold">{p.name}</h3>
+                                            <p className="text-sm text-neutral-500">{p.tag} · <span className="font-semibold text-neutral-900">{p.price}</span></p>
+                                        </div>
+                                        <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#D42410]/[0.08] text-[#D42410] transition group-hover:bg-[#D42410] group-hover:text-white">
+                                            <Icon name="arrow_forward" className="text-lg" />
+                                        </span>
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+
+                {/* CÓMO FUNCIONA */}
+                <section id="como" className="bg-[#FFF4F2]">
+                    <div className="mx-auto grid max-w-7xl items-center gap-10 px-5 py-20 sm:px-8 lg:grid-cols-[0.8fr_1.6fr]">
+                        <div className="sc-reveal">
+                            <Kicker>Cómo funciona</Kicker>
+                            <h2 className="mt-3 font-display text-[clamp(30px,3.4vw,44px)] font-bold leading-[1.08] tracking-[-0.03em]">Tres pasos y listo</h2>
+                            <p className="mt-3 max-w-sm text-neutral-600">De la tienda a tu primera conexión en minutos.</p>
+                        </div>
+                        <ol className="grid gap-4 md:grid-cols-3">
+                            {STEPS.map((s, i) => (
+                                <li key={s.title} className="sc-reveal group rounded-2xl bg-white p-6 shadow-[0_4px_20px_rgba(212,36,16,0.06)] transition duration-500 hover:-translate-y-1 hover:shadow-[0_16px_40px_rgba(212,36,16,0.12)]" style={{ '--d': `${i * 120}ms` }}>
+                                    <span className="relative flex h-10 w-10 items-center justify-center rounded-full bg-[#D42410] font-display font-bold text-white">
+                                        <span aria-hidden="true" className="sc-ripple absolute inset-0 rounded-full border-2 border-[#D42410]" style={{ animationDelay: `${i * 0.5}s` }} />
+                                        {i + 1}
+                                    </span>
+                                    <h3 className="mt-5 font-semibold">{s.title}</h3>
+                                    <p className="mt-1.5 text-sm text-neutral-500">{s.desc}</p>
+                                </li>
+                            ))}
+                        </ol>
+                    </div>
+                </section>
+
+                {/* PREGUNTAS (franja negra) */}
+                <section id="preguntas" className="bg-[#0B0B0B] text-white">
+                    <div className="mx-auto grid max-w-7xl gap-10 px-5 py-20 sm:px-8 lg:grid-cols-[0.8fr_1.6fr]">
+                        <div className="sc-reveal">
+                            <Kicker light>Preguntas frecuentes</Kicker>
+                            <h2 className="mt-3 font-display text-[clamp(30px,3.4vw,44px)] font-bold leading-[1.08] tracking-[-0.03em]">Resolvemos tus dudas</h2>
+                        </div>
+                        <div className="flex flex-col gap-3">
                             {FAQS.map((f, i) => {
                                 const open = openFaq === i;
                                 return (
-                                    <div
-                                        key={f.q}
-                                        className={`rounded-[18px] border bg-[#111111] transition-colors duration-500 ${open ? 'border-[#FF3B1F]/40' : 'border-white/[0.09] hover:border-white/20'}`}
-                                    >
-                                        <button
-                                            type="button"
-                                            aria-expanded={open}
-                                            onClick={() => setOpenFaq(open ? null : i)}
-                                            className="flex w-full items-center justify-between gap-4 px-[22px] py-5 text-left text-base font-medium"
-                                        >
+                                    <div key={f.q} className={`rounded-2xl border transition-colors duration-500 ${open ? 'border-[#D42410] bg-white text-neutral-900' : 'border-white/10 bg-white/[0.03] hover:border-white/25'}`}>
+                                        <button type="button" aria-expanded={open} onClick={() => setOpenFaq(open ? null : i)} className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left font-medium">
                                             {f.q}
-                                            <Icon name="add" className={`text-[22px] text-[#FF5A3C] transition duration-500 ${open ? 'rotate-45' : ''}`} />
+                                            <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition duration-500 ${open ? 'rotate-45 bg-[#D42410] text-white' : 'bg-white/10 text-[#FF5A3C]'}`}>
+                                                <Icon name="add" className="text-xl" />
+                                            </span>
                                         </button>
-                                        <div
-                                            className={`grid transition-[grid-template-rows,opacity] duration-500 ${open ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}
-                                            style={{ transitionTimingFunction: ease }}
-                                        >
-                                            <div className="overflow-hidden">
-                                                <p className="px-[22px] pb-5 text-neutral-400">{f.a}</p>
-                                            </div>
+                                        <div className={`grid transition-[grid-template-rows,opacity] duration-500 ${open ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
+                                            <div className="overflow-hidden"><p className="px-6 pb-5 text-neutral-600">{f.a}</p></div>
                                         </div>
                                     </div>
                                 );
                             })}
                         </div>
-                    </section>
+                    </div>
+                </section>
 
-                    {/* CTA */}
-                    <section className="px-5 pb-7 sm:px-7">
-                        <div className="sc-reveal relative flex flex-wrap items-center justify-between gap-6 overflow-hidden rounded-[26px] bg-[#D42410] px-6 py-14 sm:px-10">
-                            <div aria-hidden="true" className="sc-blob pointer-events-none absolute -right-24 -top-32 h-[420px] w-[420px] bg-[#FF6A4D]/40" />
-                            <h2 className="relative flex-[1_1_420px] font-display text-[clamp(34px,4.4vw,60px)] leading-none tracking-[-0.04em] text-white">
-                                Empieza a destacar<br />en tu próxima reunión
-                            </h2>
-                            <Link href={route('shop.comprar')} className="group relative inline-flex items-center gap-2 rounded-full bg-black px-6 py-4 text-[15px] font-semibold text-white transition duration-300 hover:-translate-y-0.5 hover:bg-neutral-900">
-                                Crear mi SpaceCard
-                                <Icon name="north_east" className="text-xl transition duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
-                            </Link>
+                {/* CTA ROJO */}
+                <section className="relative overflow-hidden bg-[#D42410] text-white">
+                    <div aria-hidden="true" className="sc-reveal sc-from-right absolute -right-10 top-0 h-full w-[45%]">
+                        <div className="sc-drift h-full w-full bg-[#B81E0C] [clip-path:polygon(30%_0,100%_0,100%_100%,0_100%)]" />
+                    </div>
+                    <div aria-hidden="true" className="sc-reveal sc-from-right absolute right-[30%] top-0 h-full w-24" style={{ '--d': '150ms' }}>
+                        <div className="sc-drift h-full w-full bg-[#E8361D] [clip-path:polygon(60%_0,100%_0,40%_100%,0_100%)]" style={{ animationDelay: '-4s' }} />
+                    </div>
+                    <div className="relative mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-6 px-5 py-12 sm:px-8">
+                        <div className="sc-reveal sc-from-left">
+                            <h2 className="font-display text-[clamp(26px,3vw,38px)] font-bold tracking-[-0.03em]">¿Listo para destacar?</h2>
+                            <p className="mt-1 text-white/85">Diseña tu SpaceCard en minutos y llévala a tu próxima reunión.</p>
                         </div>
-                    </section>
+                        <Link href={route('shop.comprar')} className="group inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 text-sm font-semibold text-[#D42410] transition hover:-translate-y-0.5">
+                            Crear mi SpaceCard
+                            <Icon name="arrow_forward" className="text-lg transition group-hover:translate-x-1" />
+                        </Link>
+                    </div>
+                </section>
 
-                    {/* FOOTER */}
-                    <footer className="flex flex-wrap items-center justify-between gap-3 px-5 pb-7 pt-5 text-[13px] text-neutral-400 sm:px-7">
-                        <span className="flex items-center gap-3">
-                            <BrandLogo />
-                            · AVASPACE®
-                        </span>
-                        <span className="flex flex-wrap gap-x-5 gap-y-1">
-                            <Link href={route('shop.comprar')} className="py-2.5 text-neutral-300 transition hover:text-white">Tienda</Link>
-                            {canLogin && !user && <Link href={route('login')} className="py-2.5 text-neutral-300 transition hover:text-white">Entrar</Link>}
-                            {canRegister && !user && <Link href={route('register')} className="py-2.5 text-neutral-300 transition hover:text-white">Crear cuenta</Link>}
-                            {user && <Link href={route('dashboard')} className="py-2.5 text-neutral-300 transition hover:text-white">Mi panel</Link>}
-                        </span>
-                    </footer>
-                </div>
+                {/* FOOTER */}
+                <footer className="bg-[#0B0B0B] text-neutral-400">
+                    <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-6 px-5 py-10 text-sm sm:px-8">
+                        <BrandLogo className="h-7" />
+                        <nav aria-label="Pie de página" className="flex flex-wrap gap-x-6 gap-y-2">
+                            <a href="#inicio" className="transition hover:text-white">Inicio</a>
+                            <a href="#incluye" className="transition hover:text-white">Qué incluye</a>
+                            <Link href={route('shop.comprar')} className="transition hover:text-white">Tienda</Link>
+                            <a href="#preguntas" className="transition hover:text-white">Preguntas</a>
+                        </nav>
+                        <span>© 2026 SpaceCard · AVASPACE®</span>
+                    </div>
+                </footer>
             </div>
         </>
     );

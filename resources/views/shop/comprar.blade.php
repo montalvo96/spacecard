@@ -16,7 +16,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..600,0..1,0&display=block" rel="stylesheet">
+    @include('partials.icon-font')
 
     <!-- Estilo alineado con la landing: negro, acento rojo, paneles translúcidos -->
     <style>
@@ -65,7 +65,7 @@
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
             vertical-align: middle;
         }
-        .ms-fill { font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24; }
+        .ms-fill { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
 
         /* ---- Animaciones orgánicas (ligeras: solo transform y opacity) ---- */
         @keyframes sc-rise {
@@ -764,7 +764,7 @@
 
             <!-- Pulsera SpaceBand (imagen real de producto) -->
             <div id="mockup-bracelet-view" class="bracelet-real" style="display:none; flex-direction:column; align-items:center; gap:14px; width:100%;">
-                <img class="sc-bob" src="/img/products/bracelets.png" alt="SpaceBand NFC" style="width:100%; max-width:420px; filter: drop-shadow(0 30px 50px rgba(255,40,10,.3));">
+                <img class="sc-bob" loading="lazy" decoding="async" src="/img/products/bracelets.png" alt="SpaceBand NFC" style="width:100%; max-width:420px; filter: drop-shadow(0 30px 50px rgba(255,40,10,.3));">
                 <p style="font-size:12px; color:var(--text-muted); text-align:center;">
                     SpaceBand® NFC · disponible en <strong style="color:#ef4444;">rojo</strong>, <strong style="color:var(--text-light);">negro</strong> y <strong style="color:#e5e7eb;">blanco</strong><br>
                     Color seleccionado: <strong id="bracelet-color-label" style="color:var(--text-light);">Blanco</strong>
@@ -774,7 +774,7 @@
             <!-- Mockup de Placa Reviews Google -->
             <div id="mockup-plate-view" class="mockup-plate-view">
                 <div class="plate-header">
-                    <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M21.35 11.1H12v2.7h5.38c-.23 1.28-1 2.37-2.08 3.1v2.58h3.36c1.96-1.8 3.09-4.47 3.09-7.58c0-.62-.05-1.21-.1-1.8z"/><path fill="#34A853" d="M12 21c2.43 0 4.47-.8 5.96-2.22l-3.36-2.58c-.93.62-2.11 1-3.6 1c-2.77 0-5.11-1.86-5.95-4.38H1.57v2.66C3.06 18.25 7.2 21 12 21z"/><path fill="#FBBC05" d="M6.05 12.82a5.4 5.4 0 0 1 0-3.64V6.52H1.57a8.96 8.96 0 0 0 0 10.96l4.48-2.66z"/><path fill="#EA4335" d="M12 8.38c1.32 0 2.5.45 3.44 1.35l2.58-2.58C16.46 5.68 14.43 5 12 5C7.2 5 3.06 7.75 1.57 10.74l4.48 2.66c.84-2.52 3.18-4.38 5.95-4.38z"/></svg>
+                    <svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#FBBC05" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.6-.4-3.5z"/><path fill="#EA4335" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#34A853" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#4285F4" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.6-.4-3.5z"/></svg>
                     <span>Valóranos en Google</span>
                 </div>
                 
@@ -849,15 +849,15 @@
                     </div>
 
                     <!-- MODO PREDISEÑADA (catálogo AVASPACE) -->
-                    <div id="card-preset-mode" style="display:none; margin-top:16px;">
+                    <div id="card-preset-mode" style="display:none; margin-top:22px;">
                         <label class="form-label">Elige un diseño de catálogo</label>
                         <div class="preset-strip">
-                            <button type="button" class="preset-thumb active" data-preset="black"  onclick="pickPreset('black','Negro','#0c0b14')"><img src="/img/products/thumbs/card-black.png" alt="Negro"></button>
-                            <button type="button" class="preset-thumb" data-preset="red"    onclick="pickPreset('red','Rojo','#e11d2a')"><img src="/img/products/thumbs/card-red.png" alt="Rojo"></button>
-                            <button type="button" class="preset-thumb" data-preset="pink"   onclick="pickPreset('pink','Rosa','#d81f8f')"><img src="/img/products/thumbs/card-pink.png" alt="Rosa"></button>
-                            <button type="button" class="preset-thumb" data-preset="purple" onclick="pickPreset('purple','Púrpura','#7c3aed')"><img src="/img/products/thumbs/card-purple.png" alt="Púrpura"></button>
-                            <button type="button" class="preset-thumb" data-preset="blue"   onclick="pickPreset('blue','Azul','#1e40af')"><img src="/img/products/thumbs/card-blue.png" alt="Azul"></button>
-                            <button type="button" class="preset-thumb" data-preset="green"  onclick="pickPreset('green','Verde','#16a34a')"><img src="/img/products/thumbs/card-green.png" alt="Verde"></button>
+                            <button type="button" class="preset-thumb active" data-preset="black"  onclick="pickPreset('black','Negro','#0c0b14')"><img loading="lazy" decoding="async" src="/img/products/thumbs/card-black.png" alt="Negro"></button>
+                            <button type="button" class="preset-thumb" data-preset="red"    onclick="pickPreset('red','Rojo','#e11d2a')"><img loading="lazy" decoding="async" src="/img/products/thumbs/card-red.png" alt="Rojo"></button>
+                            <button type="button" class="preset-thumb" data-preset="pink"   onclick="pickPreset('pink','Rosa','#d81f8f')"><img loading="lazy" decoding="async" src="/img/products/thumbs/card-pink.png" alt="Rosa"></button>
+                            <button type="button" class="preset-thumb" data-preset="purple" onclick="pickPreset('purple','Púrpura','#7c3aed')"><img loading="lazy" decoding="async" src="/img/products/thumbs/card-purple.png" alt="Púrpura"></button>
+                            <button type="button" class="preset-thumb" data-preset="blue"   onclick="pickPreset('blue','Azul','#1e40af')"><img loading="lazy" decoding="async" src="/img/products/thumbs/card-blue.png" alt="Azul"></button>
+                            <button type="button" class="preset-thumb" data-preset="green"  onclick="pickPreset('green','Verde','#16a34a')"><img loading="lazy" decoding="async" src="/img/products/thumbs/card-green.png" alt="Verde"></button>
                         </div>
                         <div class="preset-note">
                             <span class="ms" aria-hidden="true">check_circle</span>
@@ -866,7 +866,7 @@
                     </div>
 
                     <!-- MODO PERSONALIZADA (diseñador 2 caras) -->
-                    <div id="card-custom-mode">
+                    <div id="card-custom-mode" style="margin-top:22px;">
 
                     <!-- Cara activa -->
                     <div class="ctrl-group">
