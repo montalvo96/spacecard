@@ -1,15 +1,27 @@
 /**
- * Layout de acceso (login / registro) con el estilo de la landing:
- * fondo negro, acento rojo, panel de formulario + panel visual con la
- * tarjeta flotando. Iconos: Material Symbols (clase .ms).
+ * Layout de acceso (login / registro) con el estilo de la landing: formulario
+ * en blanco con acentos rojos y, al lado, un panel negro como la franja de la
+ * portada, con la roseta de tarjetas (CardFan) y etiquetas rojas flotando.
+ * Iconos: Material Symbols (clase .ms).
  */
 
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { Link } from '@inertiajs/react';
 import BrandLogo from '@/Components/BrandLogo';
+import CardFan from '@/Components/CardFan';
 
 export function Icon({ name, fill = false, className = '' }) {
     return <span aria-hidden="true" className={`ms ${fill ? 'ms-fill' : ''} ${className}`}>{name}</span>;
+}
+
+/** Palabra resaltada en el bloque rojo inclinado, como en el titular de la portada. */
+export function Highlight({ children }) {
+    return (
+        <span className="relative mx-1 inline-block px-2 text-white">
+            <span aria-hidden="true" className="sc-in-left absolute inset-0 -skew-x-12 rounded-md bg-[#D42410] shadow-[0_10px_24px_rgba(212,36,16,0.35)]" style={{ animationDelay: '350ms' }} />
+            <span className="relative">{children}</span>
+        </span>
+    );
 }
 
 /** Campo con icono, etiqueta, error y (para contraseñas) botón de mostrar/ocultar. */
@@ -19,11 +31,11 @@ export function Field({ id, label, icon, type = 'text', error, autoFocus = false
 
     return (
         <div>
-            <label htmlFor={id} className="mb-1.5 block text-[13px] font-medium text-neutral-300">{label}</label>
+            <label htmlFor={id} className="mb-1.5 block text-[13px] font-semibold text-neutral-800">{label}</label>
             <div
-                className={`group flex items-center gap-2.5 rounded-2xl border bg-[#161616] px-4 transition duration-300 focus-within:border-[#FF5A3C] focus-within:shadow-[0_0_0_4px_rgba(255,59,31,0.15)] ${error ? 'border-[#FF5A3C]/70' : 'border-white/10 hover:border-white/20'}`}
+                className={`group flex items-center gap-2.5 rounded-2xl border bg-neutral-50 px-4 transition duration-300 focus-within:border-[#D42410] focus-within:bg-white focus-within:shadow-[0_0_0_4px_rgba(212,36,16,0.12)] ${error ? 'border-[#D42410]/60' : 'border-black/10 hover:border-black/25'}`}
             >
-                <Icon name={icon} className="text-xl text-neutral-500 transition group-focus-within:text-[#FF5A3C]" />
+                <Icon name={icon} className="text-xl text-neutral-400 transition group-focus-within:text-[#D42410]" />
                 <input
                     id={id}
                     name={id}
@@ -31,7 +43,7 @@ export function Field({ id, label, icon, type = 'text', error, autoFocus = false
                     autoFocus={autoFocus}
                     aria-invalid={!!error}
                     aria-describedby={error ? `${id}-error` : undefined}
-                    className="sc-input h-12 min-w-0 flex-1 border-0 bg-transparent p-0 text-[15px] text-white placeholder:text-neutral-600 focus:outline-none focus:ring-0"
+                    className="sc-input h-12 min-w-0 flex-1 border-0 bg-transparent p-0 text-[15px] text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-0"
                     {...props}
                 />
                 {isPassword && (
@@ -39,14 +51,14 @@ export function Field({ id, label, icon, type = 'text', error, autoFocus = false
                         type="button"
                         onClick={() => setVisible((v) => !v)}
                         aria-label={visible ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-                        className="-mr-2 flex h-10 w-10 items-center justify-center rounded-full text-neutral-500 transition hover:bg-white/5 hover:text-white"
+                        className="-mr-2 flex h-10 w-10 items-center justify-center rounded-full text-neutral-400 transition hover:bg-black/5 hover:text-neutral-900"
                     >
                         <Icon name={visible ? 'visibility_off' : 'visibility'} className="text-xl" />
                     </button>
                 )}
             </div>
             {error && (
-                <p id={`${id}-error`} className="sc-swap mt-1.5 flex items-center gap-1 text-[13px] text-[#FF8A73]">
+                <p id={`${id}-error`} className="sc-swap mt-1.5 flex items-center gap-1 text-[13px] font-medium text-[#B81E0C]">
                     <Icon name="error" className="text-base" />
                     {error}
                 </p>
@@ -60,7 +72,7 @@ export function SubmitButton({ children, processing }) {
         <button
             type="submit"
             disabled={processing}
-            className="group flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[#D42410] text-[15px] font-semibold text-white shadow-[0_10px_30px_rgba(255,40,10,0.35)] transition duration-300 hover:-translate-y-0.5 hover:bg-[#B81E0C] hover:shadow-[0_16px_40px_rgba(255,40,10,0.5)] disabled:translate-y-0 disabled:opacity-60"
+            className="group flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[#D42410] text-[15px] font-semibold text-white shadow-[0_10px_24px_rgba(212,36,16,0.3)] transition duration-300 hover:-translate-y-0.5 hover:bg-[#B81E0C] hover:shadow-[0_16px_34px_rgba(212,36,16,0.4)] disabled:translate-y-0 disabled:opacity-60"
         >
             {processing ? <Icon name="progress_activity" className="animate-spin text-xl" /> : children}
             {!processing && <Icon name="arrow_forward" className="text-lg transition duration-300 group-hover:translate-x-1" />}
@@ -68,52 +80,43 @@ export function SubmitButton({ children, processing }) {
     );
 }
 
-export default function AuthLayout({ mode, title, subtitle, children }) {
-    const visualRef = useRef(null);
-    const frame = useRef(0);
+// Etiquetas rojas que flotan alrededor de la roseta (mismo estilo que en la portada).
+const TAGS = [
+    // Sobre los bordes de las tarjetas (montan un poco encima) para que no se vean sueltas
+    { icon: 'contactless', label: 'NFC', pos: 'left-[13%] top-[27%]', d: '0s' },
+    { icon: 'qr_code_2', label: 'Código QR', pos: 'right-[9%] top-[27%]', d: '0s' },
+    { icon: 'block', label: 'Sin apps', pos: 'inset-x-0 bottom-[24%] flex justify-center', d: '-3.2s' },
+];
 
-    // Inclina la tarjeta hacia el cursor (variables CSS, sin re-renderizar;
-    // como mucho una actualización por cuadro).
-    const onMove = (e) => {
-        if (frame.current || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-        const { clientX, clientY } = e;
-        frame.current = requestAnimationFrame(() => {
-            frame.current = 0;
-            const r = visualRef.current.getBoundingClientRect();
-            visualRef.current.style.setProperty('--mx', ((clientX - r.left) / r.width - 0.5).toFixed(3));
-            visualRef.current.style.setProperty('--my', ((clientY - r.top) / r.height - 0.5).toFixed(3));
-        });
-    };
-    const onLeave = () => {
-        cancelAnimationFrame(frame.current);
-        frame.current = 0;
-        visualRef.current.style.setProperty('--mx', 0);
-        visualRef.current.style.setProperty('--my', 0);
-    };
-
+export default function AuthLayout({ mode, kicker, title, subtitle, children }) {
     const tab = (active) =>
-        `flex h-10 flex-1 items-center justify-center rounded-full text-[13px] font-semibold transition duration-500 ${active ? 'bg-[#D42410] text-white shadow-[0_4px_14px_rgba(255,40,10,0.35)]' : 'text-neutral-400 hover:text-white'}`;
+        `flex h-10 flex-1 items-center justify-center rounded-full text-[13px] font-semibold transition duration-500 ${active ? 'bg-[#D42410] text-white shadow-[0_6px_16px_rgba(212,36,16,0.3)]' : 'text-neutral-500 hover:text-neutral-900'}`;
 
     return (
-        <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#070707] px-4 py-10 font-inter text-neutral-100 antialiased">
-            {/* Luces de fondo */}
-            <div aria-hidden="true" className="sc-blob pointer-events-none absolute -bottom-40 -left-40 h-[520px] w-[520px] bg-[radial-gradient(closest-side,rgba(255,40,10,0.35),transparent)]" />
-            <div aria-hidden="true" className="sc-blob pointer-events-none absolute -right-32 -top-40 h-[420px] w-[420px] bg-[radial-gradient(closest-side,rgba(255,90,60,0.22),transparent)] [animation-delay:-9s]" />
+        <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-white via-[#F6F6F7] to-[#ECECEE] px-4 py-10 font-inter text-neutral-900 antialiased">
+            {/* Formas de la marca en las esquinas de la página */}
+            <div aria-hidden="true" className="absolute -left-12 top-0 h-full w-32">
+                <div className="sc-in-left h-full w-full bg-[#D42410] [clip-path:polygon(0_0,100%_0,30%_100%,0_100%)]" />
+            </div>
+            <div aria-hidden="true" className="sc-in-right absolute -right-6 bottom-0 h-28 w-56">
+                <div className="sc-drift h-full w-full bg-neutral-900 [clip-path:polygon(30%_100%,100%_0,100%_100%)]" />
+            </div>
 
-            <div className="sc-rise relative grid w-full max-w-[1100px] overflow-hidden rounded-[32px] border border-white/10 bg-[#0E0E0E]/90 shadow-[0_40px_120px_rgba(0,0,0,0.6)] lg:grid-cols-[1fr_1.05fr]">
+            <div className="sc-rise relative grid w-full max-w-[1120px] overflow-hidden rounded-[32px] bg-white shadow-[0_40px_100px_rgba(0,0,0,0.12)] ring-1 ring-black/5 lg:grid-cols-[1fr_1.05fr]">
                 {/* Formulario */}
                 <div className="flex flex-col px-6 py-8 sm:px-12 sm:py-10">
                     <Link href="/" className="self-start">
-                        <BrandLogo />
+                        <BrandLogo className="h-7" />
                     </Link>
 
                     <div className="mx-auto flex w-full max-w-[380px] flex-1 flex-col justify-center py-10">
-                        <h1 className="sc-rise font-display text-[40px] font-normal leading-none tracking-[-0.04em]" style={{ animationDelay: '120ms' }}>
+                        <p className="sc-rise text-xs font-bold uppercase tracking-[0.18em] text-[#D42410]" style={{ animationDelay: '80ms' }}>{kicker}</p>
+                        <h1 className="sc-rise mt-3 font-display text-[clamp(34px,4vw,44px)] font-bold leading-[1.05] tracking-[-0.035em]" style={{ animationDelay: '150ms' }}>
                             {title}
                         </h1>
-                        <p className="sc-rise mt-3 text-sm text-neutral-400" style={{ animationDelay: '200ms' }}>{subtitle}</p>
+                        <p className="sc-rise mt-3 text-sm text-neutral-600" style={{ animationDelay: '220ms' }}>{subtitle}</p>
 
-                        <nav aria-label="Acceso" className="sc-rise mt-7 flex rounded-full border border-white/10 bg-white/[0.03] p-1" style={{ animationDelay: '280ms' }}>
+                        <nav aria-label="Acceso" className="sc-rise mt-7 flex rounded-full bg-neutral-100 p-1" style={{ animationDelay: '290ms' }}>
                             <Link href={route('login')} className={tab(mode === 'login')} aria-current={mode === 'login' ? 'page' : undefined}>Entrar</Link>
                             <Link href={route('register')} className={tab(mode === 'register')} aria-current={mode === 'register' ? 'page' : undefined}>Crear cuenta</Link>
                         </nav>
@@ -121,57 +124,43 @@ export default function AuthLayout({ mode, title, subtitle, children }) {
                         <div className="sc-rise mt-7" style={{ animationDelay: '360ms' }}>{children}</div>
                     </div>
 
-                    <Link href="/" className="group inline-flex items-center gap-1.5 self-start text-[13px] text-neutral-500 transition hover:text-white">
+                    <Link href="/" className="group inline-flex items-center gap-1.5 self-start text-[13px] font-medium text-neutral-500 transition hover:text-neutral-900">
                         <Icon name="arrow_back" className="text-lg transition duration-300 group-hover:-translate-x-1" />
                         Volver al inicio
                     </Link>
                 </div>
 
-                {/* Visual */}
-                <div
-                    ref={visualRef}
-                    onMouseMove={onMove}
-                    onMouseLeave={onLeave}
-                    className="relative hidden min-h-[640px] overflow-hidden border-l border-white/[0.06] bg-[#0A0A0A] [--mx:0] [--my:0] lg:block"
-                >
-                    {/* Retícula sutil */}
-                    <div aria-hidden="true" className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:72px_72px] [mask-image:radial-gradient(ellipse_at_center,#000_30%,transparent_75%)]" />
-                    {/* Luz orgánica que sigue al cursor */}
-                    <div
-                        aria-hidden="true"
-                        className="absolute left-1/2 top-1/2 h-[520px] w-[520px]"
-                        style={{
-                            transform: 'translate(calc(-50% + var(--mx) * 120px), calc(-50% + var(--my) * 90px))',
-                            transition: 'transform 1.6s cubic-bezier(0.22,1,0.36,1)',
-                        }}
-                    >
-                        <div className="sc-blob h-full w-full bg-[radial-gradient(closest-side,rgba(255,40,10,0.5),rgba(255,40,10,0.12)_55%,transparent)]" />
+                {/* Panel negro con la roseta, como la franja de la portada */}
+                <div className="relative hidden min-h-[660px] flex-col overflow-hidden bg-[#0B0B0B] text-white lg:flex">
+                    <div aria-hidden="true" className="absolute -right-6 top-0 h-28 w-56">
+                        <div className="sc-in-right h-full w-full bg-[#D42410] [clip-path:polygon(30%_0,100%_0,100%_100%)]" style={{ animationDelay: '200ms' }} />
                     </div>
-
-                    {/* Tarjetas flotando */}
-                    <div
-                        className="absolute inset-0 flex items-center justify-center [perspective:1000px]"
-                        style={{
-                            transform: 'rotateY(calc(var(--mx) * 18deg)) rotateX(calc(var(--my) * -14deg))',
-                            transition: 'transform 0.9s cubic-bezier(0.22,1,0.36,1)',
-                        }}
-                    >
-                        <div className="sc-bob absolute left-[8%] top-[14%] w-[46%] opacity-70 [animation-delay:-2s]">
-                            <img src="/img/products/card-black.png" alt="" className="w-full rotate-[14deg] drop-shadow-[0_30px_40px_rgba(0,0,0,0.6)]" />
+                    {/* Roseta centrada en el espacio libre del panel */}
+                    <div className="relative flex flex-1 items-center px-10 pt-10">
+                        <div aria-hidden="true" className="absolute left-1/2 top-1/2 h-[560px] w-[560px] -translate-x-1/2 -translate-y-1/2">
+                            <div className="sc-blob h-full w-full bg-[radial-gradient(closest-side,rgba(255,40,10,0.38),transparent)]" />
                         </div>
-                        <div className="sc-float relative w-[72%]">
-                            <img src="/img/products/card-red.png" alt="SpaceCard roja" className="w-full drop-shadow-[0_40px_60px_rgba(255,40,10,0.35)]" />
+                        <div className="relative mx-auto w-full max-w-[440px]">
+                            <CardFan />
+                            {TAGS.map((t, i) => (
+                                <span key={t.label} className={`sc-rise pointer-events-none absolute z-20 ${t.pos}`} style={{ animationDelay: `${900 + i * 160}ms` }}>
+                                    <span className="sc-bob inline-flex items-center gap-2 rounded-full bg-[#D42410] py-1.5 pl-1.5 pr-4 text-sm font-bold text-white shadow-[0_14px_34px_rgba(212,36,16,0.5)]" style={{ animationDelay: t.d }}>
+                                        <span className="relative flex h-8 w-8 items-center justify-center rounded-full bg-white/20">
+                                            <span aria-hidden="true" className="sc-ripple absolute inset-0 rounded-full border-2 border-white/70" />
+                                            <Icon name={t.icon} className="relative text-lg" />
+                                        </span>
+                                        {t.label}
+                                    </span>
+                                </span>
+                            ))}
                         </div>
                     </div>
 
                     {/* Mensaje */}
-                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#0A0A0A] via-[#0A0A0A]/80 to-transparent p-10 pt-24">
-                        <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 py-1.5 pl-2.5 pr-3.5 text-xs font-medium text-neutral-200">
-                            <Icon name="contactless" className="text-base text-[#FF5A3C]" />
-                            NFC · QR · Sin apps
-                        </span>
-                        <p className="mt-4 max-w-sm font-display text-[28px] leading-[1.1] tracking-[-0.03em]">
-                            Tu tarjeta, tu perfil, <span className="text-[#FF5A3C]">siempre al día.</span>
+                    <div className="relative p-10 pt-0">
+                        <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#FF5A3C]">SpaceCard</p>
+                        <p className="mt-3 max-w-sm font-display text-[30px] font-bold leading-[1.05] tracking-[-0.035em]">
+                            La tarjeta que <span className="text-[#FF5A3C]">trabaja por ti</span>
                         </p>
                     </div>
                 </div>

@@ -1,4 +1,4 @@
-import AuthLayout, { Field, Icon, SubmitButton } from '@/Layouts/AuthLayout';
+import AuthLayout, { Field, Highlight, Icon, SubmitButton } from '@/Layouts/AuthLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
 
 export default function Login({ status, canResetPassword }) {
@@ -17,12 +17,12 @@ export default function Login({ status, canResetPassword }) {
     };
 
     return (
-        <AuthLayout mode="login" title="Bienvenido de nuevo" subtitle="Entra para editar tu perfil y ver tus contactos.">
+        <AuthLayout mode="login" kicker="Bienvenido de nuevo" title={<>Entra a tu <Highlight>SpaceCard</Highlight></>} subtitle="Edita tu perfil y revisa tus contactos.">
             <Head title="Entrar" />
 
             {status && (
-                <div className="mb-5 flex items-center gap-2 rounded-2xl border border-emerald-300/20 bg-emerald-300/[0.07] px-4 py-3 text-sm text-emerald-200">
-                    <Icon name="check_circle" className="text-lg text-emerald-300" />
+                <div className="mb-5 flex items-center gap-2 rounded-2xl border border-emerald-600/20 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+                    <Icon name="check_circle" className="text-lg text-emerald-600" />
                     {status}
                 </div>
             )}
@@ -54,18 +54,18 @@ export default function Login({ status, canResetPassword }) {
                 />
 
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                    <label className="flex cursor-pointer items-center gap-2.5 py-1 text-sm text-neutral-400">
+                    <label className="flex cursor-pointer items-center gap-2.5 py-1 text-sm text-neutral-600">
                         <input
                             type="checkbox"
                             name="remember"
                             checked={data.remember}
                             onChange={(e) => setData('remember', e.target.checked)}
-                            className="h-[18px] w-[18px] rounded-md border-white/20 bg-white/5 text-[#D42410] focus:ring-[#FF5A3C] focus:ring-offset-0"
+                            className="h-[18px] w-[18px] rounded-md border-black/20 bg-white text-[#D42410] focus:ring-[#D42410] focus:ring-offset-0"
                         />
                         Recordarme
                     </label>
                     {canResetPassword && (
-                        <Link href={route('password.request')} className="py-1 text-sm font-medium text-[#FF5A3C] transition hover:text-white">
+                        <Link href={route('password.request')} className="py-1 text-sm font-semibold text-[#D42410] transition hover:text-[#B81E0C]">
                             ¿Olvidaste tu contraseña?
                         </Link>
                     )}
@@ -75,9 +75,9 @@ export default function Login({ status, canResetPassword }) {
                     <SubmitButton processing={processing}>Entrar</SubmitButton>
                 </div>
 
-                <p className="text-center text-sm text-neutral-400">
+                <p className="text-center text-sm text-neutral-600">
                     ¿No tienes cuenta?{' '}
-                    <Link href={route('register')} className="font-medium text-[#FF5A3C] transition hover:text-white">
+                    <Link href={route('register')} className="font-semibold text-[#D42410] transition hover:text-[#B81E0C]">
                         Crea una gratis
                     </Link>
                 </p>

@@ -22,21 +22,26 @@
     font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
 
-/* Campos del login/registro: el autocompletado del navegador pinta un fondo
-   claro y texto negro; lo forzamos al estilo oscuro del campo. */
+/* Campos del login/registro: el autocompletado del navegador pinta su propio
+   fondo celeste; lo forzamos al fondo claro del campo (blanco al enfocarlo). */
 .sc-input:-webkit-autofill,
 .sc-input:-webkit-autofill:hover,
-.sc-input:-webkit-autofill:focus,
 .sc-input:-webkit-autofill:active {
-    -webkit-text-fill-color: #ffffff;
-    caret-color: #ffffff;
-    -webkit-box-shadow: 0 0 0 1000px #161616 inset;
-    box-shadow: 0 0 0 1000px #161616 inset;
+    -webkit-text-fill-color: #171717;
+    caret-color: #171717;
+    -webkit-box-shadow: 0 0 0 1000px #fafafa inset;
+    box-shadow: 0 0 0 1000px #fafafa inset;
     transition: background-color 9999s ease-out 0s;
+}
+.sc-input:-webkit-autofill:focus {
+    -webkit-text-fill-color: #171717;
+    caret-color: #171717;
+    -webkit-box-shadow: 0 0 0 1000px #ffffff inset;
+    box-shadow: 0 0 0 1000px #ffffff inset;
 }
 .sc-input:autofill {
     background-color: transparent;
-    color: #ffffff;
+    color: #171717;
 }
 
 /* ---- Animaciones orgánicas (ligeras) ----

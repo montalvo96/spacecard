@@ -1,4 +1,4 @@
-import AuthLayout, { Field, SubmitButton } from '@/Layouts/AuthLayout';
+import AuthLayout, { Field, Highlight, SubmitButton } from '@/Layouts/AuthLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
 
 export default function Register() {
@@ -18,7 +18,7 @@ export default function Register() {
     };
 
     return (
-        <AuthLayout mode="register" title="Empieza ahora" subtitle="Crea tu cuenta y arma tu perfil digital en minutos.">
+        <AuthLayout mode="register" kicker="Crea tu cuenta" title={<>Empieza <Highlight>ahora</Highlight></>} subtitle="Crea tu cuenta y arma tu perfil digital en minutos.">
             <Head title="Crear cuenta" />
 
             <form onSubmit={submit} className="flex flex-col gap-4">
@@ -78,9 +78,9 @@ export default function Register() {
                     <SubmitButton processing={processing}>Crear cuenta</SubmitButton>
                 </div>
 
-                <p className="text-center text-sm text-neutral-400">
+                <p className="text-center text-sm text-neutral-600">
                     ¿Ya tienes cuenta?{' '}
-                    <Link href={route('login')} className="font-medium text-[#FF5A3C] transition hover:text-white">
+                    <Link href={route('login')} className="font-semibold text-[#D42410] transition hover:text-[#B81E0C]">
                         Entra aquí
                     </Link>
                 </p>
