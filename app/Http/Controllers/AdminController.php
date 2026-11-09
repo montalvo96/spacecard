@@ -35,6 +35,8 @@ class AdminController extends Controller
                 'devices as printed_count' => fn ($q) => $q->whereNotNull('printed_at'),
                 'devices as shipped_count' => fn ($q) => $q->whereNotNull('shipped_at'),
                 'devices as claimed_count' => fn ($q) => $q->where('status', 'claimed'),
+                // Utilizadas: marcadas a mano en el checklist o ya reclamadas por un cliente.
+                'devices as used_count' => fn ($q) => $q->where(fn ($w) => $w->whereNotNull('used_at')->orWhere('status', 'claimed')),
             ])
             ->orderBy('created_at', 'desc')
             ->get();
@@ -85,7 +87,8 @@ class AdminController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'type' => 'required|string|in:card,bracelet,review_plate,sticker,keychain',
+            // Solo los tres productos que se venden: tarjeta, pulsera y placa de reseñas.
+            'type' => 'required|string|in:card,bracelet,review_plate',
             'quantity' => 'required|integer|min:1|max:1000',
             'notes' => 'nullable|string',
         ]);
@@ -215,11 +218,13 @@ class AdminController extends Controller
 
         // 2. Generar archivo CSV en memoria
         $csvContent = [];
-        $csvContent[] = 'Code,NFC_URL,Type';
+        $csvContent[] = "\xEF\xBB\xBF" . 'Codigo,Enlace NFC,Tipo,Utilizada,Nota';
 
         foreach ($devices as $device) {
             $nfcUrl = route('devices.resolve', ['code' => $device->code]);
-            $csvContent[] = sprintf('"%s","%s","%s"', $device->code, $nfcUrl, $device->type);
+            $used = $device->used_at || $device->status === 'claimed';
+            $csvContent[] = sprintf('"%s","%s","%s","%s","%s"', $device->code, $nfcUrl, $device->type,
+                $used ? 'Sí' : 'No', str_replace('"', '""', (string) $device->used_note));
 
             // 3. Generar y adjuntar códigos QR (PNG) si aplica
             if ($device->has_qr) {
@@ -245,6 +250,79 @@ class AdminController extends Controller
 
         // 4. Retornar el ZIP como descarga y eliminar el temporal tras enviar
         return response()->download($zipPath, $zipFileName)->deleteFileAfterSend(true);
+    }
+
+    /** Datos de una tarjeta para el checklist del lote. */
+    private function checklistRow(Device $d): array
+    {
+        return [
+            'id'        => $d->id,
+            'code'      => $d->code,
+            'has_qr'    => (bool) $d->has_qr,
+            'nfc_url'   => route('devices.resolve', ['code' => $d->code]),
+            'status'    => $d->status,
+            'printed'   => (bool) $d->printed_at,
+            'shipped'   => (bool) $d->shipped_at,
+            'claimed'   => $d->status === 'claimed',
+            'owner'     => $d->owner?->name,
+            'used'      => (bool) $d->used_at || $d->status === 'claimed',
+            'used_at'   => $d->used_at?->format('d/m/Y H:i'),
+            'used_note' => $d->used_note,
+        ];
+    }
+
+    /**
+     * Checklist de un lote: cada tarjeta con su enlace NFC, su QR y si ya se utilizó.
+     */
+    public function batchDevices(int $id)
+    {
+        $batch = DeviceBatch::findOrFail($id);
+
+        return response()->json(
+            $batch->devices()->with('owner:id,name')->orderBy('id')->get()->map(fn ($d) => $this->checklistRow($d))
+        );
+    }
+
+    /**
+     * Sella una tarjeta como utilizada (entregada/asignada), con una nota opcional.
+     * Es definitivo: funciona como sello de autenticidad, así que una tarjeta ya
+     * utilizada (o reclamada por un cliente) no se puede desmarcar ni reutilizar.
+     */
+    public function toggleDeviceUsed(Request $request, int $id)
+    {
+        $data = $request->validate([
+            'note' => 'nullable|string|max:255',
+        ]);
+        $device = Device::with('owner:id,name')->findOrFail($id);
+
+        if ($device->used_at || $device->status === 'claimed') {
+            return response()->json([
+                'message' => "La tarjeta {$device->code} ya fue utilizada y no se puede volver a usar.",
+                'device'  => $this->checklistRow($device),
+            ], 409);
+        }
+
+        $device->forceFill([
+            'used_at'   => now(),
+            'used_note' => $data['note'] ?? null,
+        ])->save();
+
+        return response()->json($this->checklistRow($device));
+    }
+
+    /**
+     * Descarga el QR de una tarjeta en PNG (alta resolución, listo para imprimir).
+     */
+    public function deviceQr(int $id)
+    {
+        $device = Device::findOrFail($id);
+        $png = QrCode::format('png')->size(1000)->margin(2)
+            ->generate(route('devices.resolve', ['code' => $device->code]));
+
+        return response((string) $png, 200, [
+            'Content-Type'        => 'image/png',
+            'Content-Disposition' => 'attachment; filename="' . $device->code . '.png"',
+        ]);
     }
 
     /**

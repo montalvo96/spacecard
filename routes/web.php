@@ -76,6 +76,10 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::post('/admin/batches/{id}/printed', [AdminController::class, 'markBatchPrinted'])->name('admin.batches.printed');
     Route::post('/admin/batches/{id}/shipped', [AdminController::class, 'markBatchShipped'])->name('admin.batches.shipped');
     Route::post('/admin/devices/{id}/status', [AdminController::class, 'toggleDeviceStatus'])->name('admin.devices.status');
+    // Checklist de uso por tarjeta dentro de un lote.
+    Route::get('/admin/batches/{id}/devices', [AdminController::class, 'batchDevices'])->name('admin.batches.devices');
+    Route::post('/admin/devices/{id}/used', [AdminController::class, 'toggleDeviceUsed'])->name('admin.devices.used');
+    Route::get('/admin/devices/{id}/qr.png', [AdminController::class, 'deviceQr'])->name('admin.devices.qr');
     Route::post('/admin/users/{id}/plan', [AdminController::class, 'updateUserPlan'])->name('admin.users.plan');
     Route::post('/admin/orders/{id}/generate', [AdminController::class, 'generateDevicesFromOrder'])->name('admin.orders.generate');
 

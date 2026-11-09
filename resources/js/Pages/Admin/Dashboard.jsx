@@ -8,10 +8,16 @@
 
 import React, { useState } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import BatchChecklist from '@/Components/BatchChecklist';
 import { Head, router } from '@inertiajs/react';
+
+// Solo se fabrican tres productos.
+const TYPE_LABELS = { card: 'Tarjeta', bracelet: 'Pulsera', review_plate: 'Placa de reseñas' };
 
 export default function AdminDashboard({ batches, users, orders, stats, currentUserId }) {
     const [activeTab, setActiveTab] = useState('batches');
+    const [openBatch, setOpenBatch] = useState(null);      // lote con el checklist abierto
+    const [usedCounts, setUsedCounts] = useState({});      // utilizadas, actualizadas en vivo
 
     // Formulario de Lote Manual
     const [name, setName] = useState('');
@@ -173,17 +179,15 @@ export default function AdminDashboard({ batches, users, orders, stats, currentU
                                         </div>
                                         <div className="grid grid-cols-2 gap-4">
                                             <div>
-                                                <label className="block text-xs font-medium text-gray-500 mb-1">Tipo de Tag</label>
+                                                <label className="block text-xs font-medium text-gray-500 mb-1">Tipo de producto</label>
                                                 <select
                                                     value={type}
                                                     onChange={(e) => setType(e.target.value)}
                                                     className="w-full p-3 text-sm rounded-md border border-gray-200 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                                 >
-                                                    <option value="card">Tarjeta (Card)</option>
-                                                    <option value="bracelet">Pulsera (Bracelet)</option>
-                                                    <option value="review_plate">Placa de Reseñas</option>
-                                                    <option value="sticker">Sticker</option>
-                                                    <option value="keychain">Llavero (Keychain)</option>
+                                                    <option value="card">Tarjeta</option>
+                                                    <option value="bracelet">Pulsera</option>
+                                                    <option value="review_plate">Placa de reseñas</option>
                                                 </select>
                                             </div>
                                             <div>
@@ -227,53 +231,78 @@ export default function AdminDashboard({ batches, users, orders, stats, currentU
                                             <div className="py-8 text-center text-gray-400 text-sm">Sin lotes.</div>
                                         ) : (
                                             <div className="space-y-4">
-                                                {batches.map((batch) => (
+                                                {batches.map((batch) => {
+                                                    const total = batch.devices_count ?? batch.quantity;
+                                                    const usedN = usedCounts[batch.id] ?? batch.used_count ?? 0;
+                                                    const open = openBatch === batch.id;
+                                                    const pill = 'inline-flex items-center gap-1 px-2 py-1 rounded-lg';
+                                                    return (
                                                     <div key={batch.id} className="p-4 bg-gray-50 dark:bg-gray-900/40 border border-gray-100 dark:border-gray-700 rounded-lg space-y-3">
                                                         <div className="flex justify-between items-start gap-4">
                                                             <div>
                                                                 <h4 className="font-semibold text-sm text-gray-900 dark:text-white">{batch.name}</h4>
                                                                 <p className="text-xs text-gray-400">
-                                                                    Tipo: <span className="capitalize">{batch.type}</span> • Cantidad: {batch.quantity} • Creador: {batch.creator?.name}
+                                                                    Tipo: {TYPE_LABELS[batch.type] ?? batch.type} • Cantidad: {batch.quantity} • Creador: {batch.creator?.name}
                                                                 </p>
                                                             </div>
                                                         </div>
 
-                                                        {/* Pipeline de producción */}
+                                                        {/* Pipeline de producción + uso */}
                                                         <div className="flex flex-wrap gap-2 text-[11px]">
-                                                            <span className="px-2 py-1 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300">
-                                                                🖨️ Impresas: <strong>{batch.printed_count ?? 0}/{batch.devices_count ?? batch.quantity}</strong>
+                                                            <span className={`${pill} bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300`}>
+                                                                <span aria-hidden="true" className="ms text-sm">print</span> Impresas: <strong>{batch.printed_count ?? 0}/{total}</strong>
                                                             </span>
-                                                            <span className="px-2 py-1 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300">
-                                                                📦 Enviadas: <strong>{batch.shipped_count ?? 0}/{batch.devices_count ?? batch.quantity}</strong>
+                                                            <span className={`${pill} bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300`}>
+                                                                <span aria-hidden="true" className="ms text-sm">local_shipping</span> Enviadas: <strong>{batch.shipped_count ?? 0}/{total}</strong>
                                                             </span>
-                                                            <span className="px-2 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-950/30 text-indigo-700 dark:text-indigo-300">
-                                                                ✅ Reclamadas: <strong>{batch.claimed_count ?? 0}/{batch.devices_count ?? batch.quantity}</strong>
+                                                            <span className={`${pill} bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300`}>
+                                                                <span aria-hidden="true" className="ms text-sm">verified_user</span> Reclamadas: <strong>{batch.claimed_count ?? 0}/{total}</strong>
+                                                            </span>
+                                                            <span className={`${pill} bg-[#D42410] text-white`}>
+                                                                <span aria-hidden="true" className="ms text-sm">check_circle</span> Utilizadas: <strong>{usedN}/{total}</strong>
                                                             </span>
                                                         </div>
 
-                                                        {/* Acciones: exportar (para imprenta), marcar impreso, marcar enviado */}
+                                                        {/* Acciones: checklist, exportar (para imprenta), marcar impreso, marcar enviado */}
                                                         <div className="flex flex-wrap gap-2">
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setOpenBatch(open ? null : batch.id)}
+                                                                aria-expanded={open}
+                                                                className="inline-flex items-center gap-1.5 px-3 py-2 bg-[#D42410] hover:bg-[#B81E0C] text-white rounded-md text-xs font-semibold"
+                                                            >
+                                                                <span aria-hidden="true" className="ms text-base">{open ? 'keyboard_arrow_up' : 'checklist'}</span>
+                                                                {open ? 'Ocultar checklist' : 'Checklist de tarjetas'}
+                                                            </button>
                                                             <a
                                                                 href={`/admin/batches/${batch.id}/export`}
-                                                                className="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md text-xs font-semibold shadow-md shadow-emerald-500/10"
+                                                                className="inline-flex items-center gap-1.5 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md text-xs font-semibold shadow-md shadow-emerald-500/10"
                                                             >
-                                                                ⬇️ Exportar ZIP (QR + NFC)
+                                                                <span aria-hidden="true" className="ms text-base">download</span> Exportar ZIP (QR PNG + NFC)
                                                             </a>
                                                             <button
                                                                 onClick={() => handleMarkPrinted(batch)}
-                                                                className="px-3 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 rounded-md text-xs font-semibold"
+                                                                className="inline-flex items-center gap-1.5 px-3 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 rounded-md text-xs font-semibold"
                                                             >
-                                                                🖨️ Marcar impreso
+                                                                <span aria-hidden="true" className="ms text-base">print</span> Marcar impreso
                                                             </button>
                                                             <button
                                                                 onClick={() => handleMarkShipped(batch)}
-                                                                className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-xs font-semibold"
+                                                                className="inline-flex items-center gap-1.5 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-xs font-semibold"
                                                             >
-                                                                📦 Marcar enviado
+                                                                <span aria-hidden="true" className="ms text-base">local_shipping</span> Marcar enviado
                                                             </button>
                                                         </div>
+
+                                                        {open && (
+                                                            <BatchChecklist
+                                                                batch={batch}
+                                                                onUsedChange={(n) => setUsedCounts((c) => ({ ...c, [batch.id]: n }))}
+                                                            />
+                                                        )}
                                                     </div>
-                                                ))}
+                                                    );
+                                                })}
                                             </div>
                                         )}
                                     </div>

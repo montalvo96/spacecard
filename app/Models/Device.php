@@ -24,6 +24,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'claimed_at',
     'printed_at',
     'shipped_at',
+    'used_at',
+    'used_note',
     'qr_generated_at',
     'destination_type',
     'external_url',
@@ -51,6 +53,7 @@ class Device extends Model
             'claimed_at' => 'datetime',
             'printed_at' => 'datetime',
             'shipped_at' => 'datetime',
+            'used_at' => 'datetime',
             'qr_generated_at' => 'datetime',
         ];
     }
