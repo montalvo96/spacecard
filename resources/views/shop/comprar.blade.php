@@ -824,6 +824,11 @@
         .cart-panel { background: #FFFFFF; }
         .cart-item, .cart-total-row { border-top-color: rgba(0, 0, 0, 0.07); }
         .cart-remove:hover { background: rgba(212, 36, 16, 0.08); }
+
+        .shop-alert { display: flex; gap: 10px; align-items: flex-start; margin: -8px 0 22px; padding: 14px 16px; border-radius: 16px; background: #FFF4F2; border: 1px solid rgba(212, 36, 16, 0.25); color: #B81E0C; font-size: 13px; line-height: 1.5; animation: sc-swap .6s var(--ease) both; }
+        .shop-alert .ms { font-size: 20px; color: var(--primary); }
+        .shop-alert strong { display: block; color: #8F1809; }
+        .logo-note { display: block; margin-top: 6px; font-size: 12px; color: var(--text-muted); }
     </style>
 </head>
 <body>
@@ -930,7 +935,19 @@
             <span class="form-kicker">SpaceShop</span>
             <h2 class="form-title">Configura tu<br><span>dispositivo</span></h2>
 
-            <form action="{{ route('shop.checkout') }}" method="POST" enctype="multipart/form-data" id="checkout-form" onsubmit="return prepareCheckout()">
+            {{-- Si la compra no se pudo guardar, se dice por qué (antes regresaba sin avisar). --}}
+            @if (session('error') || $errors->any())
+                <div class="shop-alert" role="alert">
+                    <span class="ms" aria-hidden="true">error</span>
+                    <div>
+                        <strong>No pudimos guardar tu pedido.</strong>
+                        @if (session('error'))<p>{{ session('error') }}</p>@endif
+                        @foreach ($errors->all() as $message)<p>{{ $message }}</p>@endforeach
+                    </div>
+                </div>
+            @endif
+
+            <form action="{{ route('shop.checkout') }}" method="POST" id="checkout-form" onsubmit="return prepareCheckout()">
                 @csrf
                 <input type="hidden" name="product_type" id="product_type" value="card">
                 <input type="hidden" id="color_primary" value="#D42410">
@@ -1037,7 +1054,7 @@
                         <div class="file-upload-zone">
                             <span class="ms" aria-hidden="true">cloud_upload</span>
                             <span class="file-upload-text">Sube tu logo · <strong>clic para buscar</strong></span>
-                            <input type="file" name="logo" id="logo_input" class="file-input" accept="image/*" onchange="previewLogo(this)">
+                            <input type="file" id="logo_input" class="file-input" accept="image/*" onchange="previewLogo(this)">
                         </div>
                         <div class="el-row"><span>Cara</span>
                             <select id="logo-side" class="el-select" onchange="setElSide('logo', this.value)">
@@ -1117,7 +1134,7 @@
                         <div class="file-upload-zone">
                             <span class="ms" aria-hidden="true">cloud_upload</span>
                             <span class="file-upload-text">Sube tu logo para grabarlo al pie de la placa <strong>haz clic aquí</strong></span>
-                            <input type="file" name="logo_plate" id="logo_plate_input" class="file-input" accept="image/*" onchange="previewLogo(this, 'plate')">
+                            <input type="file" id="logo_plate_input" class="file-input" accept="image/*" onchange="previewLogo(this, 'plate')">
                         </div>
                     </div>
                 </div>
@@ -1358,23 +1375,62 @@
             document.querySelectorAll('[data-align]').forEach(x => x.classList.toggle('active', x.dataset.align===a));
             render();
         }
-        function previewLogo(input, type){
+        /* El logo se optimiza aquí antes de guardarlo: fotos de varios MB o SVG
+           se convierten a un PNG de máximo 1200 px (con transparencia), que pesa
+           poco y se imprime nítido en una tarjeta. Antes un logo pesado hacía
+           que el pedido no se guardara o que el logo se perdiera sin avisar. */
+        const LOGO_MAX = 1200;
+        function optimizeLogo(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onerror = () => reject(new Error('read'));
+                reader.onload = e => {
+                    const img = new Image();
+                    img.onerror = () => reject(new Error('decode'));
+                    img.onload = () => {
+                        // SVG sin tamaño propio: se toma 1200 px de ancho.
+                        let w = img.naturalWidth || LOGO_MAX, h = img.naturalHeight || Math.round(LOGO_MAX * 0.62);
+                        const scale = Math.min(1, LOGO_MAX / Math.max(w, h));
+                        w = Math.max(1, Math.round(w * scale)); h = Math.max(1, Math.round(h * scale));
+                        const c = document.createElement('canvas'); c.width = w; c.height = h;
+                        c.getContext('2d').drawImage(img, 0, 0, w, h);
+                        let out = c.toDataURL('image/png');
+                        // Fotos muy detalladas: si el PNG sigue pesado, JPG de alta calidad
+                        // sobre blanco (una foto no tiene transparencia que perder).
+                        if (out.length > 2.5 * 1024 * 1024) {
+                            const j = document.createElement('canvas'); j.width = w; j.height = h;
+                            const jc = j.getContext('2d'); jc.fillStyle = '#fff'; jc.fillRect(0, 0, w, h); jc.drawImage(c, 0, 0);
+                            out = j.toDataURL('image/jpeg', 0.9);
+                        }
+                        resolve(out);
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function previewLogo(input, type){
             const file = input.files[0]; if (!file) return;
-            const reader = new FileReader();
-            reader.onload = e => {
-                if (type === 'plate') {
-                    const img = $('mockup-plate-logo-img');
-                    img.src = e.target.result; img.style.display = 'block';
-                    $('mockup-plate-logo-dummy').style.display = 'none';
-                } else {
-                    const img = $('el-logo-img');
-                    img.src = e.target.result; img.style.display = 'block';
-                    $('el-logo-dummy').style.display = 'none';
-                    D.el.logo.hasImg = true;
-                    render();
-                }
-            };
-            reader.readAsDataURL(file);
+            let dataUrl;
+            try {
+                dataUrl = await optimizeLogo(file);
+            } catch (err) {
+                alert('No pudimos leer esa imagen. Prueba con un PNG, JPG o SVG.');
+                input.value = '';
+                return;
+            }
+            if (type === 'plate') {
+                const img = $('mockup-plate-logo-img');
+                img.src = dataUrl; img.style.display = 'block';
+                $('mockup-plate-logo-dummy').style.display = 'none';
+            } else {
+                const img = $('el-logo-img');
+                img.src = dataUrl; img.style.display = 'block';
+                $('el-logo-dummy').style.display = 'none';
+                D.el.logo.hasImg = true;
+                render();
+            }
         }
 
         /* ---- Arrastrar elementos ---- */

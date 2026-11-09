@@ -47,6 +47,13 @@ class ShopController extends Controller
             'customer_email' => 'required|email|max:255',
             'shipping_address' => 'required|string',
             'cart' => 'required|string|max:12000000',
+        ], [
+            'customer_name.required'    => 'Escribe tu nombre completo.',
+            'customer_email.required'   => 'Escribe tu correo electrónico.',
+            'customer_email.email'      => 'El correo electrónico no es válido.',
+            'shipping_address.required' => 'Escribe la dirección de entrega.',
+            'cart.required'             => 'Tu carrito está vacío.',
+            'cart.max'                  => 'Tu diseño es demasiado pesado. Prueba con un logo más ligero.',
         ]);
 
         $cart = json_decode($request->input('cart'), true);
@@ -55,6 +62,14 @@ class ShopController extends Controller
         }
         if (count($cart) > 50) {
             return redirect()->back()->with('error', 'El carrito supera el máximo de artículos.')->withInput();
+        }
+
+        // Un logo que no se puede guardar se avisa, en vez de perderse en silencio.
+        foreach ($cart as $ci) {
+            $logo = $ci['logo_data'] ?? null;
+            if ($logo && $this->storeLogoData($logo, dryRun: true) === null) {
+                return redirect()->back()->with('error', 'El logo que subiste no es válido o pesa más de 4 MB. Prueba con un PNG, JPG o SVG más ligero.');
+            }
         }
 
         try {
@@ -121,7 +136,7 @@ class ShopController extends Controller
     /**
      * Guarda un logo recibido como data URL base64 y devuelve su URL pública.
      */
-    protected function storeLogoData(?string $dataUrl): ?string
+    protected function storeLogoData(?string $dataUrl, bool $dryRun = false): ?string
     {
         if (!$dataUrl || !preg_match('/^data:image\/([a-zA-Z0-9.+-]+);base64,/', $dataUrl, $m)) {
             return null;
@@ -136,6 +151,10 @@ class ShopController extends Controller
         $data = base64_decode(substr($dataUrl, strpos($dataUrl, ',') + 1), true);
         if ($data === false || strlen($data) > 4 * 1024 * 1024) {
             return null; // inválido o mayor a 4MB
+        }
+
+        if ($dryRun) {
+            return 'ok'; // solo se comprobó que es válido
         }
 
         $path = 'logos/' . Str::uuid() . '.' . $ext;
