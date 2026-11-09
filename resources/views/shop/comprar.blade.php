@@ -696,6 +696,134 @@
         .cart-remove .ms { font-size: 20px; }
         .cart-total-row { display:flex; justify-content:space-between; align-items:center; margin-top:12px; padding-top:12px; border-top:1px solid rgba(255,255,255,.07); font-family: var(--font-title); font-weight:600; font-size:18px; color:var(--text-light); }
         .btn-checkout:disabled { opacity:.5; cursor:not-allowed; }
+
+        /* =====================================================================
+           Tema claro, como la portada: página blanca, formulario en tarjeta
+           blanca y la vista previa en un panel negro (la "franja negra").
+           Las variables se redefinen: claras en la página, oscuras dentro del
+           panel de vista previa, así cada lado conserva su contraste.
+           ===================================================================== */
+        :root {
+            --primary-text: #D42410;
+            --bg-dark: #F6F6F7;
+            --card-dark: #FFFFFF;
+            --border-color: rgba(0, 0, 0, 0.09);
+            --text-light: #171717;
+            --text-muted: #6B6B6B;
+        }
+        .preview-column {
+            --primary-text: #FF5A3C;
+            --bg-dark: #0B0B0B;
+            --border-color: rgba(255, 255, 255, 0.10);
+            --text-light: #F5F5F5;
+            --text-muted: #A3A3A3;
+            color: var(--text-light);
+            background: #0B0B0B;
+            border: none;
+            box-shadow: 0 30px 70px rgba(0, 0, 0, 0.18);
+        }
+        /* Esquina roja del panel negro, como en la portada */
+        .preview-column::before {
+            content: '';
+            position: absolute;
+            right: -24px;
+            top: 0;
+            width: 200px;
+            height: 96px;
+            background: var(--primary);
+            clip-path: polygon(30% 0, 100% 0, 100% 100%);
+            z-index: -1;
+        }
+        .preview-column .side-btn:hover, .preview-column .seg-btn:hover { color: #fff; }
+
+        body { background: linear-gradient(90deg, #FFFFFF 40%, #F4F4F5); }
+
+        header {
+            background-color: rgba(255, 255, 255, 0.96);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+        }
+        .logo { color: #171717; }
+        .header-meta { background: #fff; }
+        .header-meta a:hover { color: #171717; }
+
+        .form-column {
+            border: 1px solid rgba(0, 0, 0, 0.07);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+        }
+        /* Etiqueta en rojo y mayúsculas, como los "kickers" de la portada */
+        .form-kicker {
+            padding: 0;
+            background: none;
+            color: var(--primary);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+        }
+        /* Titular en negrita con la palabra clave en el bloque rojo inclinado */
+        .form-title { font-weight: 700; line-height: 1.05; letter-spacing: -0.035em; color: #171717; }
+        .form-title span {
+            position: relative;
+            display: inline-block;
+            margin-top: 6px;
+            padding: 0 12px;
+            color: #fff;
+            isolation: isolate;
+        }
+        .form-title span::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            z-index: -1;
+            border-radius: 6px;
+            background: var(--primary);
+            transform: skewX(-12deg);
+            box-shadow: 0 10px 24px rgba(212, 36, 16, 0.35);
+        }
+        .config-title { font-weight: 700; color: #171717; }
+        .config-section { border-top-color: rgba(0, 0, 0, 0.07); }
+
+        .form-input, select, textarea, .el-select, .mini-input, .color-picker-wrapper {
+            background-color: #FAFAFA;
+            color: #171717;
+        }
+        .form-input:hover, select:hover, textarea:hover { border-color: rgba(0, 0, 0, 0.25); }
+        .form-input:focus, select:focus, textarea:focus {
+            background-color: #FFFFFF;
+            box-shadow: 0 0 0 4px rgba(212, 36, 16, 0.12);
+        }
+
+        .product-option-card { background-color: #FFFFFF; }
+        .product-option-card:hover { border-color: rgba(0, 0, 0, 0.25); }
+        .product-option-card.active {
+            border-color: var(--primary);
+            background-color: #FFF4F2;
+            box-shadow: 0 10px 24px rgba(212, 36, 16, 0.12);
+        }
+        .product-opt-title { color: #171717; }
+
+        .file-upload-zone { background-color: #FAFAFA; border-color: rgba(0, 0, 0, 0.16); }
+        .file-upload-zone:hover { background-color: #FFF4F2; }
+
+        .bracelet-color-btn { border-color: rgba(0, 0, 0, 0.15); }
+        .bracelet-color-btn.active { box-shadow: 0 0 0 3px #fff, 0 0 0 5px #171717; }
+
+        .seg { background: #F2F2F3; }
+        .seg-btn:hover { color: #171717; }
+        .seg-btn.active { box-shadow: 0 6px 16px rgba(212, 36, 16, 0.3); }
+        .el-card { background: #FFFFFF; }
+        .el-card:hover { border-color: rgba(0, 0, 0, 0.2); }
+        .switch .slider { background: #E5E5E5; }
+        .color-picker::-webkit-color-swatch { border-color: rgba(0, 0, 0, 0.15); }
+
+        .preset-note { background: #ECFDF5; border-color: rgba(5, 150, 105, 0.2); color: #065F46; }
+        .preset-note .ms { color: #059669; }
+
+        .btn-add-cart { background: #FFF4F2; border-color: rgba(212, 36, 16, 0.45); }
+        .btn-add-cart:hover { background: #FFE8E3; }
+        .cart-panel { background: #FFFFFF; }
+        .cart-item, .cart-total-row { border-top-color: rgba(0, 0, 0, 0.07); }
+        .cart-remove:hover { background: rgba(212, 36, 16, 0.08); }
     </style>
 </head>
 <body>

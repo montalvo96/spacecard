@@ -1,6 +1,7 @@
 /**
  * Layout del área privada (panel, perfil, admin) con la identidad de la
- * landing: negro, acento rojo, navegación en píldora e iconos Material Symbols.
+ * portada: fondo blanco, navegación blanca con subrayado rojo, botones en
+ * píldora roja e iconos Material Symbols.
  */
 
 import BrandLogo from '@/Components/BrandLogo';
@@ -24,25 +25,23 @@ export default function AuthenticatedLayout({ header, children }) {
     const initial = (user?.name || '?').trim().charAt(0).toUpperCase();
 
     return (
-        <div className="relative min-h-screen overflow-x-clip bg-[#070707] font-inter text-neutral-100">
-            {/* Luz de fondo */}
-            <div aria-hidden="true" className="sc-blob pointer-events-none absolute -right-40 -top-56 h-[560px] w-[560px] bg-[radial-gradient(closest-side,rgba(255,40,10,0.22),transparent)]" />
-
-            <nav className="sticky top-0 z-40 border-b border-white/[0.07] bg-[#070707]/95">
+        <div className="relative min-h-screen overflow-x-clip bg-[#F6F6F7] font-inter text-neutral-900 antialiased">
+            <nav className="sticky top-0 z-40 border-b border-black/[0.06] bg-white/95">
                 <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
                     <Link href="/">
-                        <BrandLogo />
+                        <BrandLogo className="h-7" />
                     </Link>
 
-                    <div className="hidden items-center gap-0.5 rounded-full border border-white/10 bg-white/[0.03] p-1 sm:flex">
+                    {/* Enlaces con el subrayado rojo de la portada */}
+                    <div className="hidden items-center gap-7 sm:flex">
                         {links.map((l) => (
                             <Link
                                 key={l.label}
                                 href={l.href}
                                 aria-current={l.active ? 'page' : undefined}
-                                className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[13px] font-semibold transition duration-300 ${l.active ? 'bg-[#D42410] text-white shadow-[0_4px_14px_rgba(255,40,10,0.35)]' : 'text-neutral-300 hover:bg-white/5 hover:text-white'}`}
+                                className={`relative inline-flex items-center gap-1.5 py-2 text-sm font-semibold transition after:absolute after:-bottom-0.5 after:left-0 after:h-0.5 after:w-full after:origin-left after:rounded-full after:bg-[#D42410] after:transition after:duration-300 ${l.active ? 'text-neutral-900 after:scale-x-100' : 'text-neutral-500 after:scale-x-0 hover:text-neutral-900 hover:after:scale-x-100'}`}
                             >
-                                <Icon name={l.icon} className="text-[18px]" />
+                                <Icon name={l.icon} className={`text-[19px] ${l.active ? 'text-[#D42410]' : ''}`} />
                                 {l.label}
                             </Link>
                         ))}
@@ -53,24 +52,24 @@ export default function AuthenticatedLayout({ header, children }) {
                             <Dropdown.Trigger>
                                 <button
                                     type="button"
-                                    className="group flex items-center gap-2.5 rounded-full border border-white/10 bg-white/[0.03] py-1 pl-1 pr-3 text-sm font-medium text-neutral-200 transition hover:border-white/20 hover:bg-white/[0.06]"
+                                    className="group flex items-center gap-2.5 rounded-full border border-black/10 bg-white py-1 pl-1 pr-3 text-sm font-semibold text-neutral-800 transition hover:border-black/25"
                                 >
-                                    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#D42410]/15 font-display text-sm font-semibold text-[#FF5A3C]">{initial}</span>
+                                    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#D42410] font-display text-sm font-bold text-white">{initial}</span>
                                     {user.name}
                                     <Icon name="expand_more" className="text-lg text-neutral-400 transition duration-300 group-hover:translate-y-0.5" />
                                 </button>
                             </Dropdown.Trigger>
 
-                            <Dropdown.Content contentClasses="py-1.5 bg-[#141414] border border-white/10 rounded-2xl" width="56">
-                                <div className="border-b border-white/[0.07] px-4 pb-2.5 pt-1.5">
-                                    <div className="truncate text-sm font-semibold text-white">{user.name}</div>
-                                    <div className="truncate text-xs text-neutral-400">{user.email}</div>
+                            <Dropdown.Content contentClasses="py-1.5 bg-white rounded-2xl ring-1 ring-black/5" width="56">
+                                <div className="border-b border-black/[0.06] px-4 pb-2.5 pt-1.5">
+                                    <div className="truncate text-sm font-semibold text-neutral-900">{user.name}</div>
+                                    <div className="truncate text-xs text-neutral-500">{user.email}</div>
                                 </div>
-                                <Dropdown.Link href={route('profile.edit')} className="!flex items-center gap-2 !text-neutral-200 hover:!bg-white/5">
+                                <Dropdown.Link href={route('profile.edit')} className="!flex items-center gap-2 !text-neutral-700 hover:!bg-neutral-100">
                                     <Icon name="person" className="text-lg text-neutral-400" />
                                     Mi perfil
                                 </Dropdown.Link>
-                                <Dropdown.Link href={route('logout')} method="post" as="button" className="!flex items-center gap-2 !text-[#FF8A73] hover:!bg-[#FF3B1F]/10">
+                                <Dropdown.Link href={route('logout')} method="post" as="button" className="!flex items-center gap-2 !text-[#B81E0C] hover:!bg-[#D42410]/[0.07]">
                                     <Icon name="logout" className="text-lg" />
                                     Cerrar sesión
                                 </Dropdown.Link>
@@ -83,7 +82,7 @@ export default function AuthenticatedLayout({ header, children }) {
                         onClick={() => setMenuOpen((o) => !o)}
                         aria-expanded={menuOpen}
                         aria-label={menuOpen ? 'Cerrar menú' : 'Abrir menú'}
-                        className="flex h-11 w-11 items-center justify-center rounded-full border border-white/10 text-neutral-300 transition hover:bg-white/5 sm:hidden"
+                        className="flex h-11 w-11 items-center justify-center rounded-full border border-black/10 text-neutral-700 transition hover:bg-neutral-100 sm:hidden"
                     >
                         <Icon name={menuOpen ? 'close' : 'menu'} className="text-2xl" />
                     </button>
@@ -92,31 +91,31 @@ export default function AuthenticatedLayout({ header, children }) {
                 {/* Menú móvil */}
                 <div className={`grid transition-[grid-template-rows] duration-500 [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] sm:hidden ${menuOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}>
                     <div className="overflow-hidden">
-                        <div className="space-y-1 border-t border-white/[0.07] px-4 py-3">
+                        <div className="space-y-1 border-t border-black/[0.06] px-4 py-3">
                             {links.map((l) => (
                                 <Link
                                     key={l.label}
                                     href={l.href}
-                                    className={`flex items-center gap-3 rounded-2xl px-4 py-3 text-[15px] font-medium ${l.active ? 'bg-[#D42410]/15 text-white' : 'text-neutral-300 hover:bg-white/5'}`}
+                                    className={`flex items-center gap-3 rounded-2xl px-4 py-3 text-[15px] font-semibold ${l.active ? 'bg-[#D42410] text-white' : 'text-neutral-700 hover:bg-neutral-100'}`}
                                 >
-                                    <Icon name={l.icon} className={`text-xl ${l.active ? 'text-[#FF5A3C]' : 'text-neutral-500'}`} />
+                                    <Icon name={l.icon} className={`text-xl ${l.active ? 'text-white' : 'text-neutral-400'}`} />
                                     {l.label}
                                 </Link>
                             ))}
                         </div>
-                        <div className="border-t border-white/[0.07] px-4 py-3">
+                        <div className="border-t border-black/[0.06] px-4 py-3">
                             <div className="flex items-center gap-3 px-4 py-2">
-                                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#D42410]/15 font-display font-semibold text-[#FF5A3C]">{initial}</span>
+                                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#D42410] font-display font-bold text-white">{initial}</span>
                                 <div className="min-w-0">
                                     <div className="truncate text-sm font-semibold">{user.name}</div>
-                                    <div className="truncate text-xs text-neutral-400">{user.email}</div>
+                                    <div className="truncate text-xs text-neutral-500">{user.email}</div>
                                 </div>
                             </div>
-                            <Link href={route('profile.edit')} className="flex items-center gap-3 rounded-2xl px-4 py-3 text-[15px] text-neutral-300 hover:bg-white/5">
-                                <Icon name="person" className="text-xl text-neutral-500" />
+                            <Link href={route('profile.edit')} className="flex items-center gap-3 rounded-2xl px-4 py-3 text-[15px] text-neutral-700 hover:bg-neutral-100">
+                                <Icon name="person" className="text-xl text-neutral-400" />
                                 Mi perfil
                             </Link>
-                            <Link href={route('logout')} method="post" as="button" className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-[15px] text-[#FF8A73] hover:bg-[#FF3B1F]/10">
+                            <Link href={route('logout')} method="post" as="button" className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-[15px] text-[#B81E0C] hover:bg-[#D42410]/[0.07]">
                                 <Icon name="logout" className="text-xl" />
                                 Cerrar sesión
                             </Link>
@@ -126,8 +125,15 @@ export default function AuthenticatedLayout({ header, children }) {
             </nav>
 
             {header && (
-                <header className="relative">
-                    <div className="sc-rise mx-auto max-w-7xl px-4 pb-2 pt-10 sm:px-6 lg:px-8">{header}</div>
+                <header className="relative overflow-hidden border-b border-black/[0.06] bg-gradient-to-r from-white from-45% to-[#F4F4F5]">
+                    {/* Formas de la marca, como en la portada y el acceso */}
+                    <div aria-hidden="true" className="absolute -right-6 top-0 h-24 w-48">
+                        <div className="sc-in-right h-full w-full bg-[#D42410] [clip-path:polygon(30%_0,100%_0,100%_100%)]" />
+                    </div>
+                    <div aria-hidden="true" className="absolute -left-10 bottom-0 h-20 w-40">
+                        <div className="sc-in-left h-full w-full bg-neutral-900 [clip-path:polygon(0_0,70%_100%,0_100%)]" />
+                    </div>
+                    <div className="relative mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">{header}</div>
                 </header>
             )}
 

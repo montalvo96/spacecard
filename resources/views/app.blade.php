@@ -7,8 +7,8 @@
         <title inertia>{{ config('app.name', 'Laravel') }}</title>
         <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 
-        {{-- La identidad visual es solo oscura (negro + rojo): se fuerza el tema dark --}}
-        <script>document.documentElement.classList.add('dark');</script>
+        {{-- Identidad clara (blanco + rojo + negro, como la portada): sin tema dark
+             forzado, los componentes del panel usan sus variantes claras. --}}
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,7 +22,7 @@
         @vite(['resources/js/app.jsx', "resources/js/Pages/{$page['component']}.jsx"])
         @inertiaHead
     </head>
-    <body class="font-sans antialiased bg-gray-950 text-gray-100">
+    <body class="font-sans antialiased bg-white text-neutral-900">
         @inertia
     </body>
 </html>
