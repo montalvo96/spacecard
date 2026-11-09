@@ -17,7 +17,7 @@ use App\Models\OrderItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use F9WebLtd\QrCode\Facades\QrCode;
 use ZipArchive;
 use Inertia\Inertia;
 
@@ -74,7 +74,7 @@ class AdminController extends Controller
             'users' => $users,
             'orders' => $orders,
             'stats' => $stats,
-            'isMaster' => (bool) auth()->user()->is_master,
+            'currentUserId' => auth()->id(),
         ]);
     }
 
@@ -287,21 +287,23 @@ class AdminController extends Controller
     }
 
     /**
-     * Concede o retira privilegios de administrador a un usuario (solo maestro).
+     * Concede o retira privilegios de administrador a un usuario.
+     * Solo hay dos roles (cliente y administrador) y cualquier admin puede
+     * cambiarlos; lo único bloqueado es quitarse el rol a uno mismo, para que
+     * nunca se quede el sistema sin administradores por accidente.
      */
     public function toggleUserAdmin(Request $request, int $id)
     {
         $user = User::findOrFail($id);
 
-        // No se puede tocar a un maestro ni a uno mismo.
-        if ($user->is_master) {
-            return redirect()->back()->with('error', 'No se pueden modificar los privilegios de un usuario maestro.');
-        }
         if ($user->id === auth()->id()) {
             return redirect()->back()->with('error', 'No puedes cambiar tus propios privilegios.');
         }
 
-        $user->update(['is_admin' => ! $user->is_admin]);
+        // Al quitar el rol también se apaga la marca antigua de "maestro".
+        $user->forceFill($user->is_admin
+            ? ['is_admin' => false, 'is_master' => false]
+            : ['is_admin' => true])->save();
 
         $estado = $user->is_admin ? 'ahora es administrador' : 'ya no es administrador';
         return redirect()->back()->with('success', "{$user->name} {$estado}.");

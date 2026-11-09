@@ -20,7 +20,12 @@ export default function AuthenticatedLayout({ header, children }) {
     const links = [
         { href: route('dashboard'), label: 'Mi panel', icon: 'space_dashboard', active: route().current('dashboard') },
         { href: route('shop.comprar'), label: 'SpaceShop', icon: 'storefront', active: route().current('shop.comprar') },
-        ...(user?.is_admin ? [{ href: route('admin.dashboard'), label: 'Admin', icon: 'admin_panel_settings', active: route().current('admin.dashboard') }] : []),
+        ...(user?.is_admin
+            ? [
+                  { href: route('admin.designs'), label: 'Producción', icon: 'print', active: route().current('admin.designs') },
+                  { href: route('admin.dashboard'), label: 'Admin', icon: 'admin_panel_settings', active: route().current('admin.dashboard') },
+              ]
+            : []),
     ];
     const initial = (user?.name || '?').trim().charAt(0).toUpperCase();
 

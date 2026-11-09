@@ -26,6 +26,12 @@ RUN install-php-extensions pdo_mysql zip intl bcmath gd imagick opcache pcntl \
     && a2enmod rewrite headers \
     && mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 
+# rsvg-convert + fuente Inter: convierten el diseño final de cada tarjeta
+# (SVG) a PNG de 300 dpi para imprenta, con degradados y textos exactos.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends librsvg2-bin fonts-inter \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY docker/php.ini $PHP_INI_DIR/conf.d/zz-app.ini
 COPY docker/apache.conf /etc/apache2/sites-available/000-default.conf
 COPY --chmod=0755 docker/entrypoint.sh /usr/local/bin/entrypoint

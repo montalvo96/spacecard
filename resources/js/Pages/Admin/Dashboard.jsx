@@ -10,7 +10,7 @@ import React, { useState } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, router } from '@inertiajs/react';
 
-export default function AdminDashboard({ batches, users, orders, stats, isMaster = false }) {
+export default function AdminDashboard({ batches, users, orders, stats, currentUserId }) {
     const [activeTab, setActiveTab] = useState('batches');
 
     // Formulario de Lote Manual
@@ -84,9 +84,9 @@ export default function AdminDashboard({ batches, users, orders, stats, isMaster
     };
 
     const roleBadge = (user) => {
-        if (user.is_master) return { label: 'Maestro', cls: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-950/40 dark:text-indigo-300' };
-        if (user.is_admin) return { label: 'Admin', cls: 'bg-blue-100 text-blue-800 dark:bg-blue-950/40 dark:text-blue-300' };
-        return { label: 'Usuario', cls: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300' };
+        // Solo dos roles: administrador y cliente.
+        if (user.is_admin) return { label: 'Administrador', cls: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-950/40 dark:text-indigo-300' };
+        return { label: 'Cliente', cls: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300' };
     };
 
     return (
@@ -423,11 +423,6 @@ export default function AdminDashboard({ batches, users, orders, stats, isMaster
                                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                                         Usuarios Registrados {stats.total_users ? `(${stats.total_users})` : ''}
                                     </h3>
-                                    {isMaster && (
-                                        <span className="text-[11px] px-2 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-950/30 text-indigo-700 dark:text-indigo-300 font-semibold">
-                                            Vista de Usuario Maestro
-                                        </span>
-                                    )}
                                 </div>
                                 <div className="divide-y divide-gray-100 dark:divide-gray-700">
                                     {users.map((user) => {
@@ -454,7 +449,7 @@ export default function AdminDashboard({ batches, users, orders, stats, isMaster
                                                 >
                                                     Cambiar Plan
                                                 </button>
-                                                {isMaster && !user.is_master && (
+                                                {user.id !== currentUserId && (
                                                     <button
                                                         onClick={() => handleToggleAdmin(user)}
                                                         className={`px-3 py-1.5 rounded-lg text-xs font-semibold ${

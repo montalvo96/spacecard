@@ -79,10 +79,15 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::post('/admin/users/{id}/plan', [AdminController::class, 'updateUserPlan'])->name('admin.users.plan');
     Route::post('/admin/orders/{id}/generate', [AdminController::class, 'generateDevicesFromOrder'])->name('admin.orders.generate');
 
-    // Solo el usuario maestro puede gestionar administradores.
-    Route::middleware('master')->group(function () {
-        Route::post('/admin/users/{id}/toggle-admin', [AdminController::class, 'toggleUserAdmin'])->name('admin.users.toggle-admin');
-    });
+    // Producción: registro de clientes y diseños, descargas e impresión.
+    Route::get('/admin/produccion', [\App\Http\Controllers\AdminDesignController::class, 'index'])->name('admin.designs');
+    Route::get('/admin/produccion/exportar', [\App\Http\Controllers\AdminDesignController::class, 'exportCsv'])->name('admin.designs.export');
+    Route::get('/admin/produccion/{id}/imprimir', [\App\Http\Controllers\AdminDesignController::class, 'print'])->name('admin.designs.print');
+    Route::get('/admin/produccion/{id}/descargar', [\App\Http\Controllers\AdminDesignController::class, 'download'])->name('admin.designs.download');
+    Route::post('/admin/produccion/{id}/impreso', [\App\Http\Controllers\AdminDesignController::class, 'markPrinted'])->name('admin.designs.printed');
+
+    // Solo hay dos roles (cliente y administrador): cualquier admin gestiona administradores.
+    Route::post('/admin/users/{id}/toggle-admin', [AdminController::class, 'toggleUserAdmin'])->name('admin.users.toggle-admin');
 });
 
 // Rutas de compras públicas (ecommerce de hardware personalizado)
