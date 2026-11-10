@@ -314,15 +314,28 @@
         <div class="glow" aria-hidden="true"></div>
 
         <div class="success-card sc-rise">
+            @php($isPaid = in_array($order->status, \App\Models\Order::PAID_STATUSES, true))
             <div class="success-icon">
-                <span class="ms ms-fill" aria-hidden="true">check</span>
+                <span class="ms ms-fill" aria-hidden="true">{{ $isPaid ? 'check' : 'hourglass_top' }}</span>
             </div>
 
             <div><span class="kicker">SpaceShop</span></div>
-            <h1 class="success-title">¡Pedido <span>confirmado!</span></h1>
-            <p class="success-desc">
-                Gracias por comprar en SpaceCard. Hemos registrado tu pedido con éxito y el equipo de Avaspace ha comenzado el proceso de impresión física y grabado láser personalizado.
-            </p>
+            @if ($isPaid)
+                <h1 class="success-title">¡Pedido <span>confirmado!</span></h1>
+                <p class="success-desc">
+                    Gracias por comprar en SpaceCard. Recibimos tu pago y el equipo de Avaspace ha comenzado el proceso de impresión física y grabado láser personalizado.
+                </p>
+            @elseif ($order->status === 'pending')
+                <h1 class="success-title">Pago <span>en proceso</span></h1>
+                <p class="success-desc">
+                    Estamos esperando la confirmación de tu pago. En cuanto Stripe nos la envíe empezaremos con tu pedido. Puedes recargar esta página en unos minutos.
+                </p>
+            @else
+                <h1 class="success-title">Pedido <span>sin pagar</span></h1>
+                <p class="success-desc">
+                    No recibimos el pago de este pedido, así que no se realizó. Puedes volver a la tienda e intentarlo de nuevo.
+                </p>
+            @endif
 
             <div class="order-details-box sc-rise" style="animation-delay: 150ms;">
                 <div class="details-row">
@@ -338,11 +351,12 @@
                     <span class="details-value">{{ $order->customer_email }}</span>
                 </div>
                 <div class="details-row">
-                    <span class="details-label"><span class="ms" aria-hidden="true">payments</span>Total del pago (simulado)</span>
+                    <span class="details-label"><span class="ms" aria-hidden="true">payments</span>{{ $isPaid ? 'Total pagado' : 'Total del pedido' }}</span>
                     <span class="details-value total">${{ number_format($order->total, 2) }}</span>
                 </div>
             </div>
 
+            @if ($isPaid)
             <div class="steps-box sc-rise" style="animation-delay: 280ms;">
                 <h4 class="steps-title"><span class="ms" aria-hidden="true">route</span>¿Qué sigue ahora?</h4>
                 <div class="step-item">
@@ -358,8 +372,13 @@
                     <span><strong>Activación de escaneo:</strong> Cuando recibas tu hardware, simplemente <strong>escanéalo con tu celular</strong>. Te guiará automáticamente para crear tu cuenta y configurar tu tarjeta digital o reviews.</span>
                 </div>
             </div>
+            @endif
 
-            <a href="/" class="btn-continue sc-rise" style="animation-delay: 400ms;">Volver al inicio<span class="ms" aria-hidden="true">arrow_forward</span></a>
+            @if ($order->status === 'cancelled')
+                <a href="{{ route('shop.comprar') }}" class="btn-continue sc-rise" style="animation-delay: 400ms;">Volver a la tienda<span class="ms" aria-hidden="true">arrow_forward</span></a>
+            @else
+                <a href="/" class="btn-continue sc-rise" style="animation-delay: 400ms;">Volver al inicio<span class="ms" aria-hidden="true">arrow_forward</span></a>
+            @endif
         </div>
     </div>
 

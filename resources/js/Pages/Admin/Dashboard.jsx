@@ -8,11 +8,9 @@
 
 import React, { useState } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import BatchChecklist from '@/Components/BatchChecklist';
+import BatchCard from '@/Components/BatchCard';
+import OrdersPanel from '@/Components/OrdersPanel';
 import { Head, router } from '@inertiajs/react';
-
-// Solo se fabrican tres productos.
-const TYPE_LABELS = { card: 'Tarjeta', bracelet: 'Pulsera', review_plate: 'Placa de reseñas' };
 
 export default function AdminDashboard({ batches, users, orders, stats, currentUserId }) {
     const [activeTab, setActiveTab] = useState('batches');
@@ -64,28 +62,10 @@ export default function AdminDashboard({ batches, users, orders, stats, currentU
         });
     };
 
-    const handleProcessOrder = (orderId) => {
-        if (confirm('¿Estás seguro de procesar esta orden? Se generarán los dispositivos físicos en stock con su diseño de fábrica.')) {
-            router.post(`/admin/orders/${orderId}/generate`);
-        }
-    };
-
     const handleToggleAdmin = (user) => {
         const accion = user.is_admin ? 'quitar acceso de administrador a' : 'hacer administrador a';
         if (confirm(`¿Seguro que quieres ${accion} ${user.name}?`)) {
             router.post(`/admin/users/${user.id}/toggle-admin`, {}, { preserveScroll: true });
-        }
-    };
-
-    const handleMarkPrinted = (batch) => {
-        if (confirm(`Marcar todas las tarjetas del lote «${batch.name}» como IMPRESAS?`)) {
-            router.post(`/admin/batches/${batch.id}/printed`, {}, { preserveScroll: true });
-        }
-    };
-
-    const handleMarkShipped = (batch) => {
-        if (confirm(`Marcar las tarjetas impresas del lote «${batch.name}» como ENVIADAS?`)) {
-            router.post(`/admin/batches/${batch.id}/shipped`, {}, { preserveScroll: true });
         }
     };
 
@@ -224,85 +204,51 @@ export default function AdminDashboard({ batches, users, orders, stats, currentU
                                 {/* Lista de Lotes */}
                                 <div className="lg:col-span-2 space-y-4">
                                     <div className="bg-white p-6 shadow-sm sm:rounded-lg dark:bg-gray-800">
-                                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                                            Lotes Existentes ( Manufactura )
-                                        </h3>
+                                        <div className="mb-4 flex items-center justify-between gap-3">
+                                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Lotes de manufactura</h3>
+                                            <span className="text-xs text-gray-500">{batches.length} lote(s)</span>
+                                        </div>
+
+                                        {/* Guía rápida del flujo: 3 pasos siempre visibles */}
+                                        <div className="mb-5 rounded-2xl bg-[#FFF4F2] p-4">
+                                            <p className="mb-3 flex items-center gap-1.5 text-sm font-semibold text-[#B81E0C]">
+                                                <span aria-hidden="true" className="ms text-lg">help</span> ¿Cómo funciona un lote?
+                                            </p>
+                                            <ol className="grid gap-2 sm:grid-cols-3">
+                                                {[
+                                                    { n: 1, icon: 'print', t: 'Imprimir', d: 'Descarga el ZIP, mándalo a imprenta y marca las tarjetas como impresas.' },
+                                                    { n: 2, icon: 'local_shipping', t: 'Enviar', d: 'Cuando salgan o las entregues, márcalas como enviadas.' },
+                                                    { n: 3, icon: 'verified_user', t: 'Reclamar o sellar', d: 'Se marca sola cuando el cliente la escanea y la vincula a su cuenta. Si la entregaste tú, séllala.' },
+                                                ].map((s) => (
+                                                    <li key={s.n} className="rounded-xl bg-white p-3 ring-1 ring-black/[0.05]">
+                                                        <p className="flex items-center gap-2 text-xs font-bold text-neutral-900">
+                                                            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#D42410] text-[11px] text-white">{s.n}</span>
+                                                            <span aria-hidden="true" className="ms text-base text-neutral-500">{s.icon}</span> {s.t}
+                                                        </p>
+                                                        <p className="mt-1.5 text-[11px] leading-relaxed text-neutral-600">{s.d}</p>
+                                                    </li>
+                                                ))}
+                                            </ol>
+                                            <p className="mt-3 flex items-start gap-1.5 text-[11px] text-neutral-600">
+                                                <span aria-hidden="true" className="ms text-sm">tips_and_updates</span>
+                                                Cada tarjeta tiene sus botones para marcarla sola. Para hacerlo con muchas, selecciónalas (o «Seleccionar todas»). Un lote se puede eliminar mientras ninguna tarjeta se haya enviado, sellado o reclamado.
+                                            </p>
+                                        </div>
+
                                         {batches.length === 0 ? (
-                                            <div className="py-8 text-center text-gray-400 text-sm">Sin lotes.</div>
+                                            <div className="py-8 text-center text-gray-400 text-sm">Sin lotes. Crea uno con el formulario de la izquierda.</div>
                                         ) : (
                                             <div className="space-y-4">
-                                                {batches.map((batch) => {
-                                                    const total = batch.devices_count ?? batch.quantity;
-                                                    const usedN = usedCounts[batch.id] ?? batch.used_count ?? 0;
-                                                    const open = openBatch === batch.id;
-                                                    const pill = 'inline-flex items-center gap-1 px-2 py-1 rounded-lg';
-                                                    return (
-                                                    <div key={batch.id} className="p-4 bg-gray-50 dark:bg-gray-900/40 border border-gray-100 dark:border-gray-700 rounded-lg space-y-3">
-                                                        <div className="flex justify-between items-start gap-4">
-                                                            <div>
-                                                                <h4 className="font-semibold text-sm text-gray-900 dark:text-white">{batch.name}</h4>
-                                                                <p className="text-xs text-gray-400">
-                                                                    Tipo: {TYPE_LABELS[batch.type] ?? batch.type} • Cantidad: {batch.quantity} • Creador: {batch.creator?.name}
-                                                                </p>
-                                                            </div>
-                                                        </div>
-
-                                                        {/* Pipeline de producción + uso */}
-                                                        <div className="flex flex-wrap gap-2 text-[11px]">
-                                                            <span className={`${pill} bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300`}>
-                                                                <span aria-hidden="true" className="ms text-sm">print</span> Impresas: <strong>{batch.printed_count ?? 0}/{total}</strong>
-                                                            </span>
-                                                            <span className={`${pill} bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300`}>
-                                                                <span aria-hidden="true" className="ms text-sm">local_shipping</span> Enviadas: <strong>{batch.shipped_count ?? 0}/{total}</strong>
-                                                            </span>
-                                                            <span className={`${pill} bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300`}>
-                                                                <span aria-hidden="true" className="ms text-sm">verified_user</span> Reclamadas: <strong>{batch.claimed_count ?? 0}/{total}</strong>
-                                                            </span>
-                                                            <span className={`${pill} bg-[#D42410] text-white`}>
-                                                                <span aria-hidden="true" className="ms text-sm">check_circle</span> Utilizadas: <strong>{usedN}/{total}</strong>
-                                                            </span>
-                                                        </div>
-
-                                                        {/* Acciones: checklist, exportar (para imprenta), marcar impreso, marcar enviado */}
-                                                        <div className="flex flex-wrap gap-2">
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => setOpenBatch(open ? null : batch.id)}
-                                                                aria-expanded={open}
-                                                                className="inline-flex items-center gap-1.5 px-3 py-2 bg-[#D42410] hover:bg-[#B81E0C] text-white rounded-md text-xs font-semibold"
-                                                            >
-                                                                <span aria-hidden="true" className="ms text-base">{open ? 'keyboard_arrow_up' : 'checklist'}</span>
-                                                                {open ? 'Ocultar checklist' : 'Checklist de tarjetas'}
-                                                            </button>
-                                                            <a
-                                                                href={`/admin/batches/${batch.id}/export`}
-                                                                className="inline-flex items-center gap-1.5 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md text-xs font-semibold shadow-md shadow-emerald-500/10"
-                                                            >
-                                                                <span aria-hidden="true" className="ms text-base">download</span> Exportar ZIP (QR PNG + NFC)
-                                                            </a>
-                                                            <button
-                                                                onClick={() => handleMarkPrinted(batch)}
-                                                                className="inline-flex items-center gap-1.5 px-3 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 rounded-md text-xs font-semibold"
-                                                            >
-                                                                <span aria-hidden="true" className="ms text-base">print</span> Marcar impreso
-                                                            </button>
-                                                            <button
-                                                                onClick={() => handleMarkShipped(batch)}
-                                                                className="inline-flex items-center gap-1.5 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-xs font-semibold"
-                                                            >
-                                                                <span aria-hidden="true" className="ms text-base">local_shipping</span> Marcar enviado
-                                                            </button>
-                                                        </div>
-
-                                                        {open && (
-                                                            <BatchChecklist
-                                                                batch={batch}
-                                                                onUsedChange={(n) => setUsedCounts((c) => ({ ...c, [batch.id]: n }))}
-                                                            />
-                                                        )}
-                                                    </div>
-                                                    );
-                                                })}
+                                                {batches.map((batch) => (
+                                                    <BatchCard
+                                                        key={batch.id}
+                                                        batch={batch}
+                                                        open={openBatch === batch.id}
+                                                        onToggle={() => setOpenBatch(openBatch === batch.id ? null : batch.id)}
+                                                        usedOverride={usedCounts[batch.id]}
+                                                        onUsedChange={(n) => setUsedCounts((c) => ({ ...c, [batch.id]: n }))}
+                                                    />
+                                                ))}
                                             </div>
                                         )}
                                     </div>
@@ -311,139 +257,7 @@ export default function AdminDashboard({ batches, users, orders, stats, currentU
                         )}
 
                         {/* Pestaña: Órdenes de Compra (Ecommerce) */}
-                        {activeTab === 'orders' && (
-                            <div className="bg-white p-6 shadow-sm sm:rounded-lg dark:bg-gray-800">
-                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">
-                                    Pedidos y Personalizaciones Recibidas
-                                </h3>
-                                
-                                {orders.length === 0 ? (
-                                    <div className="py-12 text-center text-gray-400 text-sm">
-                                        No se han recibido pedidos de hardware personalizado todavía.
-                                    </div>
-                                ) : (
-                                    <div className="space-y-6">
-                                        {orders.map((order) => (
-                                            <div 
-                                                key={order.id} 
-                                                className={`p-6 border rounded-lg flex flex-col lg:flex-row justify-between gap-6 ${
-                                                    order.status === 'paid' 
-                                                        ? 'border-amber-200 bg-amber-50/10 dark:border-amber-900/30' 
-                                                        : 'border-gray-100 bg-gray-50/10 dark:border-gray-700'
-                                                }`}
-                                            >
-                                                {/* Detalles de envío */}
-                                                <div className="space-y-3 flex-grow">
-                                                    <div className="flex items-center gap-3">
-                                                        <span className="font-extrabold text-sm text-gray-900 dark:text-white">
-                                                            Pedido #SPC-{10000 + order.id}
-                                                        </span>
-                                                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase ${
-                                                            order.status === 'paid'
-                                                                ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300'
-                                                                : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300'
-                                                        }`}>
-                                                            {order.status === 'paid' ? 'Pendiente Fabricar' : 'Surtido / Completado'}
-                                                        </span>
-                                                    </div>
-                                                    
-                                                    <div className="text-xs space-y-1 text-gray-600 dark:text-gray-300">
-                                                        <div><strong className="text-gray-900 dark:text-white">Cliente:</strong> {order.customer_name} ({order.customer_email})</div>
-                                                        <div>
-                                                            <strong className="text-gray-900 dark:text-white">Cuenta:</strong>{' '}
-                                                            {order.user ? (
-                                                                <span className="inline-flex items-center gap-1">
-                                                                    {order.user.name}
-                                                                    <span className="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 text-[10px] font-bold">VINCULADA</span>
-                                                                </span>
-                                                            ) : (
-                                                                <span className="px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400 text-[10px] font-bold">INVITADO</span>
-                                                            )}
-                                                        </div>
-                                                        <div><strong className="text-gray-900 dark:text-white">Envío:</strong> {order.shipping_address}</div>
-                                                        <div><strong className="text-gray-900 dark:text-white">Fecha:</strong> {new Date(order.created_at).toLocaleString()}</div>
-                                                    </div>
-
-                                                    {/* Artículos de la orden y su diseño */}
-                                                    <div className="pt-2">
-                                                        <h5 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Artículos a Fabricar:</h5>
-                                                        <div className="space-y-3">
-                                                            {order.items.map((item) => (
-                                                                <div key={item.id} className="p-3 bg-white dark:bg-gray-900 rounded-md border border-gray-100 dark:border-gray-800 flex flex-wrap gap-4 items-center">
-                                                                    <div className="text-xs">
-                                                                        <span className="font-bold text-gray-900 dark:text-white capitalize">
-                                                                            {item.product_type === 'review_plate' ? 'Placa Google' : item.product_type}
-                                                                        </span>
-                                                                        <span className="text-gray-400 ml-2">Cant: {item.quantity}</span>
-                                                                    </div>
-
-                                                                    {/* Qué imprimir: catálogo vs personalizado */}
-                                                                    {item.design_config?.mode === 'preset' ? (
-                                                                        <span className="text-[10px] font-bold px-2 py-1 rounded-md bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300">
-                                                                            🎴 Catálogo AVASPACE · {item.design_config.preset_name}
-                                                                        </span>
-                                                                    ) : item.product_type === 'card' ? (
-                                                                        <span className="text-[10px] font-bold px-2 py-1 rounded-md bg-indigo-100 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300">
-                                                                            🎨 Diseño personalizado (2 caras)
-                                                                        </span>
-                                                                    ) : null}
-                                                                    
-                                                                    {/* Mockup de color */}
-                                                                    {item.color_primary && (
-                                                                        <div className="flex items-center gap-1.5 text-xs">
-                                                                            <span className="text-[10px] text-gray-400">Color Primario:</span>
-                                                                            <div className="w-4 h-4 rounded-full border" style={{ backgroundColor: item.color_primary }}></div>
-                                                                            <span className="font-mono text-[10px]">{item.color_primary}</span>
-                                                                        </div>
-                                                                    )}
-                                                                    {item.color_secondary && (
-                                                                        <div className="flex items-center gap-1.5 text-xs">
-                                                                            <span className="text-[10px] text-gray-400">Secundario:</span>
-                                                                            <div className="w-4 h-4 rounded-full border" style={{ backgroundColor: item.color_secondary }}></div>
-                                                                            <span className="font-mono text-[10px]">{item.color_secondary}</span>
-                                                                        </div>
-                                                                    )}
-
-                                                                    {/* Logotipo */}
-                                                                    {item.logo_url && (
-                                                                        <div className="flex items-center gap-2">
-                                                                            <span className="text-[10px] text-gray-400">Logo:</span>
-                                                                            <a 
-                                                                                href={item.logo_url} 
-                                                                                target="_blank" 
-                                                                                className="p-1 bg-gray-100 rounded border hover:bg-gray-200"
-                                                                            >
-                                                                                <img src={item.logo_url} alt="Logo" className="h-6 object-contain" />
-                                                                            </a>
-                                                                        </div>
-                                                                    )}
-                                                                </div>
-                                                            ))}
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                {/* Botón de Surtido */}
-                                                <div className="flex items-center justify-end shrink-0">
-                                                    {order.status === 'paid' ? (
-                                                        <button
-                                                            onClick={() => handleProcessOrder(order.id)}
-                                                            className="py-3 px-5 bg-amber-500 hover:bg-amber-600 text-white rounded-md text-xs font-bold shadow-md shadow-amber-500/15"
-                                                        >
-                                                            Procesar y Generar Dispositivos
-                                                        </button>
-                                                    ) : (
-                                                        <span className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
-                                                            ✓ Surtido Completado
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                        )}
+                        {activeTab === 'orders' && <OrdersPanel orders={orders} />}
 
                         {/* Pestaña: Usuarios y Planes */}
                         {activeTab === 'users' && (

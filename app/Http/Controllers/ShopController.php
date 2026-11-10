@@ -10,11 +10,13 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Services\StripeCheckoutService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Inertia\Inertia;
 
 class ShopController extends Controller
 {
@@ -30,8 +32,14 @@ class ShopController extends Controller
     /**
      * Muestra la página pública de compras y personalización física.
      */
-    public function showForm()
+    public function showForm(Request $request)
     {
+        // La tienda es Blade, no Inertia: si llega desde un <Link> de Inertia, forzamos una
+        // carga completa. Si no, Inertia la abre en un iframe y Stripe Checkout no carga ahí.
+        if ($request->header('X-Inertia')) {
+            return Inertia::location(route('shop.comprar'));
+        }
+
         $prices = self::PRICES;
         return view('shop.comprar', compact('prices'));
     }
@@ -40,8 +48,13 @@ class ShopController extends Controller
      * Procesa la compra de un CARRITO (uno o varios productos) en una sola orden.
      * Cada item del carrito trae su propia personalización y logo (base64).
      */
-    public function checkout(Request $request)
+    public function checkout(Request $request, StripeCheckoutService $payments)
     {
+        if (!$payments->isConfigured()) {
+            Log::error('Checkout de SpaceShop sin Stripe configurado (faltan STRIPE_SECRET / STRIPE_WEBHOOK_SECRET).');
+            return redirect()->back()->with('error', 'Los pagos no están disponibles en este momento. Por favor, inténtalo más tarde.')->withInput();
+        }
+
         $request->validate([
             'customer_name' => 'required|string|max:255',
             'customer_email' => 'required|email|max:255',
@@ -107,10 +120,10 @@ class ShopController extends Controller
                     ];
                 }
 
-                // 2. Crear la Orden (paid = pasarela simulada). Vinculada al usuario si hay sesión.
+                // 2. Crear la Orden como pendiente: solo el webhook de Stripe la marca pagada.
                 $order = Order::create([
                     'user_id' => auth()->id(),
-                    'status' => 'paid',
+                    'status' => 'pending',
                     'customer_name' => $request->input('customer_name'),
                     'customer_email' => $request->input('customer_email'),
                     'shipping_address' => $request->input('shipping_address'),
@@ -125,12 +138,34 @@ class ShopController extends Controller
                 return $order;
             });
 
-            return redirect()->route('shop.success', ['id' => $order->id]);
-
         } catch (\Exception $e) {
             Log::error("Error en el checkout del carrito SpaceShop: " . $e->getMessage());
             return redirect()->back()->with('error', 'Ocurrió un error al procesar tu compra. Por favor, inténtalo de nuevo.')->withInput();
         }
+
+        // 4. Mandar al cliente a pagar en Stripe Checkout.
+        try {
+            $session = $payments->createCheckoutSession($order->load('items'));
+            $order->update(['stripe_session_id' => $session->id]);
+
+            return redirect()->away($session->url, 303);
+
+        } catch (\Throwable $e) {
+            Log::error("No se pudo crear la sesión de Stripe para la orden {$order->id}: " . $e->getMessage());
+            $order->update(['status' => 'cancelled']);
+            return redirect()->back()->with('error', 'No pudimos conectar con la pasarela de pago. Por favor, inténtalo de nuevo en unos minutos.')->withInput();
+        }
+    }
+
+    /**
+     * El cliente canceló en Stripe Checkout y volvió a la tienda.
+     * La orden no se toca aquí (la URL es pública): queda pendiente hasta que
+     * Stripe expira la sesión y el webhook la marca como cancelada.
+     */
+    public function cancelled()
+    {
+        return redirect()->route('shop.comprar')
+            ->with('error', 'Cancelaste el pago, así que tu pedido no se realizó. Puedes intentarlo de nuevo cuando quieras.');
     }
 
     /**
@@ -166,9 +201,22 @@ class ShopController extends Controller
     /**
      * Muestra la página de éxito del pedido.
      */
-    public function showSuccess(int $id)
+    public function showSuccess(Request $request, int $id, StripeCheckoutService $payments)
     {
         $order = Order::with('items')->findOrFail($id);
+
+        // Si el webhook aún no llega, confirmamos directo con Stripe usando la sesión
+        // con la que volvió el cliente (solo si coincide con la de esta orden).
+        $sessionId = (string) $request->query('session_id', '');
+        if ($order->status === 'pending' && $sessionId !== '' && hash_equals((string) $order->stripe_session_id, $sessionId)) {
+            try {
+                $payments->syncFromSession($payments->retrieveSession($sessionId));
+                $order->refresh();
+            } catch (\Throwable $e) {
+                Log::warning("No se pudo confirmar con Stripe la orden {$order->id}: " . $e->getMessage());
+            }
+        }
+
         return view('shop.compra_exitosa', compact('order'));
     }
 }

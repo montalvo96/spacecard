@@ -618,7 +618,6 @@
         .card-canvas::after { /* barniz sutil */ content:''; position:absolute; inset:0; background: radial-gradient(120% 120% at 0% 0%, rgba(255,255,255,.12), transparent 45%); pointer-events:none; }
         .card-chip { position:absolute; top:14px; right:14px; opacity:.8; color:#fff; transition: opacity .4s var(--ease); }
         .card-chip .ms { font-size: 24px; }
-        .card-brand { position:absolute; bottom:12px; left:16px; font-size:9px; letter-spacing:1px; font-weight:700; color:rgba(255,255,255,.75); }
 
         .card-el { position:absolute; transform: translate(-50%,-50%); cursor: grab; }
         /* Hasta que el diseñador coloca los elementos, no se muestran (si no,
@@ -746,6 +745,20 @@
         .header-meta { background: #fff; }
         .header-meta a:hover { color: #171717; }
 
+        /* Botón para regresar al panel (o al inicio si no hay sesión) */
+        .header-right { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+        .back-btn {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 9px 18px; border-radius: 999px;
+            background: var(--primary); color: #fff;
+            font-size: 14px; font-weight: 600; text-decoration: none;
+            box-shadow: 0 8px 20px rgba(212, 36, 16, 0.28);
+            transition: transform 0.2s var(--ease), background 0.2s;
+        }
+        .back-btn:hover { background: var(--primary-hover); transform: translateY(-1px); }
+        .back-btn .ms { font-size: 18px; transition: transform 0.2s var(--ease); }
+        .back-btn:hover .ms { transform: translateX(-2px); }
+
         .form-column {
             border: 1px solid rgba(0, 0, 0, 0.07);
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
@@ -839,13 +852,20 @@
             <img src="/img/spacecard-logo.svg" alt="SpaceCard" width="748" height="176" style="height:34px;width:auto;display:block;">
             <span class="accent">Shop</span>
         </a>
-        <div class="header-meta">
+        <div class="header-right">
+            <div class="header-meta">
+                @auth
+                    <span class="ms" aria-hidden="true" style="font-size:18px;color:var(--primary-text);">verified_user</span>
+                    <span>Comprando como <strong style="color:var(--text-light);">{{ auth()->user()->name }}</strong> · se vinculará a tu cuenta</span>
+                @else
+                    <span class="ms" aria-hidden="true" style="font-size:18px;color:var(--primary-text);">login</span>
+                    <span><a href="{{ route('login') }}">Inicia sesión</a> para vincular la compra a tu cuenta (opcional)</span>
+                @endauth
+            </div>
             @auth
-                <span class="ms" aria-hidden="true" style="font-size:18px;color:var(--primary-text);">verified_user</span>
-                <span>Comprando como <strong style="color:var(--text-light);">{{ auth()->user()->name }}</strong> · se vinculará a tu cuenta</span>
+                <a href="{{ route('dashboard') }}" class="back-btn"><span class="ms" aria-hidden="true">arrow_back</span>Regresar a mi panel</a>
             @else
-                <span class="ms" aria-hidden="true" style="font-size:18px;color:var(--primary-text);">login</span>
-                <span><a href="{{ route('login') }}">Inicia sesión</a> para vincular la compra a tu cuenta (opcional)</span>
+                <a href="/" class="back-btn"><span class="ms" aria-hidden="true">arrow_back</span>Volver al inicio</a>
             @endauth
         </div>
     </header>
@@ -885,7 +905,6 @@
                         <div id="info-block" class="info-block"></div>
                     </div>
 
-                    <div id="card-brand" class="card-brand">SPACECARD® NFC</div>
                 </div>
 
                 <p class="designer-hint"><span class="ms" aria-hidden="true">drag_pan</span>Arrastra el logo, la info y el QR para colocarlos · cambia de cara arriba</p>
@@ -1266,7 +1285,6 @@
 
             // Decoración por cara
             $('card-chip').style.opacity = side === 'front' ? '0.8' : '0.25';
-            $('card-brand').style.color = ink === '#ffffff' ? 'rgba(255,255,255,.75)' : 'rgba(0,0,0,.55)';
 
             // Logo
             const L = D.el.logo, logoEl = $('el-logo');
