@@ -37,6 +37,8 @@ class AdminController extends Controller
                 'devices as claimed_count' => fn ($q) => $q->where('status', 'claimed'),
                 // Utilizadas: marcadas a mano en el checklist o ya reclamadas por un cliente.
                 'devices as used_count' => fn ($q) => $q->where(fn ($w) => $w->whereNotNull('used_at')->orWhere('status', 'claimed')),
+                // Tarjetas que surten un pedido de SpaceShop: el lote no se puede borrar.
+                'devices as order_linked_count' => fn ($q) => $q->whereNotNull('order_item_id'),
             ])
             ->orderBy('created_at', 'desc')
             ->get();
@@ -419,5 +421,91 @@ class AdminController extends Controller
         }
 
         return redirect()->back()->with('success', "{$n} tarjeta(s) del lote «{$batch->name}» marcadas como enviadas.");
+    }
+
+    /**
+     * Acción sobre varias tarjetas de un lote a la vez (las seleccionadas en el checklist).
+     * - printed: marca impresas.
+     * - shipped: marca enviadas (solo las ya impresas; las demás se omiten).
+     * - used:    sella como utilizadas (definitivo; omite las ya utilizadas o reclamadas).
+     * Devuelve las tarjetas actualizadas y cuántas se omitieron.
+     */
+    public function bulkDevices(Request $request, int $id, \App\Services\DeviceProvisioningService $prov)
+    {
+        $data = $request->validate([
+            'action' => 'required|in:printed,shipped,used',
+            'ids'    => 'required|array|min:1|max:5000',
+            'ids.*'  => 'integer',
+            'note'   => 'nullable|string|max:255',
+        ]);
+
+        $batch = DeviceBatch::findOrFail($id);
+        $devices = $batch->devices()->with('owner:id,name')->whereIn('id', $data['ids'])->get();
+
+        $done = 0;
+        $skipped = 0;
+        DB::transaction(function () use ($devices, $data, $prov, &$done, &$skipped) {
+            foreach ($devices as $device) {
+                if ($data['action'] === 'printed') {
+                    if ($device->printed_at) {
+                        $skipped++;
+                        continue;
+                    }
+                    $prov->markPrinted($device);
+                    $done++;
+                } elseif ($data['action'] === 'shipped') {
+                    if (!$device->printed_at || $device->shipped_at) {
+                        $skipped++;
+                        continue;
+                    }
+                    $prov->markShipped($device);
+                    $done++;
+                } else { // used
+                    if ($device->used_at || $device->status === 'claimed') {
+                        $skipped++;
+                        continue;
+                    }
+                    $device->forceFill(['used_at' => now(), 'used_note' => $data['note'] ?? null])->save();
+                    $done++;
+                }
+            }
+        });
+
+        return response()->json([
+            'done'    => $done,
+            'skipped' => $skipped,
+            'devices' => $devices->map(fn ($d) => $this->checklistRow($d))->values(),
+        ]);
+    }
+
+    /**
+     * Elimina un lote creado por error, con todas sus tarjetas.
+     * Solo se permite si ninguna tarjeta salió al mundo: sin enviar, sin utilizar,
+     * sin reclamar y sin estar ligada a un pedido de SpaceShop.
+     */
+    public function destroyBatch(int $id)
+    {
+        $batch = DeviceBatch::findOrFail($id);
+        $devices = $batch->devices();
+
+        $blocked = (clone $devices)->where(fn ($q) => $q
+            ->whereNotNull('shipped_at')
+            ->orWhereNotNull('used_at')
+            ->orWhere('status', 'claimed')
+            ->orWhereNotNull('order_item_id')
+        )->count();
+
+        if ($blocked > 0) {
+            return redirect()->back()->with('error', "No se puede eliminar «{$batch->name}»: {$blocked} tarjeta(s) ya se enviaron, se utilizaron, las reclamó un cliente o surten un pedido.");
+        }
+
+        DB::transaction(function () use ($batch) {
+            $batch->devices()->delete();
+            $batch->delete();
+        });
+
+        Log::info("Lote {$batch->id} «{$batch->name}» eliminado por el usuario " . auth()->id());
+
+        return redirect()->back()->with('success', "Lote «{$batch->name}» eliminado.");
     }
 }

@@ -35,7 +35,6 @@
             aspect-ratio: {{ $preset ? '54 / 85.6' : '85.6 / 54' }};
         }
         .chip { position: absolute; top: 3.7cqw; right: 3.7cqw; width: 6.3cqw; height: 6.3cqw; }
-        .brand { position: absolute; bottom: 3.2cqw; left: 4.2cqw; font-size: 2.4cqw; letter-spacing: .26cqw; font-weight: 700; }
         .el { position: absolute; transform: translate(-50%, -50%); }
         .el img { width: 100%; height: 100%; object-fit: contain; display: block; }
         .qr-box { width: 100%; height: 100%; background: #fff; border-radius: 2.1cqw; display: flex; align-items: center; justify-content: center; }
@@ -130,7 +129,6 @@
                     $bg = $faces['bg'][$side];
                     $el = $faces['el'];
                     $ink = $bg['ink'];
-                    $dim = $ink === '#ffffff' ? 'rgba(255,255,255,.75)' : 'rgba(0,0,0,.55)';
                     $info = $el['info'];
                     $fs = max(1.84, 5.2 * $info['size'] / 100); // mismo cálculo que el diseñador, en cqw
                 @endphp
@@ -163,8 +161,7 @@
                             @if ($info['website'])<div class="l">{{ $info['website'] }}</div>@endif
                         </div>
                     @endif
-
-                    <div class="brand" style="color: {{ $dim }}">SPACECARD® NFC</div>
+                    {{-- Sin marca SPACECARD: el diseño personalizado es del cliente. Los prediseñados ya traen la suya en la imagen. --}}
                 </div>
             @endif
         </div>

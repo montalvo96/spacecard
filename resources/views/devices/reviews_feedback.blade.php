@@ -1,12 +1,8 @@
 @extends('layouts.public')
-/**
- * Vista intermedia para placas de reseñas de negocios con feedback privado activo.
- *
- * Última modificación: 2026-08-06
- * Autor: Antigravity
- */
+{{-- Vista intermedia para placas de reseñas de negocios con feedback privado activo. --}}
 
 @section('title', 'Tu opinión importa - ' . $target->business_name)
+@section('icon', 'reviews')
 
 @section('styles')
 <style>
@@ -20,14 +16,15 @@
     .btn-google {
         background: #ffffff;
         color: #1f2937;
-        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
-        border: 1px solid #e5e7eb;
+        box-shadow: none;
+        border: 1px solid rgba(0, 0, 0, 0.12);
         font-family: var(--font-title);
     }
     
     .btn-google:hover {
         background: #f9fafb;
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        box-shadow: none;
+        border-color: rgba(0, 0, 0, 0.25);
     }
     
     .btn-google img {
@@ -48,7 +45,7 @@
     .divider::before, .divider::after {
         content: '';
         flex: 1;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
     }
     
     .divider:not(:empty)::before {
@@ -62,8 +59,8 @@
     .feedback-form {
         display: none;
         text-align: left;
-        background: rgba(255, 255, 255, 0.02);
-        border: 1px solid rgba(255, 255, 255, 0.05);
+        background: #FAFAFA;
+        border: 1px solid rgba(0, 0, 0, 0.07);
         border-radius: 16px;
         padding: 20px;
         margin-top: 20px;
@@ -97,14 +94,15 @@
 @endsection
 
 @section('content')
-    <span class="badge badge-info">{{ $target->business_name }}</span>
-    <h1 class="title">¡Tu opinión nos ayuda a crecer!</h1>
+    <p class="kicker">{{ $target->business_name }}</p>
+    <h1 class="title">¡Tu opinión nos ayuda a <span class="hl">crecer!</span></h1>
     <p class="description">
         Queremos conocer tu experiencia en nuestro negocio. ¿Cómo prefieres compartir tus comentarios con nosotros hoy?
     </p>
 
     <!-- Éxito al enviar formulario -->
     <div id="success-alert" class="alert-success" style="display: none;">
+        <span class="ms" aria-hidden="true">check_circle</span>
         ¡Muchas gracias! Tu mensaje ha sido enviado directamente a la administración de forma privada.
     </div>
     
@@ -198,7 +196,7 @@
         .then(data => {
             if (data.success) {
                 // Mostrar alerta
-                successAlert.style.display = 'block';
+                successAlert.style.display = 'flex';
                 // Ocultar formulario
                 feedbackPanel.style.display = 'none';
                 form.reset();

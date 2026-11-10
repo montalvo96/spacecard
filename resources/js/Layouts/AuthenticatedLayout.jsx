@@ -38,13 +38,13 @@ export default function AuthenticatedLayout({ header, children }) {
                     </Link>
 
                     {/* Enlaces con el subrayado rojo de la portada */}
-                    <div className="hidden items-center gap-7 sm:flex">
+                    <div className="hidden items-center gap-4 sm:flex md:gap-5 lg:gap-7">
                         {links.map((l) => (
                             <Link
                                 key={l.label}
                                 href={l.href}
                                 aria-current={l.active ? 'page' : undefined}
-                                className={`relative inline-flex items-center gap-1.5 py-2 text-sm font-semibold transition after:absolute after:-bottom-0.5 after:left-0 after:h-0.5 after:w-full after:origin-left after:rounded-full after:bg-[#D42410] after:transition after:duration-300 ${l.active ? 'text-neutral-900 after:scale-x-100' : 'text-neutral-500 after:scale-x-0 hover:text-neutral-900 hover:after:scale-x-100'}`}
+                                className={`relative inline-flex items-center gap-1.5 whitespace-nowrap py-2 text-sm font-semibold transition after:absolute after:-bottom-0.5 after:left-0 after:h-0.5 after:w-full after:origin-left after:rounded-full after:bg-[#D42410] after:transition after:duration-300 ${l.active ? 'text-neutral-900 after:scale-x-100' : 'text-neutral-500 after:scale-x-0 hover:text-neutral-900 hover:after:scale-x-100'}`}
                             >
                                 <Icon name={l.icon} className={`text-[19px] ${l.active ? 'text-[#D42410]' : ''}`} />
                                 {l.label}
@@ -59,8 +59,8 @@ export default function AuthenticatedLayout({ header, children }) {
                                     type="button"
                                     className="group flex items-center gap-2.5 rounded-full border border-black/10 bg-white py-1 pl-1 pr-3 text-sm font-semibold text-neutral-800 transition hover:border-black/25"
                                 >
-                                    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#D42410] font-display text-sm font-bold text-white">{initial}</span>
-                                    {user.name}
+                                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#D42410] font-display text-sm font-bold text-white">{initial}</span>
+                                    <span className="hidden max-w-[160px] truncate lg:inline">{user.name}</span>
                                     <Icon name="expand_more" className="text-lg text-neutral-400 transition duration-300 group-hover:translate-y-0.5" />
                                 </button>
                             </Dropdown.Trigger>

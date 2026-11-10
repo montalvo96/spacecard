@@ -649,13 +649,13 @@
                     @if($space->contact_phone)
                         <a href="https://wa.me/{{ preg_replace('/\D+/', '', $space->contact_phone) }}" target="_blank" class="block-item">
                             <span class="block-label">{{ $block->label }}</span>
-                            <span class="block-arrow">➔</span>
+                            <span class="block-arrow"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
                         </a>
                     @endif
                 @else
                     <a href="{{ $block->url }}" target="_blank" class="block-item">
                         <span class="block-label">{{ $block->label }}</span>
-                        <span class="block-arrow">➔</span>
+                        <span class="block-arrow"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
                     </a>
                 @endif
             @endforeach

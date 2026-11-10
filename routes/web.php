@@ -79,6 +79,8 @@ Route::middleware(['auth', 'admin'])->group(function () {
     // Checklist de uso por tarjeta dentro de un lote.
     Route::get('/admin/batches/{id}/devices', [AdminController::class, 'batchDevices'])->name('admin.batches.devices');
     Route::post('/admin/devices/{id}/used', [AdminController::class, 'toggleDeviceUsed'])->name('admin.devices.used');
+    Route::post('/admin/batches/{id}/devices/bulk', [AdminController::class, 'bulkDevices'])->name('admin.batches.devices.bulk');
+    Route::delete('/admin/batches/{id}', [AdminController::class, 'destroyBatch'])->name('admin.batches.destroy');
     Route::get('/admin/devices/{id}/qr.png', [AdminController::class, 'deviceQr'])->name('admin.devices.qr');
     Route::post('/admin/users/{id}/plan', [AdminController::class, 'updateUserPlan'])->name('admin.users.plan');
     Route::post('/admin/orders/{id}/generate', [AdminController::class, 'generateDevicesFromOrder'])->name('admin.orders.generate');

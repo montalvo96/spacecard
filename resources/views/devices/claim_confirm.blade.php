@@ -1,25 +1,23 @@
 @extends('layouts.public')
-/**
- * Vista para confirmar el reclamo de un dispositivo en stock cuando el usuario ya tiene sesión activa.
- *
- * Última modificación: 2026-08-06
- * Autor: Antigravity
- */
+{{-- Se abre al escanear un dispositivo sin dueño con la sesión iniciada: confirma que se vincule a la cuenta. --}}
 
-@section('title', 'Reclamar Dispositivo - SpaceCard')
+@php($typeName = ['card' => 'SpaceCard', 'bracelet' => 'pulsera NFC', 'review_plate' => 'placa de reseñas'][$device->type] ?? 'dispositivo')
+
+@section('title', 'Reclamar dispositivo - SpaceCard')
+@section('icon', 'add_link')
 
 @section('content')
-    <span class="badge badge-info">Disponible</span>
-    <h1 class="title">¡Dispositivo Encontrado!</h1>
-    <p class="description">
-        Has escaneado un dispositivo físico en stock con el código <strong>{{ $device->code }}</strong>.<br><br>
-        ¿Deseas vincular este dispositivo (tipo: <strong>{{ __(strtoupper($device->type)) }}</strong>) a tu cuenta de SpaceCard?
-    </p>
-    
-    <form action="{{ route('devices.claim.confirm', ['code' => $device->code]) }}" method="POST">
+    <p class="kicker">Dispositivo encontrado</p>
+    <h1 class="title">¿Vinculamos esta {{ $typeName }} a <span class="hl">tu cuenta?</span></h1>
+    <p class="description">Quedará a nombre de <strong>{{ auth()->user()->name }}</strong> y podrás configurarla desde tu panel.</p>
+
+    <div class="code-chip"><span class="ms" aria-hidden="true">tag</span>{{ $device->code }}</div>
+
+    <form action="{{ route('devices.claim.confirm', ['code' => $device->code]) }}" method="POST" class="actions">
         @csrf
-        <button type="submit" class="btn">Sí, reclamar dispositivo</button>
+        <button type="submit" class="btn"><span class="ms" aria-hidden="true">check_circle</span>Sí, vincular a mi cuenta</button>
+        <a href="{{ route('dashboard') }}" class="btn btn-secondary">Ahora no, ir a mi panel</a>
     </form>
-    
-    <a href="/dashboard" class="btn btn-secondary">Cancelar e ir al panel</a>
+
+    <p class="note"><span class="ms" aria-hidden="true">info</span>Una vez vinculada, solo tú podrás cambiar a dónde lleva al escanearla.</p>
 @endsection
