@@ -43,7 +43,7 @@ export function Field({ id, label, icon, type = 'text', error, autoFocus = false
                     autoFocus={autoFocus}
                     aria-invalid={!!error}
                     aria-describedby={error ? `${id}-error` : undefined}
-                    className="sc-input h-12 min-w-0 flex-1 border-0 bg-transparent p-0 text-[15px] text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-0"
+                    className="sc-input h-12 min-w-0 flex-1 border-0 bg-transparent p-0 text-base text-neutral-900 sm:text-[15px] placeholder:text-neutral-400 focus:outline-none focus:ring-0"
                     {...props}
                 />
                 {isPassword && (
@@ -93,35 +93,36 @@ export default function AuthLayout({ mode, kicker, title, subtitle, children }) 
         `flex h-10 flex-1 items-center justify-center rounded-full text-[13px] font-semibold transition duration-500 ${active ? 'bg-[#D42410] text-white shadow-[0_6px_16px_rgba(212,36,16,0.3)]' : 'text-neutral-500 hover:text-neutral-900'}`;
 
     return (
-        <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-white via-[#F6F6F7] to-[#ECECEE] px-4 py-10 font-inter text-neutral-900 antialiased">
-            {/* Formas de la marca en las esquinas de la página */}
-            <div aria-hidden="true" className="absolute -left-12 top-0 h-full w-32">
+        <div className="relative flex min-h-screen min-h-[100dvh] items-center justify-center overflow-hidden bg-gradient-to-br from-white via-[#F6F6F7] to-[#ECECEE] px-3 py-4 font-inter text-neutral-900 antialiased sm:px-6 sm:py-10">
+            {/* Formas de la marca en las esquinas de la página (más pequeñas en móvil para no tapar la tarjeta) */}
+            <div aria-hidden="true" className="absolute -left-12 top-0 h-full w-16 sm:w-24 lg:w-32">
                 <div className="sc-in-left h-full w-full bg-[#D42410] [clip-path:polygon(0_0,100%_0,30%_100%,0_100%)]" />
             </div>
-            <div aria-hidden="true" className="sc-in-right absolute -right-6 bottom-0 h-28 w-56">
+            <div aria-hidden="true" className="sc-in-right absolute -right-6 bottom-0 h-16 w-32 sm:h-28 sm:w-56">
                 <div className="sc-drift h-full w-full bg-neutral-900 [clip-path:polygon(30%_100%,100%_0,100%_100%)]" />
             </div>
 
-            <div className="sc-rise relative grid w-full max-w-[1120px] overflow-hidden rounded-[32px] bg-white shadow-[0_40px_100px_rgba(0,0,0,0.12)] ring-1 ring-black/5 lg:grid-cols-[1fr_1.05fr]">
+            {/* Una columna (ancho cómodo) en móvil y tablet; dos columnas en escritorio */}
+            <div className="sc-rise relative grid w-full max-w-[560px] overflow-hidden rounded-3xl bg-white shadow-[0_40px_100px_rgba(0,0,0,0.12)] ring-1 ring-black/5 grid-cols-[minmax(0,1fr)] sm:rounded-[32px] lg:max-w-[1120px] lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)]">
                 {/* Formulario */}
-                <div className="flex flex-col px-6 py-8 sm:px-12 sm:py-10">
+                <div className="flex min-w-0 flex-col px-5 py-6 sm:px-12 sm:py-10">
                     <Link href="/" className="self-start">
                         <BrandLogo className="h-7" />
                     </Link>
 
-                    <div className="mx-auto flex w-full max-w-[380px] flex-1 flex-col justify-center py-10">
+                    <div className="mx-auto flex w-full max-w-[400px] flex-1 flex-col justify-center py-7 sm:py-10">
                         <p className="sc-rise text-xs font-bold uppercase tracking-[0.18em] text-[#D42410]" style={{ animationDelay: '80ms' }}>{kicker}</p>
-                        <h1 className="sc-rise mt-3 font-display text-[clamp(34px,4vw,44px)] font-bold leading-[1.05] tracking-[-0.035em]" style={{ animationDelay: '150ms' }}>
+                        <h1 className="sc-rise mt-3 font-display text-[clamp(30px,8vw,44px)] lg:text-[clamp(34px,3.6vw,44px)] font-bold leading-[1.05] tracking-[-0.035em]" style={{ animationDelay: '150ms' }}>
                             {title}
                         </h1>
                         <p className="sc-rise mt-3 text-sm text-neutral-600" style={{ animationDelay: '220ms' }}>{subtitle}</p>
 
-                        <nav aria-label="Acceso" className="sc-rise mt-7 flex rounded-full bg-neutral-100 p-1" style={{ animationDelay: '290ms' }}>
+                        <nav aria-label="Acceso" className="sc-rise mt-6 flex rounded-full sm:mt-7 bg-neutral-100 p-1" style={{ animationDelay: '290ms' }}>
                             <Link href={route('login')} className={tab(mode === 'login')} aria-current={mode === 'login' ? 'page' : undefined}>Entrar</Link>
                             <Link href={route('register')} className={tab(mode === 'register')} aria-current={mode === 'register' ? 'page' : undefined}>Crear cuenta</Link>
                         </nav>
 
-                        <div className="sc-rise mt-7" style={{ animationDelay: '360ms' }}>{children}</div>
+                        <div className="sc-rise mt-6 sm:mt-7" style={{ animationDelay: '360ms' }}>{children}</div>
                     </div>
 
                     <Link href="/" className="group inline-flex items-center gap-1.5 self-start text-[13px] font-medium text-neutral-500 transition hover:text-neutral-900">
