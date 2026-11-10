@@ -80,6 +80,8 @@ class AdminDesignController extends Controller
     {
         return OrderItem::with(['order.user', 'devices'])
             ->where('product_type', 'card')
+            // Solo se imprime lo que ya se cobró.
+            ->whereHas('order', fn ($q) => $q->whereIn('status', \App\Models\Order::PAID_STATUSES))
             ->latest()
             ->get();
     }

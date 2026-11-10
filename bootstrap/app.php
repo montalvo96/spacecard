@@ -26,6 +26,9 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
         ]);
 
+        // Stripe no manda token CSRF; el webhook se autentica con su firma.
+        $middleware->validateCsrfTokens(except: ['stripe/webhook']);
+
         $middleware->alias([
             'admin' => \App\Http\Middleware\IsAdmin::class,
             'master' => \App\Http\Middleware\IsMaster::class,

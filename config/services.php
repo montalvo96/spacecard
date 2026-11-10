@@ -51,6 +51,14 @@ return [
         'version' => env('ANTHROPIC_VERSION', '2023-06-01'),
     ],
 
+    // Stripe Checkout — en local usa llaves pk_test_/sk_test_ y el whsec_ que da `stripe listen`.
+    'stripe' => [
+        'key'            => env('STRIPE_KEY'),
+        'secret'         => env('STRIPE_SECRET'),
+        'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
+        'currency'       => env('STRIPE_CURRENCY', 'mxn'),
+    ],
+
     // Apple Wallet (.pkpass) — requiere un Pass Type ID + certificado de Apple Developer.
     'apple_wallet' => [
         'pass_type_id'  => env('APPLE_WALLET_PASS_TYPE_ID'),   // pass.com.tuempresa.spacecard

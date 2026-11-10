@@ -98,5 +98,9 @@ Route::middleware(['auth', 'admin'])->group(function () {
 Route::get('/comprar', [ShopController::class, 'showForm'])->name('shop.comprar');
 Route::post('/comprar/checkout', [ShopController::class, 'checkout'])->name('shop.checkout');
 Route::get('/comprar/success/{id}', [ShopController::class, 'showSuccess'])->name('shop.success');
+Route::get('/comprar/cancelado', [ShopController::class, 'cancelled'])->name('shop.cancelled');
+
+// Webhook de Stripe (sin CSRF: lo valida la firma Stripe-Signature, ver bootstrap/app.php)
+Route::post('/stripe/webhook', \App\Http\Controllers\StripeWebhookController::class)->name('stripe.webhook');
 
 require __DIR__.'/auth.php';

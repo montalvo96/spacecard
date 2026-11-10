@@ -236,26 +236,43 @@ export default function AdminDashboard({ batches, users, orders, stats, currentU
                                                     const usedN = usedCounts[batch.id] ?? batch.used_count ?? 0;
                                                     const open = openBatch === batch.id;
                                                     const pill = 'inline-flex items-center gap-1 px-2 py-1 rounded-lg';
+                                                    // Lote terminado: todas sus tarjetas impresas, enviadas y reclamadas.
+                                                    const done = total > 0
+                                                        && (batch.printed_count ?? 0) >= total
+                                                        && (batch.shipped_count ?? 0) >= total
+                                                        && (batch.claimed_count ?? 0) >= total;
                                                     return (
-                                                    <div key={batch.id} className="p-4 bg-gray-50 dark:bg-gray-900/40 border border-gray-100 dark:border-gray-700 rounded-lg space-y-3">
+                                                    <div
+                                                        key={batch.id}
+                                                        className={`p-4 rounded-lg space-y-3 border ${
+                                                            done
+                                                                ? 'bg-emerald-50 border-emerald-300 dark:bg-emerald-950/30 dark:border-emerald-800'
+                                                                : 'bg-gray-50 border-gray-100 dark:bg-gray-900/40 dark:border-gray-700'
+                                                        }`}
+                                                    >
                                                         <div className="flex justify-between items-start gap-4">
                                                             <div>
                                                                 <h4 className="font-semibold text-sm text-gray-900 dark:text-white">{batch.name}</h4>
-                                                                <p className="text-xs text-gray-400">
+                                                                <p className={`text-xs ${done ? 'text-emerald-700/80 dark:text-emerald-300/70' : 'text-gray-400'}`}>
                                                                     Tipo: {TYPE_LABELS[batch.type] ?? batch.type} • Cantidad: {batch.quantity} • Creador: {batch.creator?.name}
                                                                 </p>
                                                             </div>
+                                                            {done && (
+                                                                <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-emerald-600 px-3 py-1 text-xs font-bold text-white shadow-sm">
+                                                                    <span aria-hidden="true" className="ms text-sm">task_alt</span> Lote completado
+                                                                </span>
+                                                            )}
                                                         </div>
 
                                                         {/* Pipeline de producción + uso */}
                                                         <div className="flex flex-wrap gap-2 text-[11px]">
-                                                            <span className={`${pill} bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300`}>
+                                                            <span className={`${pill} ${done ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200' : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300'}`}>
                                                                 <span aria-hidden="true" className="ms text-sm">print</span> Impresas: <strong>{batch.printed_count ?? 0}/{total}</strong>
                                                             </span>
-                                                            <span className={`${pill} bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300`}>
+                                                            <span className={`${pill} ${done ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200' : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300'}`}>
                                                                 <span aria-hidden="true" className="ms text-sm">local_shipping</span> Enviadas: <strong>{batch.shipped_count ?? 0}/{total}</strong>
                                                             </span>
-                                                            <span className={`${pill} bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300`}>
+                                                            <span className={`${pill} ${done ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200' : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300'}`}>
                                                                 <span aria-hidden="true" className="ms text-sm">verified_user</span> Reclamadas: <strong>{batch.claimed_count ?? 0}/{total}</strong>
                                                             </span>
                                                             <span className={`${pill} bg-[#D42410] text-white`}>
@@ -339,11 +356,17 @@ export default function AdminDashboard({ batches, users, orders, stats, currentU
                                                             Pedido #SPC-{10000 + order.id}
                                                         </span>
                                                         <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase ${
-                                                            order.status === 'paid'
-                                                                ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300'
-                                                                : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300'
+                                                            {
+                                                                paid: 'bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300',
+                                                                completed: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300',
+                                                            }[order.status] ?? 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300'
                                                         }`}>
-                                                            {order.status === 'paid' ? 'Pendiente Fabricar' : 'Surtido / Completado'}
+                                                            {{
+                                                                paid: 'Pendiente Fabricar',
+                                                                completed: 'Surtido / Completado',
+                                                                pending: 'Esperando pago',
+                                                                cancelled: 'Sin pagar / Cancelado',
+                                                            }[order.status] ?? order.status}
                                                         </span>
                                                     </div>
                                                     
@@ -432,11 +455,11 @@ export default function AdminDashboard({ batches, users, orders, stats, currentU
                                                         >
                                                             Procesar y Generar Dispositivos
                                                         </button>
-                                                    ) : (
+                                                    ) : order.status === 'completed' ? (
                                                         <span className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
                                                             ✓ Surtido Completado
                                                         </span>
-                                                    )}
+                                                    ) : null}
                                                 </div>
                                             </div>
                                         ))}
