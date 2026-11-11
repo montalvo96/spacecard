@@ -54,6 +54,7 @@ class SalesReportExporter
     public function sales(CarbonImmutable $month): Collection
     {
         return Order::with(['items', 'user'])
+            ->where('is_test', false)   // los pedidos de prueba de admin no son ventas
             ->whereIn('status', Order::PAID_STATUSES)
             ->whereRaw('COALESCE(paid_at, created_at) BETWEEN ? AND ?', [$month->startOfMonth(), $month->endOfMonth()])
             ->orderByRaw('COALESCE(paid_at, created_at)')
@@ -64,6 +65,7 @@ class SalesReportExporter
     public function unpaid(CarbonImmutable $month): Collection
     {
         return Order::with('items')
+            ->where('is_test', false)
             ->whereNotIn('status', Order::PAID_STATUSES)
             ->whereBetween('created_at', [$month->startOfMonth(), $month->endOfMonth()])
             ->orderBy('created_at')

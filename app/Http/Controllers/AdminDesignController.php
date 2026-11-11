@@ -53,6 +53,7 @@ class AdminDesignController extends Controller
             'order_id'    => $order->id,
             'order_code'  => 'SPC-' . (10000 + $order->id),
             'order_status'=> $order->status,
+            'is_test'     => (bool) $order->is_test,
             'created_at'  => $item->created_at?->toDateTimeString(),
             'product'     => $item->product_type,
             'quantity'    => $item->quantity,

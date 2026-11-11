@@ -108,6 +108,15 @@ function OrderItem({ item }) {
     );
 }
 
+/** Etiqueta de los pedidos de prueba de administradores (sin cobro). */
+export function TestBadge() {
+    return (
+        <span className="inline-flex items-center gap-1 rounded-full bg-neutral-900 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-white" title="Pedido de prueba de un administrador: no se cobró y no cuenta en Ventas">
+            <Icon name="science" className="text-sm" /> Prueba
+        </span>
+    );
+}
+
 function OrderCard({ order }) {
     const st = STATUS[order.status] ?? { label: order.status, icon: 'help', cls: 'bg-neutral-100 text-neutral-600' };
     const units = order.items.reduce((n, i) => n + Number(i.quantity || 0), 0);
@@ -118,12 +127,19 @@ function OrderCard({ order }) {
         }
     };
 
+    const removeTest = () => {
+        if (confirm(`¿Borrar el pedido de prueba #SPC-${10000 + order.id}? También se borran las tarjetas que se generaron para él. No se puede deshacer.`)) {
+            router.delete(`/admin/pedidos-prueba/${order.id}`, { preserveScroll: true });
+        }
+    };
+
     return (
         <article className={`overflow-hidden rounded-2xl border bg-white ${order.status === 'paid' ? 'border-amber-300 shadow-[0_0_0_4px_rgba(245,158,11,0.08)]' : 'border-black/[0.07]'}`}>
             {/* Encabezado */}
             <header className="flex flex-wrap items-center justify-between gap-3 border-b border-black/[0.06] px-5 py-4">
                 <div className="flex flex-wrap items-center gap-3">
                     <h4 className="font-display text-lg font-bold tracking-tight text-neutral-900">#SPC-{10000 + order.id}</h4>
+                    {order.is_test && <TestBadge />}
                     <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold ${st.cls}`}>
                         <Icon name={st.icon} className="text-sm" /> {st.label}
                     </span>
@@ -199,6 +215,15 @@ function OrderCard({ order }) {
                     <span className="inline-flex items-center gap-1 text-xs text-neutral-500">
                         <Icon name="info" className="text-base" /> Se podrá fabricar cuando Stripe confirme el pago
                     </span>
+                )}
+                {order.is_test && (
+                    <button
+                        type="button"
+                        onClick={removeTest}
+                        className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-semibold text-[#B81E0C] ring-1 ring-[#D42410]/30 transition hover:bg-[#FFF4F2]"
+                    >
+                        <Icon name="delete" className="text-base" /> Borrar pedido de prueba
+                    </button>
                 )}
             </footer>
         </article>
