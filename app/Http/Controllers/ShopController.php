@@ -50,7 +50,11 @@ class ShopController extends Controller
      */
     public function checkout(Request $request, StripeCheckoutService $payments)
     {
-        if (!$payments->isConfigured()) {
+        // Pedido de prueba: solo un administrador puede pedirlo. No pasa por Stripe,
+        // queda como pagado para que llegue a Producción y no cuenta en Ventas.
+        $testOrder = $request->boolean('test_order') && (bool) $request->user()?->is_admin;
+
+        if (!$testOrder && !$payments->isConfigured()) {
             Log::error('Checkout de SpaceShop sin Stripe configurado (faltan STRIPE_SECRET / STRIPE_WEBHOOK_SECRET).');
             return redirect()->back()->with('error', 'Los pagos no están disponibles en este momento. Por favor, inténtalo más tarde.')->withInput();
         }
@@ -86,7 +90,7 @@ class ShopController extends Controller
         }
 
         try {
-            $order = DB::transaction(function () use ($request, $cart) {
+            $order = DB::transaction(function () use ($request, $cart, $testOrder) {
                 // 1. Preparar los artículos y calcular el total con precios del servidor.
                 $total = 0;
                 $prepared = [];
@@ -121,9 +125,12 @@ class ShopController extends Controller
                 }
 
                 // 2. Crear la Orden como pendiente: solo el webhook de Stripe la marca pagada.
+                //    Un pedido de prueba de admin nace ya como "pagado" (sin cobro).
                 $order = Order::create([
                     'user_id' => auth()->id(),
-                    'status' => 'pending',
+                    'status' => $testOrder ? 'paid' : 'pending',
+                    'is_test' => $testOrder,
+                    'paid_at' => $testOrder ? now() : null,
                     'customer_name' => $request->input('customer_name'),
                     'customer_email' => $request->input('customer_email'),
                     'shipping_address' => $request->input('shipping_address'),
@@ -141,6 +148,14 @@ class ShopController extends Controller
         } catch (\Exception $e) {
             Log::error("Error en el checkout del carrito SpaceShop: " . $e->getMessage());
             return redirect()->back()->with('error', 'Ocurrió un error al procesar tu compra. Por favor, inténtalo de nuevo.')->withInput();
+        }
+
+        // 4a. Pedido de prueba: directo a Producción, sin pasar por Stripe.
+        if ($testOrder) {
+            Log::info("Pedido de prueba #SPC-" . (10000 + $order->id) . " creado por el admin " . auth()->id());
+
+            return redirect()->route('admin.designs')
+                ->with('success', 'Pedido de prueba #SPC-' . (10000 + $order->id) . ' guardado sin cobro. Ya está en Producción para revisarlo e imprimirlo.');
         }
 
         // 4. Mandar al cliente a pagar en Stripe Checkout.

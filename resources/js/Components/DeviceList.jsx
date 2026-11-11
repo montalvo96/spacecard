@@ -5,7 +5,7 @@
  * Estilo de la landing: blanco, acento rojo #D42410, iconos Material Symbols.
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { router } from '@inertiajs/react';
 
@@ -89,9 +89,67 @@ function Notice({ children }) {
     );
 }
 
-function DeviceCard({ device, onDestination, onDesign }) {
+/** Fecha en que se reclamó (o se agregó) el dispositivo, como Date. */
+function claimedDate(device) {
+    const raw = device.claimed_at || device.created_at;
+    if (!raw) return null;
+    const d = new Date(String(raw).replace(' ', 'T'));
+    return isNaN(d) ? null : d;
+}
+
+const fmtDate = (d) => d.toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' });
+const toInput = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+const SORTS = [
+    { id: 'newest', label: 'Más recientes primero' },
+    { id: 'oldest', label: 'Más antiguos primero' },
+    { id: 'type', label: 'Por tipo de producto' },
+];
+
+const RANGES = [
+    { id: 'all', label: 'Todas' },
+    { id: '7d', label: 'Últimos 7 días' },
+    { id: 'month', label: 'Este mes' },
+    { id: 'custom', label: 'Elegir fechas' },
+];
+
+/** Barra de orden y filtro por fecha de reclamo. */
+function DeviceToolbar({ sort, setSort, range, setRange, from, setFrom, to, setTo, shown, total }) {
+    const chip = (active) => `rounded-full px-3 py-1.5 text-xs font-semibold transition ${active ? 'bg-neutral-900 text-white' : 'bg-white text-neutral-600 ring-1 ring-black/10 hover:ring-black/25'}`;
+    return (
+        <div className="mb-5 flex flex-col gap-3 rounded-3xl bg-neutral-50 p-3 sm:p-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Filtrar por fecha de reclamo">
+                    <Icon name="calendar_month" className="text-lg text-neutral-400" />
+                    {RANGES.map((r) => (
+                        <button key={r.id} type="button" onClick={() => setRange(r.id)} aria-pressed={range === r.id} className={chip(range === r.id)}>{r.label}</button>
+                    ))}
+                </div>
+                <label className="flex items-center gap-2 text-xs font-semibold text-neutral-500">
+                    <Icon name="sort" className="text-lg text-neutral-400" />
+                    <span className="sr-only">Ordenar</span>
+                    <select value={sort} onChange={(e) => setSort(e.target.value)} className="rounded-full border-black/10 py-1.5 pl-3 pr-8 text-xs font-semibold text-neutral-800 focus:border-[#D42410] focus:ring-[#D42410]/20">
+                        {SORTS.map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}
+                    </select>
+                </label>
+            </div>
+            {range === 'custom' && (
+                <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-neutral-600">
+                    <span>Reclamadas del</span>
+                    <input type="date" value={from} max={to || undefined} onChange={(e) => setFrom(e.target.value)} aria-label="Desde" className="rounded-full border-black/10 px-3 py-1.5 text-xs focus:border-[#D42410] focus:ring-[#D42410]/20" />
+                    <span>al</span>
+                    <input type="date" value={to} min={from || undefined} onChange={(e) => setTo(e.target.value)} aria-label="Hasta" className="rounded-full border-black/10 px-3 py-1.5 text-xs focus:border-[#D42410] focus:ring-[#D42410]/20" />
+                </div>
+            )}
+            {shown !== total && <p className="text-xs text-neutral-500">Mostrando {shown} de {total} dispositivo(s).</p>}
+        </div>
+    );
+}
+
+function DeviceCard({ device, onDestination, onDesign, onQr }) {
     const p = PRODUCTS[device.type] ?? { label: device.type, icon: 'contactless' };
     const d = destinationInfo(device);
+    const when = claimedDate(device);
     return (
         <article className={`flex min-w-0 flex-col rounded-3xl border bg-white p-5 transition hover:-translate-y-0.5 hover:shadow-[0_14px_30px_rgba(0,0,0,0.07)] ${d.ok ? 'border-black/[0.07]' : 'border-amber-200'}`}>
             <div className="flex items-start gap-3">
@@ -101,6 +159,11 @@ function DeviceCard({ device, onDestination, onDesign }) {
                 <div className="min-w-0 flex-1">
                     <p className="font-semibold text-neutral-900">{p.label}</p>
                     <p className="font-mono text-xs font-semibold text-neutral-500">{device.code}</p>
+                    {when && (
+                        <p className="mt-0.5 flex items-center gap-1 text-xs text-neutral-500">
+                            <Icon name="schedule" className="text-sm" /> {device.claimed_at ? 'Reclamada' : 'Agregada'} el {fmtDate(when)}
+                        </p>
+                    )}
                 </div>
                 <a
                     href={route('devices.resolve', device.code)}
@@ -122,7 +185,7 @@ function DeviceCard({ device, onDestination, onDesign }) {
                 </div>
             </div>
 
-            <div className="mt-4 grid grid-cols-[1fr_auto] gap-2">
+            <div className="mt-4 grid grid-cols-[1fr_auto_auto] gap-2">
                 <button
                     type="button"
                     onClick={() => onDestination(device)}
@@ -137,6 +200,14 @@ function DeviceCard({ device, onDestination, onDesign }) {
                 >
                     <Icon name="palette" className="text-lg" /> Diseño
                 </button>
+                <button
+                    type="button"
+                    onClick={() => onQr(device)}
+                    title="Ver y descargar el código QR"
+                    className="inline-flex items-center justify-center gap-1.5 rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-neutral-800 ring-1 ring-black/10 transition hover:ring-black/25"
+                >
+                    <Icon name="qr_code_2" className="text-lg" /> QR
+                </button>
             </div>
         </article>
     );
@@ -144,7 +215,7 @@ function DeviceCard({ device, onDestination, onDesign }) {
 
 export default function DeviceList({ devices, spaces, reviewTargets }) {
     const [selectedDevice, setSelectedDevice] = useState(null);
-    const [activeModal, setActiveModal] = useState(null); // 'destination' | 'design' | null
+    const [activeModal, setActiveModal] = useState(null); // 'destination' | 'design' | 'qr' | null
     const [saving, setSaving] = useState(false);
 
     const [destinationType, setDestinationType] = useState('none');
@@ -168,6 +239,11 @@ export default function DeviceList({ devices, spaces, reviewTargets }) {
         setActiveModal('design');
     };
 
+    const openQrModal = (device) => {
+        setSelectedDevice(device);
+        setActiveModal('qr');
+    };
+
     const submitDestination = (e) => {
         e.preventDefault();
         setSaving(true);
@@ -181,6 +257,43 @@ export default function DeviceList({ devices, spaces, reviewTargets }) {
             onSuccess: close,
             onFinish: () => setSaving(false),
         });
+    };
+
+    // Orden y filtro por fecha de reclamo (solo en pantalla).
+    const [sort, setSort] = useState('newest');
+    const [range, setRange] = useState('all');
+    const [from, setFrom] = useState('');
+    const [to, setTo] = useState('');
+
+    const visible = useMemo(() => {
+        const now = new Date();
+        let start = null, end = null;
+        if (range === '7d') start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6);
+        if (range === 'month') start = new Date(now.getFullYear(), now.getMonth(), 1);
+        if (range === 'custom') {
+            if (from) start = new Date(`${from}T00:00:00`);
+            if (to) end = new Date(`${to}T23:59:59.999`);
+        }
+        const list = devices.filter((d) => {
+            if (!start && !end) return true;
+            const when = claimedDate(d);
+            return when && (!start || when >= start) && (!end || when <= end);
+        });
+        const time = (d) => claimedDate(d)?.getTime() ?? 0;
+        return [...list].sort((a, b) => {
+            if (sort === 'oldest') return time(a) - time(b);
+            if (sort === 'type') return (PRODUCTS[a.type]?.label ?? a.type).localeCompare(PRODUCTS[b.type]?.label ?? b.type) || time(b) - time(a);
+            return time(b) - time(a);
+        });
+    }, [devices, sort, range, from, to]);
+
+    const chooseRange = (id) => {
+        setRange(id);
+        if (id === 'custom' && !from && !to) {
+            const now = new Date();
+            setFrom(toInput(new Date(now.getFullYear(), now.getMonth(), 1)));
+            setTo(toInput(now));
+        }
     };
 
     const pending = devices.filter((d) => !d.destination_type || d.destination_type === 'none').length;
@@ -218,11 +331,26 @@ export default function DeviceList({ devices, spaces, reviewTargets }) {
                     </a>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                    {devices.map((device) => (
-                        <DeviceCard key={device.id} device={device} onDestination={openDestinationModal} onDesign={openDesignModal} />
-                    ))}
-                </div>
+                <>
+                    <DeviceToolbar
+                        sort={sort} setSort={setSort}
+                        range={range} setRange={chooseRange}
+                        from={from} setFrom={setFrom} to={to} setTo={setTo}
+                        shown={visible.length} total={devices.length}
+                    />
+                    {visible.length === 0 ? (
+                        <div className="rounded-3xl border-2 border-dashed border-black/10 px-6 py-10 text-center">
+                            <p className="font-semibold text-neutral-900">No hay dispositivos reclamados en esas fechas</p>
+                            <button type="button" onClick={() => setRange('all')} className="mt-3 text-sm font-semibold text-[#D42410] hover:underline">Ver todos</button>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                            {visible.map((device) => (
+                                <DeviceCard key={device.id} device={device} onDestination={openDestinationModal} onDesign={openDesignModal} onQr={openQrModal} />
+                            ))}
+                        </div>
+                    )}
+                </>
             )}
 
             {/* Modal: a dónde lleva al escanear */}
@@ -341,6 +469,49 @@ export default function DeviceList({ devices, spaces, reviewTargets }) {
                     </button>
                 </Modal>
             )}
+
+            {/* Modal: código QR del dispositivo, descargable en PNG */}
+            {activeModal === 'qr' && selectedDevice && (() => {
+                const dest = destinationInfo(selectedDevice);
+                const qrUrl = `/devices/${selectedDevice.id}/qr.png`;
+                return (
+                    <Modal title="Tu código QR" subtitle={`${PRODUCTS[selectedDevice.type]?.label ?? 'Dispositivo'} · ${selectedDevice.code}`} onClose={close}>
+                        <div className="relative mx-auto w-full max-w-[260px] rounded-3xl bg-white p-3 ring-1 ring-black/[0.08]">
+                            <img src={qrUrl} alt={`Código QR de ${selectedDevice.code}`} width="1000" height="1000" className="h-auto w-full" />
+                            <a
+                                href={`${qrUrl}?descargar=1`}
+                                download={`qr-${selectedDevice.code}.png`}
+                                title="Descargar PNG"
+                                aria-label="Descargar el QR en PNG"
+                                className="absolute -right-3 -top-3 flex h-11 w-11 items-center justify-center rounded-full bg-[#D42410] text-white shadow-[0_8px_20px_rgba(212,36,16,0.35)] transition hover:bg-[#B81E0C]"
+                            >
+                                <Icon name="download" className="text-xl" />
+                            </a>
+                        </div>
+
+                        <div className={`mt-5 flex items-start gap-2.5 rounded-2xl p-3 ${dest.ok ? 'bg-emerald-50' : 'bg-amber-50'}`}>
+                            <Icon name={dest.icon} fill={!dest.ok} className={`mt-px text-lg ${dest.ok ? 'text-emerald-600' : 'text-amber-600'}`} />
+                            <div className="min-w-0">
+                                <p className={`text-xs font-bold uppercase tracking-wider ${dest.ok ? 'text-emerald-700' : 'text-amber-700'}`}>{dest.ok ? 'Al escanearlo abre' : 'Aún sin configurar'}</p>
+                                <p className="truncate text-sm text-neutral-700" title={dest.detail}>{dest.ok ? `${dest.label}${dest.detail ? ` · ${dest.detail}` : ''}` : 'Configura a dónde lleva para que el QR abra algo.'}</p>
+                            </div>
+                        </div>
+
+                        <p className="mt-3 flex items-start gap-2 text-sm text-neutral-500">
+                            <Icon name="info" className="mt-px text-base text-neutral-400" />
+                            Si cambias a dónde lleva tu dispositivo, este mismo QR sigue funcionando: no necesitas descargarlo de nuevo.
+                        </p>
+
+                        <a
+                            href={`${qrUrl}?descargar=1`}
+                            download={`qr-${selectedDevice.code}.png`}
+                            className="mt-5 flex w-full items-center justify-center gap-2 rounded-full bg-[#D42410] py-3 text-sm font-semibold text-white shadow-[0_8px_20px_rgba(212,36,16,0.25)] transition hover:bg-[#B81E0C]"
+                        >
+                            <Icon name="download" className="text-lg" /> Descargar PNG
+                        </a>
+                    </Modal>
+                );
+            })()}
         </div>
     );
 }

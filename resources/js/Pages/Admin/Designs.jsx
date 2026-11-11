@@ -9,6 +9,7 @@
 import { useMemo, useState } from 'react';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { TestBadge } from '@/Components/OrdersPanel';
 
 function Icon({ name, fill = false, className = '' }) {
     return <span aria-hidden="true" className={`ms ${fill ? 'ms-fill' : ''} ${className}`}>{name}</span>;
@@ -124,6 +125,7 @@ function DesignRow({ item }) {
             <div className="flex min-w-0 flex-col">
                 <div className="flex flex-wrap items-center gap-2">
                     <span className="font-display text-lg font-bold tracking-[-0.02em]">Pedido #{item.order_code}</span>
+                    {item.is_test && <TestBadge />}
                     <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-bold ring-1 ring-inset ${stage.cls}`} title={stage.hint}>{stage.label}</span>
                     <span className="text-xs text-neutral-400">{new Date(item.created_at).toLocaleString('es-MX')}</span>
                 </div>

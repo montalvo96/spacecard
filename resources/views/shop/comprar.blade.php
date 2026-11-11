@@ -572,6 +572,30 @@
         .btn-red { background-color: #ef4444; }
         .btn-black { background-color: #18181b; }
 
+        /* Pedido de prueba (solo administradores) */
+        .test-order {
+            display: flex; gap: 14px; align-items: flex-start;
+            padding: 16px 18px; margin-top: 4px;
+            border: 1px dashed var(--border-color); border-radius: 18px;
+            cursor: pointer; transition: border-color 0.2s var(--ease), background-color 0.2s var(--ease);
+        }
+        .test-order.is-on { border-color: var(--primary); border-style: solid; background: rgba(212, 36, 16, 0.08); }
+        .test-order input { position: absolute; opacity: 0; pointer-events: none; }
+        .test-order .switch {
+            flex: none; width: 40px; height: 24px; border-radius: 999px; margin-top: 2px;
+            background: var(--border-color); position: relative; transition: background-color 0.2s var(--ease);
+        }
+        .test-order .switch::after {
+            content: ''; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px;
+            border-radius: 50%; background: #fff; transition: transform 0.2s var(--ease);
+        }
+        .test-order.is-on .switch { background: var(--primary); }
+        .test-order.is-on .switch::after { transform: translateX(16px); }
+        .test-order input:focus-visible + .switch { outline: 2px solid var(--primary-text); outline-offset: 2px; }
+        .test-order strong { display: flex; align-items: center; gap: 6px; font-size: 14px; color: var(--text-light); }
+        .test-order strong .ms { font-size: 18px; color: var(--primary-text); }
+        .test-order small { display: block; margin-top: 4px; font-size: 12px; line-height: 1.5; color: var(--text-muted); }
+
         /* Botón de checkout */
         .btn-checkout {
             width: 100%;
@@ -1196,7 +1220,19 @@
                     </div>
                 </div>
 
-                <button type="submit" class="btn-checkout" id="btn-checkout">Finalizar compra · <span id="checkout-total">$29.99</span><span class="ms" aria-hidden="true">arrow_forward</span></button>
+                @if (auth()->user()?->is_admin)
+                    {{-- Solo admins: guarda el pedido sin cobrar para probar diseño e impresora --}}
+                    <label class="test-order" id="test-order-box">
+                        <input type="checkbox" name="test_order" value="1" id="test_order" onchange="toggleTestOrder(this.checked)">
+                        <span class="switch" aria-hidden="true"></span>
+                        <span>
+                            <strong><span class="ms" aria-hidden="true">science</span>Pedido de prueba (sin pago)</strong>
+                            <small>Solo administradores. No pasa por Stripe ni cuenta en Ventas. El pedido llega a Producción con la etiqueta PRUEBA para revisar el diseño e imprimirlo. Apágalo para una compra normal.</small>
+                        </span>
+                    </label>
+                @endif
+
+                <button type="submit" class="btn-checkout" id="btn-checkout"><span id="checkout-label">Finalizar compra ·</span> <span id="checkout-total">$29.99</span><span class="ms" aria-hidden="true">arrow_forward</span></button>
             </form>
         </div>
 
@@ -1608,6 +1644,12 @@
             return true;
         }
 
+        // Interruptor "Pedido de prueba" (solo existe para administradores).
+        function toggleTestOrder(on) {
+            $('test-order-box').classList.toggle('is-on', on);
+            $('checkout-label').innerText = on ? 'Guardar pedido de prueba · sin cobro ·' : 'Finalizar compra ·';
+        }
+
         /* ---- Init ---- */
         function initDesigner(){
             setSide('front');
@@ -1625,7 +1667,7 @@
         // Se inicializa en cuanto existe el HTML, sin esperar a que terminen de
         // descargar imágenes y fuentes (window.onload hacía que el diseñador
         // apareciera desordenado durante varios segundos).
-        function initPage(){ initDesigner(); renderCart(); }
+        function initPage(){ initDesigner(); renderCart(); if ($('test_order')) toggleTestOrder($('test_order').checked); }
         if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initPage);
         else initPage();
     </script>

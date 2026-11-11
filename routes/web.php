@@ -42,6 +42,7 @@ Route::middleware('auth')->group(function () {
     // CRUD de Dispositivos y Onboarding
     Route::post('/devices/{id}/destination', [DashboardController::class, 'updateDestination'])->name('devices.update.destination');
     Route::post('/devices/{id}/design', [DashboardController::class, 'updateDesign'])->name('devices.update.design');
+    Route::get('/devices/{id}/qr.png', [\App\Http\Controllers\DeviceQrController::class, 'show'])->name('devices.qr');
     Route::post('/review-targets', [DashboardController::class, 'storeReviewTarget'])->name('review-targets.store');
 
     // CRUD de Spaces y Bloques (usamos POST para actualizar el perfil para soportar subida de imágenes en PHP/Inertia)
@@ -84,6 +85,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin/devices/{id}/qr.png', [AdminController::class, 'deviceQr'])->name('admin.devices.qr');
     Route::post('/admin/users/{id}/plan', [AdminController::class, 'updateUserPlan'])->name('admin.users.plan');
     Route::post('/admin/orders/{id}/generate', [AdminController::class, 'generateDevicesFromOrder'])->name('admin.orders.generate');
+    Route::delete('/admin/pedidos-prueba/{id}', [\App\Http\Controllers\TestOrderController::class, 'destroy'])->name('admin.orders.test.destroy');
     Route::get('/admin/reportes/ventas/datos', [\App\Http\Controllers\SalesReportController::class, 'data'])->name('admin.reports.sales.data');
     Route::get('/admin/reportes/ventas', [\App\Http\Controllers\SalesReportController::class, 'download'])->name('admin.reports.sales');
 
