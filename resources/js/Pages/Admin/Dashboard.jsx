@@ -10,6 +10,7 @@ import React, { useState } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import BatchCard from '@/Components/BatchCard';
 import OrdersPanel from '@/Components/OrdersPanel';
+import SalesDashboard from '@/Components/SalesDashboard';
 import { Head, router } from '@inertiajs/react';
 
 export default function AdminDashboard({ batches, users, orders, stats, currentUserId }) {
@@ -113,6 +114,7 @@ export default function AdminDashboard({ batches, users, orders, stats, currentU
                         {[
                             { id: 'batches', label: 'Lotes de Manufactura' },
                             { id: 'orders', label: 'Órdenes de Compra' },
+                            { id: 'sales', label: 'Ventas' },
                             { id: 'users', label: 'Usuarios y Planes' },
                         ].map((tab) => (
                             <button
@@ -258,6 +260,9 @@ export default function AdminDashboard({ batches, users, orders, stats, currentU
 
                         {/* Pestaña: Órdenes de Compra (Ecommerce) */}
                         {activeTab === 'orders' && <OrdersPanel orders={orders} />}
+
+                        {/* Pestaña: Dashboard de ventas (gráficas y reporte en Excel) */}
+                        {activeTab === 'sales' && <SalesDashboard />}
 
                         {/* Pestaña: Usuarios y Planes */}
                         {activeTab === 'users' && (

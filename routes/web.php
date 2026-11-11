@@ -84,6 +84,8 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin/devices/{id}/qr.png', [AdminController::class, 'deviceQr'])->name('admin.devices.qr');
     Route::post('/admin/users/{id}/plan', [AdminController::class, 'updateUserPlan'])->name('admin.users.plan');
     Route::post('/admin/orders/{id}/generate', [AdminController::class, 'generateDevicesFromOrder'])->name('admin.orders.generate');
+    Route::get('/admin/reportes/ventas/datos', [\App\Http\Controllers\SalesReportController::class, 'data'])->name('admin.reports.sales.data');
+    Route::get('/admin/reportes/ventas', [\App\Http\Controllers\SalesReportController::class, 'download'])->name('admin.reports.sales');
 
     // Producción: registro de clientes y diseños, descargas e impresión.
     Route::get('/admin/produccion', [\App\Http\Controllers\AdminDesignController::class, 'index'])->name('admin.designs');
