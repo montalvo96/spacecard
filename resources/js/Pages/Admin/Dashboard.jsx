@@ -12,6 +12,7 @@ import BatchCard from '@/Components/BatchCard';
 import OrdersPanel from '@/Components/OrdersPanel';
 import SalesDashboard from '@/Components/SalesDashboard';
 import { Head, router } from '@inertiajs/react';
+import { confirmDialog } from '@/Components/Notify';
 
 export default function AdminDashboard({ batches, users, orders, stats, currentUserId }) {
     const [activeTab, setActiveTab] = useState('batches');
@@ -63,11 +64,18 @@ export default function AdminDashboard({ batches, users, orders, stats, currentU
         });
     };
 
-    const handleToggleAdmin = (user) => {
-        const accion = user.is_admin ? 'quitar acceso de administrador a' : 'hacer administrador a';
-        if (confirm(`¿Seguro que quieres ${accion} ${user.name}?`)) {
-            router.post(`/admin/users/${user.id}/toggle-admin`, {}, { preserveScroll: true });
-        }
+    const handleToggleAdmin = async (user) => {
+        const quitar = user.is_admin;
+        const ok = await confirmDialog({
+            tone: quitar ? 'danger' : 'primary',
+            icon: quitar ? 'person_off' : 'admin_panel_settings',
+            title: quitar ? `¿Quitar acceso de administrador a ${user.name}?` : `¿Hacer administrador a ${user.name}?`,
+            message: quitar
+                ? 'Dejará de ver Producción y el panel de Admin.'
+                : 'Podrá ver Producción, el panel de Admin y gestionar usuarios.',
+            confirmText: quitar ? 'Quitar acceso' : 'Hacer administrador',
+        });
+        if (ok) router.post(`/admin/users/${user.id}/toggle-admin`, {}, { preserveScroll: true });
     };
 
     const roleBadge = (user) => {

@@ -94,6 +94,9 @@ class StripeCheckoutService
                 'paid_at'                  => now(),
                 'stripe_payment_intent_id' => is_string($session->payment_intent) ? $session->payment_intent : ($session->payment_intent->id ?? null),
             ]);
+
+            // Cualquier compra pagada (tarjeta, pulsera o placa de reseñas) activa el modo Pro.
+            $order->grantBuyerPro();
         });
     }
 

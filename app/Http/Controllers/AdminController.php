@@ -401,7 +401,7 @@ class AdminController extends Controller
             $n++;
         }
 
-        return redirect()->back()->with('success', "{$n} tarjeta(s) del lote «{$batch->name}» marcadas como impresas.");
+        return redirect()->back()->with('success', "{$n} tarjeta(s) del lote \"{$batch->name}\" marcadas como impresas.");
     }
 
     /**
@@ -420,7 +420,7 @@ class AdminController extends Controller
             return redirect()->back()->with('error', 'No hay tarjetas impresas pendientes de envío en este lote. Imprime primero.');
         }
 
-        return redirect()->back()->with('success', "{$n} tarjeta(s) del lote «{$batch->name}» marcadas como enviadas.");
+        return redirect()->back()->with('success', "{$n} tarjeta(s) del lote \"{$batch->name}\" marcadas como enviadas.");
     }
 
     /**
@@ -496,7 +496,7 @@ class AdminController extends Controller
         )->count();
 
         if ($blocked > 0) {
-            return redirect()->back()->with('error', "No se puede eliminar «{$batch->name}»: {$blocked} tarjeta(s) ya se enviaron, se utilizaron, las reclamó un cliente o surten un pedido.");
+            return redirect()->back()->with('error', "No se puede eliminar \"{$batch->name}\": {$blocked} tarjeta(s) ya se enviaron, se utilizaron, las reclamó un cliente o surten un pedido.");
         }
 
         DB::transaction(function () use ($batch) {
@@ -504,8 +504,8 @@ class AdminController extends Controller
             $batch->delete();
         });
 
-        Log::info("Lote {$batch->id} «{$batch->name}» eliminado por el usuario " . auth()->id());
+        Log::info("Lote {$batch->id} \"{$batch->name}\" eliminado por el usuario " . auth()->id());
 
-        return redirect()->back()->with('success', "Lote «{$batch->name}» eliminado.");
+        return redirect()->back()->with('success', "Lote \"{$batch->name}\" eliminado.");
     }
 }

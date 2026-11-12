@@ -170,5 +170,6 @@
         </div>
     </footer>
     @yield('scripts')
+    @include('partials.notify')
 </body>
 </html>

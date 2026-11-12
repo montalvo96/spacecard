@@ -7,6 +7,7 @@
 
 import { router } from '@inertiajs/react';
 import BatchChecklist from '@/Components/BatchChecklist';
+import { confirmDialog } from '@/Components/Notify';
 
 const TYPE_LABELS = { card: 'Tarjeta', bracelet: 'Pulsera', review_plate: 'Placa de reseñas' };
 
@@ -61,13 +62,18 @@ export default function BatchCard({ batch, open, onToggle, usedOverride, onUsedC
             ? 'Ya hay tarjetas enviadas, utilizadas o reclamadas: no se puede eliminar.'
             : null;
 
-    const handleDelete = () => {
-        const warn = printed > 0
-            ? `\n\nOjo: ${printed} tarjeta(s) ya están impresas. Sus QR/NFC dejarán de funcionar.`
-            : '';
-        if (confirm(`¿Eliminar el lote «${batch.name}» y sus ${total} tarjetas? Esto no se puede deshacer.${warn}`)) {
-            router.delete(route('admin.batches.destroy', batch.id), { preserveScroll: true });
-        }
+    const handleDelete = async () => {
+        const ok = await confirmDialog({
+            tone: 'danger',
+            icon: 'delete',
+            title: `¿Eliminar el lote "${batch.name}"?`,
+            message: [
+                `Se borrarán sus ${total} tarjetas. Esto no se puede deshacer.`,
+                ...(printed > 0 ? [`Ojo: ${printed} tarjeta(s) ya están impresas. Sus QR/NFC dejarán de funcionar.`] : []),
+            ],
+            confirmText: 'Eliminar lote',
+        });
+        if (ok) router.delete(route('admin.batches.destroy', batch.id), { preserveScroll: true });
     };
 
     const refresh = () => router.reload({ only: ['batches'], preserveScroll: true });

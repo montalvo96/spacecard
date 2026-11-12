@@ -502,6 +502,31 @@
             font-weight: 600;
         }
 
+        /* Paleta de colores fuertes (aptos para impresión) */
+        .swatch-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+        .swatch-label span { color: var(--text-light); }
+        .swatch-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(34px, 1fr));
+            gap: 8px;
+        }
+        .swatch {
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            cursor: pointer;
+            padding: 0;
+            transition: transform .2s ease, box-shadow .2s ease;
+        }
+        .swatch:hover { transform: scale(1.08); }
+        .swatch.active { box-shadow: 0 0 0 2px var(--bg-dark), 0 0 0 4px var(--primary); }
+
         /* Carga de logo */
         .file-upload-zone {
             border: 1.5px dashed rgba(255, 255, 255, 0.16);
@@ -852,6 +877,10 @@
         .el-card:hover { border-color: rgba(0, 0, 0, 0.2); }
         .switch .slider { background: #E5E5E5; }
         .color-picker::-webkit-color-swatch { border-color: rgba(0, 0, 0, 0.15); }
+        .swatch { border-color: rgba(0, 0, 0, 0.12); }
+        .swatch.active { box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--primary); }
+        .swatch-label { color: #6B6B6B; }
+        .swatch-label span { color: #171717; }
 
         .preset-note { background: #ECFDF5; border-color: rgba(5, 150, 105, 0.2); color: #065F46; }
         .preset-note .ms { color: #059669; }
@@ -1072,15 +1101,19 @@
                             <button type="button" id="bg-solid" class="seg-btn" onclick="setBgType('solid')">Sólido</button>
                             <button type="button" id="bg-grad" class="seg-btn active" onclick="setBgType('gradient')">Degradado</button>
                         </div>
-                        <div class="color-inputs" style="margin-top:10px;">
-                            <div class="color-picker-wrapper">
-                                <input type="color" id="bgC1" class="color-picker" value="#d42410" oninput="onBgColor()">
-                                <span id="bgC1_label" class="color-picker-text">#D42410</span>
-                            </div>
-                            <div id="bgC2-wrap" class="color-picker-wrapper">
-                                <input type="color" id="bgC2" class="color-picker" value="#070707" oninput="onBgColor()">
-                                <span id="bgC2_label" class="color-picker-text">#070707</span>
-                            </div>
+                        <div style="margin-top:12px;">
+                            <input type="hidden" id="bgC1" value="#d42410">
+                            <div class="swatch-label">Color principal · <span id="bgC1_label">Rojo</span></div>
+                            <div class="swatch-grid" data-target="bgC1" role="radiogroup" aria-label="Color principal"></div>
+                        </div>
+                        <div id="bgC2-wrap" style="margin-top:12px;">
+                            <input type="hidden" id="bgC2" value="#070707">
+                            <div class="swatch-label">Color del degradado · <span id="bgC2_label">Negro</span></div>
+                            <div class="swatch-grid" data-target="bgC2" role="radiogroup" aria-label="Color del degradado"></div>
+                        </div>
+                        <div class="preset-note" style="margin-top:12px;">
+                            <span class="ms" aria-hidden="true">print</span>
+                            <span>Solo ofrecemos <strong>colores fuertes</strong>: los tonos claros no los tenemos disponibles.</span>
                         </div>
                         <div id="angle-wrap" class="el-row">
                             <span>Ángulo</span>
@@ -1368,14 +1401,70 @@
             loadBgControls();
             render();
         }
+        /* ---- Paleta de colores fuertes ----
+           Solo tonos oscuros/saturados: los colores claros no se imprimen bien. */
+        const PRINT_COLORS = [
+            { hex: '#070707', name: 'Negro' },
+            { hex: '#27272a', name: 'Grafito' },
+            { hex: '#d42410', name: 'Rojo' },
+            { hex: '#7f1d1d', name: 'Vino' },
+            { hex: '#c2410c', name: 'Naranja' },
+            { hex: '#78350f', name: 'Café' },
+            { hex: '#a16207', name: 'Mostaza' },
+            { hex: '#15803d', name: 'Verde' },
+            { hex: '#14532d', name: 'Verde bosque' },
+            { hex: '#0f766e', name: 'Turquesa' },
+            { hex: '#1d4ed8', name: 'Azul' },
+            { hex: '#1e3a8a', name: 'Azul marino' },
+            { hex: '#6d28d9', name: 'Púrpura' },
+            { hex: '#be185d', name: 'Magenta' },
+        ];
+        const colorName = hex => (PRINT_COLORS.find(c => c.hex === String(hex).toLowerCase()) || {}).name || String(hex).toUpperCase();
+        // Si llega un color que no está en la paleta (p. ej. uno claro), usar el fuerte más cercano.
+        function nearestPrintColor(hex) {
+            const rgb = h => [1,3,5].map(i => parseInt(String(h).slice(i, i+2), 16) || 0);
+            const [r,g,b] = rgb(hex);
+            let best = PRINT_COLORS[0], bestD = Infinity;
+            PRINT_COLORS.forEach(c => {
+                const [r2,g2,b2] = rgb(c.hex);
+                const d = (r-r2)**2 + (g-g2)**2 + (b-b2)**2;
+                if (d < bestD) { bestD = d; best = c; }
+            });
+            return best.hex;
+        }
+        function buildSwatches() {
+            document.querySelectorAll('.swatch-grid').forEach(grid => {
+                const target = grid.dataset.target;
+                grid.innerHTML = PRINT_COLORS.map(c =>
+                    `<button type="button" class="swatch" role="radio" data-hex="${c.hex}" title="${c.name}" aria-label="${c.name}" style="background:${c.hex}"></button>`
+                ).join('');
+                grid.querySelectorAll('.swatch').forEach(btn => btn.addEventListener('click', () => {
+                    $(target).value = btn.dataset.hex;
+                    onBgColor();
+                }));
+            });
+        }
+        function markSwatches() {
+            document.querySelectorAll('.swatch-grid').forEach(grid => {
+                const val = String($(grid.dataset.target).value).toLowerCase();
+                grid.querySelectorAll('.swatch').forEach(btn => {
+                    const on = btn.dataset.hex === val;
+                    btn.classList.toggle('active', on);
+                    btn.setAttribute('aria-checked', on ? 'true' : 'false');
+                });
+            });
+        }
+
         function loadBgControls() {
             const b = D.bg[D.side];
-            $('bgC1').value = b.c1; $('bgC1_label').innerText = b.c1.toUpperCase();
-            $('bgC2').value = b.c2; $('bgC2_label').innerText = b.c2.toUpperCase();
+            b.c1 = nearestPrintColor(b.c1); b.c2 = nearestPrintColor(b.c2);
+            $('bgC1').value = b.c1; $('bgC1_label').innerText = colorName(b.c1);
+            $('bgC2').value = b.c2; $('bgC2_label').innerText = colorName(b.c2);
+            markSwatches();
             $('bgAngle').value = b.angle;
             $('bg-solid').classList.toggle('active', b.type==='solid');
             $('bg-grad').classList.toggle('active', b.type==='gradient');
-            $('bgC2-wrap').style.display = b.type==='solid' ? 'none' : 'flex';
+            $('bgC2-wrap').style.display = b.type==='solid' ? 'none' : 'block';
             $('angle-wrap').style.display = b.type==='solid' ? 'none' : 'flex';
         }
         function setBgType(t){ D.bg[D.side].type = t; loadBgControls(); render(); }
@@ -1410,7 +1499,8 @@
         function onBgColor(){
             const b = D.bg[D.side];
             b.c1 = $('bgC1').value; b.c2 = $('bgC2').value; b.angle = +$('bgAngle').value;
-            $('bgC1_label').innerText = b.c1.toUpperCase(); $('bgC2_label').innerText = b.c2.toUpperCase();
+            $('bgC1_label').innerText = colorName(b.c1); $('bgC2_label').innerText = colorName(b.c2);
+            markSwatches();
             render();
         }
 
@@ -1470,7 +1560,7 @@
             try {
                 dataUrl = await optimizeLogo(file);
             } catch (err) {
-                alert('No pudimos leer esa imagen. Prueba con un PNG, JPG o SVG.');
+                scToast('Prueba con un PNG, JPG o SVG.', 'error', 'No pudimos leer esa imagen');
                 input.value = '';
                 return;
             }
@@ -1667,9 +1757,10 @@
         // Se inicializa en cuanto existe el HTML, sin esperar a que terminen de
         // descargar imágenes y fuentes (window.onload hacía que el diseñador
         // apareciera desordenado durante varios segundos).
-        function initPage(){ initDesigner(); renderCart(); if ($('test_order')) toggleTestOrder($('test_order').checked); }
+        function initPage(){ buildSwatches(); initDesigner(); renderCart(); if ($('test_order')) toggleTestOrder($('test_order').checked); }
         if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initPage);
         else initPage();
     </script>
+    @include('partials.notify')
 </body>
 </html>

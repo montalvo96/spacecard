@@ -202,14 +202,14 @@
                 form.reset();
                 successAlert.scrollIntoView({ behavior: 'smooth' });
             } else {
-                alert('Ocurrió un error al enviar el comentario: ' + (data.message || 'Error desconocido'));
+                scToast(data.message || 'Inténtalo de nuevo en un momento.', 'error', 'No se pudo enviar tu comentario');
                 submitBtn.disabled = false;
                 submitBtn.innerText = 'Enviar comentario';
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Error de conexión al enviar el formulario.');
+            scToast('Revisa tu conexión e inténtalo de nuevo.', 'error', 'Error de conexión');
             submitBtn.disabled = false;
             submitBtn.innerText = 'Enviar comentario';
         });

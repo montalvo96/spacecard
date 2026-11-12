@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Order;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
@@ -42,6 +43,15 @@ class RegisteredUserController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
+
+        // Si ya había comprado como invitado con este correo, recibe su plan Pro.
+        Order::where('is_test', false)
+            ->whereIn('status', Order::PAID_STATUSES)
+            ->whereNull('user_id')
+            ->whereRaw('LOWER(customer_email) = ?', [strtolower($user->email)])
+            ->latest('paid_at')
+            ->first()
+            ?->grantBuyerPro();
 
         event(new Registered($user));
 

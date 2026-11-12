@@ -56,8 +56,13 @@ function Stat({ label, value, sub, icon, delay, locked }) {
 }
 
 export default function Dashboard({ devices, spaces, reviewTargets, userPlan, flash, analytics, leads }) {
-    const [activeTab, setActiveTab] = useState('devices');
-    const user = usePage().props.auth.user;
+    // ?tab=analytics (desde la campanita de mensajes) abre esa pestaña.
+    const [activeTab, setActiveTab] = useState(() => {
+        const t = new URLSearchParams(window.location.search).get('tab');
+        return ['devices', 'spaces', 'reviews', 'analytics'].includes(t) ? t : 'devices';
+    });
+    const { auth, unreadLeads = 0 } = usePage().props;
+    const user = auth.user;
     const firstName = (user?.name || 'Hola').split(' ')[0];
 
     // KPIs
@@ -71,7 +76,7 @@ export default function Dashboard({ devices, spaces, reviewTargets, userPlan, fl
         { id: 'devices', label: 'Mis dispositivos', icon: 'contactless' },
         { id: 'spaces', label: 'Spaces', icon: 'language' },
         { id: 'reviews', label: 'Google Reviews', icon: 'reviews' },
-        { id: 'analytics', label: 'Analíticas', icon: 'monitoring' },
+        { id: 'analytics', label: 'Analíticas', icon: 'monitoring', badge: unreadLeads },
     ];
 
     return (
@@ -144,20 +149,6 @@ export default function Dashboard({ devices, spaces, reviewTargets, userPlan, fl
             <div className="pb-20 pt-8">
                 <div className="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
 
-                    {/* Flash */}
-                    {flash.success && (
-                        <div className="sc-swap flex items-center gap-2.5 rounded-2xl border border-emerald-600/20 bg-emerald-50 px-5 py-4 text-sm font-medium text-emerald-800">
-                            <Icon name="check_circle" className="text-xl text-emerald-600" />
-                            {flash.success}
-                        </div>
-                    )}
-                    {flash.error && (
-                        <div className="sc-swap flex items-center gap-2.5 rounded-2xl border border-[#D42410]/25 bg-[#FFF4F2] px-5 py-4 text-sm font-medium text-[#B81E0C]">
-                            <Icon name="error" className="text-xl text-[#D42410]" />
-                            {flash.error}
-                        </div>
-                    )}
-
                     {/* KPIs */}
                     <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
                         <Stat label="Dispositivos" value={deviceCount} sub={`${activeDevices} activos`} icon="credit_card" delay={80} />
@@ -192,6 +183,11 @@ export default function Dashboard({ devices, spaces, reviewTargets, userPlan, fl
                                     >
                                         <Icon name={tab.icon} className="text-lg" />
                                         {tab.label}
+                                        {tab.badge > 0 && (
+                                            <span className={`flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[11px] font-bold leading-none ${active ? 'bg-white text-[#D42410]' : 'bg-[#D42410] text-white'}`}>
+                                                {tab.badge > 99 ? '99+' : tab.badge}
+                                            </span>
+                                        )}
                                     </button>
                                 );
                             })}

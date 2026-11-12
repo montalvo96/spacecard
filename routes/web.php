@@ -50,6 +50,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/spaces/ai-generate', [DashboardController::class, 'generateSpaceWithAi'])->name('spaces.ai-generate');
     Route::post('/spaces/{id}', [DashboardController::class, 'updateSpace'])->name('spaces.update');
     Route::post('/spaces/{id}/blocks', [DashboardController::class, 'saveBlocks'])->name('spaces.save-blocks');
+
+    // Bandeja de mensajes (Analíticas)
+    Route::post('/leads/read-all', [\App\Http\Controllers\LeadController::class, 'markAllRead'])->name('leads.read-all');
+    Route::post('/leads/{id}/read', [\App\Http\Controllers\LeadController::class, 'markRead'])->name('leads.read');
+    Route::delete('/leads/{id}', [\App\Http\Controllers\LeadController::class, 'destroy'])->name('leads.destroy');
 });
 
 // Ruta de resolución única para dispositivos físicos NFC/QR
@@ -67,7 +72,7 @@ Route::get('/s/{slug}', [SpaceController::class, 'show'])->name('spaces.show');
 Route::get('/s/{slug}/vcard', [SpaceController::class, 'downloadVCard'])->name('spaces.vcard');
 Route::get('/s/{slug}/wallet/apple', [SpaceController::class, 'appleWallet'])->name('spaces.wallet.apple');
 Route::get('/s/{slug}/wallet/google', [SpaceController::class, 'googleWallet'])->name('spaces.wallet.google');
-Route::post('/s/{slug}/lead', [SpaceController::class, 'storeLead'])->name('spaces.lead.store');
+Route::post('/s/{slug}/lead', [SpaceController::class, 'storeLead'])->middleware('throttle:6,1')->name('spaces.lead.store');
 
 // Rutas de administración de Avaspace
 Route::middleware(['auth', 'admin'])->group(function () {

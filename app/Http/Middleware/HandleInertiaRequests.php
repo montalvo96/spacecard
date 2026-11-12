@@ -34,6 +34,10 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
+            // Mensajes sin leer de sus Spaces y reseñas (campanita del menú y pestaña Analíticas).
+            'unreadLeads' => fn () => $request->user()
+                ? \App\Models\Lead::ownedBy($request->user())->unread()->count()
+                : 0,
             // Mensajes de éxito/error de las acciones (redirect()->with(...)).
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
