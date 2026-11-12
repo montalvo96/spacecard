@@ -359,6 +359,12 @@
             @if ($isPaid)
             <div class="steps-box sc-rise" style="animation-delay: 280ms;">
                 <h4 class="steps-title"><span class="ms" aria-hidden="true">route</span>¿Qué sigue ahora?</h4>
+                @unless ($order->is_test)
+                <div class="step-item">
+                    <span class="ms" aria-hidden="true">workspace_premium</span>
+                    <span><strong>Modo Pro activado:</strong> tu compra incluye {{ \App\Models\User::PRO_MONTHS_PER_PURCHASE }} meses de plan Pro en la cuenta con el correo <strong>{{ $order->customer_email }}</strong>. Si aún no tienes cuenta, se activa en cuanto te registres con ese correo.</span>
+                </div>
+                @endunless
                 <div class="step-item">
                     <span class="ms" aria-hidden="true">print</span>
                     <span><strong>Impresión y fabricación:</strong> Grabaremos tu logotipo y colores en tu hardware NFC en las próximas 24 horas.</span>

@@ -71,7 +71,7 @@ class DashboardController extends Controller
 
         // Obtener la información del usuario para el Dashboard
         $devices = $user->devices()->with(['space', 'reviewTarget'])->get();
-        $spaces = $user->spaces()->get();
+        $spaces = $user->spaces()->with(['blocks' => fn ($q) => $q->orderBy('position')])->get();
         $reviewTargets = $user->reviewTargets()->get();
 
         $analytics = [];
@@ -114,12 +114,27 @@ class DashboardController extends Controller
                 ->limit(20)
                 ->get();
 
-            // 5. Leads capturados
-            $leads = \App\Models\Lead::whereIn('space_id', $spaceIds)
-                ->orWhereIn('review_target_id', $reviewTargetIds)
-                ->orderBy('created_at', 'desc')
-                ->get();
         }
+
+        // Mensajes recibidos: los ve cualquier plan (son de sus visitantes).
+        $leads = \App\Models\Lead::ownedBy($user)
+            ->with(['space:id,display_name,slug', 'reviewTarget:id,business_name'])
+            ->orderByRaw('read_at IS NOT NULL')
+            ->orderByDesc('created_at')
+            ->limit(300)
+            ->get()
+            ->map(fn ($l) => [
+                'id' => $l->id,
+                'name' => $l->name,
+                'email' => $l->email,
+                'phone' => $l->phone,
+                'note' => $l->note,
+                'created_at' => $l->created_at?->toIso8601String(),
+                'read_at' => $l->read_at?->toIso8601String(),
+                'source' => $l->space
+                    ? ['type' => 'space', 'label' => $l->space->display_name, 'slug' => $l->space->slug]
+                    : ['type' => 'review', 'label' => $l->reviewTarget?->business_name ?? 'Página de reseñas'],
+            ]);
 
         return Inertia::render('Dashboard', [
             'devices' => $devices,
@@ -268,14 +283,14 @@ class DashboardController extends Controller
             'layout' => 'stack',
             'background' => 'solid',
             'palette' => [
-                'primary' => '#8b5cf6',
-                'secondary' => '#6b7280',
-                'background' => '#0c0b14',
-                'text' => '#ffffff',
+                'primary' => '#d42410',
+                'secondary' => '#525252',
+                'background' => '#ffffff',
+                'text' => '#0b0b0b',
             ],
             'font_pair' => 'Outfit_Inter',
             'button_style' => 'filled',
-            'corner_radius' => '8px',
+            'corner_radius' => '12px',
             'avatar_shape' => 'circle',
         ];
 
@@ -333,7 +348,7 @@ class DashboardController extends Controller
             'contact_email'  => $user->email,
             'theme_template' => $user->isPro() ? $generated['theme_template'] : 'corporate',
             'is_public'      => true,
-            'show_branding'  => !$user->isPro(),
+            'show_branding'  => true,
         ]);
 
         // Materializar los bloques generados.
@@ -360,6 +375,11 @@ class DashboardController extends Controller
         $user = $request->user();
         $space = $user->spaces()->findOrFail($id);
 
+        // El editor manda el tema como JSON dentro del FormData (por las imágenes).
+        if (is_string($request->input('theme_config'))) {
+            $request->merge(['theme_config' => json_decode($request->input('theme_config'), true) ?: []]);
+        }
+
         $request->validate([
             'slug' => ['required', 'string', 'max:100', Rule::unique('spaces', 'slug')->ignore($space->id)],
             'display_name' => 'required|string|max:255',
@@ -372,7 +392,6 @@ class DashboardController extends Controller
             'theme_template' => ['required', Rule::in(['aurora', 'bento', 'editorial', 'neon', 'corporate'])],
             'theme_config' => 'required|array',
             'is_public' => 'required|boolean',
-            'show_branding' => 'required|boolean',
             'avatar' => 'nullable|image|max:1024',
             'cover' => 'nullable|image|max:2048',
         ]);
@@ -382,9 +401,6 @@ class DashboardController extends Controller
         if (!$user->isPro()) {
             if (in_style_premium($request->input('theme_template'))) {
                 return redirect()->back()->with('error', 'El tema seleccionado es premium (Pro). Por favor actualiza tu plan.');
-            }
-            if (!$request->input('show_branding')) {
-                return redirect()->back()->with('error', 'Ocultar el branding de Avaspace requiere el plan Pro.');
             }
         }
 
@@ -398,9 +414,9 @@ class DashboardController extends Controller
             'contact_email' => $request->input('contact_email'),
             'contact_website' => $request->input('contact_website'),
             'theme_template' => $request->input('theme_template'),
-            'theme_config' => $request->input('theme_config'),
+            'theme_config' => $this->cleanThemeConfig((array) $request->input('theme_config'), $space->theme_config ?? []),
             'is_public' => $request->input('is_public'),
-            'show_branding' => $request->input('show_branding'),
+            'show_branding' => true, // «Hecho con SpaceCard» es fijo en todos los Spaces
         ];
 
         // Guardar imágenes si vienen en la petición
@@ -424,7 +440,7 @@ class DashboardController extends Controller
 
         $space->update($data);
 
-        return redirect()->back()->with('success', 'Space digital actualizado.');
+        return redirect()->back()->with('success', 'Tu Space se guardó. Los cambios ya están publicados.');
     }
 
     /**
@@ -435,40 +451,106 @@ class DashboardController extends Controller
         $user = $request->user();
         $space = $user->spaces()->findOrFail($id);
 
+        // Bloques que el editor permite editar; las secciones ricas (FAQ, testimonios…,
+        // generadas con IA) solo se reordenan, ocultan o eliminan desde aquí.
+        $editable = ['link', 'social', 'header', 'email', 'phone', 'whatsapp', 'file', 'embed'];
+
         $request->validate([
-            'blocks' => 'required|array',
-            'blocks.*.type' => ['required', Rule::in(['link', 'social', 'header', 'email', 'phone', 'whatsapp', 'file', 'embed'])],
-            'blocks.*.label' => 'required|string|max:255',
-            'blocks.*.url' => 'nullable|string',
+            'blocks' => 'present|array|max:60',
+            'blocks.*.id' => 'nullable|integer',
+            'blocks.*.type' => ['required', Rule::in(array_column(SpaceBlockType::cases(), 'value'))],
+            'blocks.*.label' => 'nullable|string|max:255',
+            'blocks.*.url' => 'nullable|string|max:2048',
             'blocks.*.icon' => 'nullable|string|max:100',
             'blocks.*.is_active' => 'required|boolean',
         ]);
 
         $blocksData = $request->input('blocks', []);
 
-        // Realizar los cambios de bloques en una transacción
-        DB::transaction(function () use ($space, $blocksData) {
-            $sentIds = collect($blocksData)->pluck('id')->filter()->toArray();
+        foreach ($blocksData as $i => $data) {
+            if (in_array($data['type'], $editable, true) && trim((string) ($data['label'] ?? '')) === '') {
+                return redirect()->back()->with('error', 'El bloque ' . ($i + 1) . ' no tiene texto. Escribe cómo quieres que se vea el botón.');
+            }
+        }
 
-            // Eliminar bloques anteriores que ya no vienen en la lista
+        DB::transaction(function () use ($space, $blocksData, $editable) {
+            $existing = $space->blocks()->get()->keyBy('id');
+            $sentIds = collect($blocksData)->pluck('id')->filter()->map(fn ($v) => (int) $v)->all();
+
+            // Los que ya no vienen en la lista se eliminaron en el editor.
             $space->blocks()->whereNotIn('id', $sentIds)->delete();
 
             foreach ($blocksData as $index => $data) {
-                $space->blocks()->updateOrCreate(
-                    ['id' => $data['id'] ?? null],
-                    [
-                        'type' => $data['type'],
-                        'label' => $data['label'],
-                        'url' => $data['url'] ?? null,
-                        'icon' => $data['icon'] ?? null,
-                        'position' => $index,
-                        'is_active' => $data['is_active'],
-                    ]
-                );
+                $block = !empty($data['id']) ? $existing->get((int) $data['id']) : null;
+                $isEditable = in_array($data['type'], $editable, true);
+
+                // Una sección rica solo existe si ya estaba en este Space.
+                if (!$isEditable) {
+                    $block?->update(['position' => $index, 'is_active' => (bool) $data['is_active']]);
+                    continue;
+                }
+
+                $values = [
+                    'type' => $data['type'],
+                    'label' => trim($data['label']),
+                    'url' => $data['type'] === 'header' ? null : $this->cleanBlockUrl($data['url'] ?? null),
+                    'icon' => $data['icon'] ?? null,
+                    'position' => $index,
+                    'is_active' => (bool) $data['is_active'],
+                ];
+
+                $block ? $block->update($values) : $space->blocks()->create($values);
             }
         });
 
-        return redirect()->back()->with('success', 'Bloques del Space actualizados.');
+        return redirect()->back()->with('success', 'Tus enlaces se guardaron. Ya se ven en tu Space.');
+    }
+
+    /**
+     * Normaliza el enlace de un bloque: agrega https:// si falta y descarta
+     * esquemas peligrosos (javascript:, data:…) porque se pinta en un href público.
+     */
+    protected function cleanBlockUrl(?string $url): ?string
+    {
+        $url = trim((string) $url);
+        if ($url === '' || $url === 'https://') {
+            return null;
+        }
+
+        if (preg_match('/^(https?:|mailto:|tel:)/i', $url)) {
+            return $url;
+        }
+
+        // Sin esquema (p. ej. "instagram.com/yo"): se asume web.
+        return preg_match('/^[a-z][a-z0-9+.-]*:/i', $url) ? null : 'https://' . ltrim($url, '/');
+    }
+
+    /**
+     * Deja en el tema solo valores conocidos: colores hex y opciones de la lista.
+     * Se inyectan en el CSS de la página pública, así que nada de texto libre.
+     */
+    protected function cleanThemeConfig(array $in, array $current): array
+    {
+        $hex = fn ($v, $fallback) => is_string($v) && preg_match('/^#[0-9a-fA-F]{6}$/', $v) ? strtolower($v) : $fallback;
+        $pick = fn ($v, array $allowed, $fallback) => in_array($v, $allowed, true) ? $v : $fallback;
+
+        $palette = $in['palette'] ?? [];
+        $old = $current['palette'] ?? [];
+
+        return [
+            'layout'        => $pick($in['layout'] ?? null, ['stack', 'bento'], 'stack'),
+            'background'    => $pick($in['background'] ?? null, ['solid', 'mesh'], 'solid'),
+            'palette'       => [
+                'primary'    => $hex($palette['primary'] ?? null, $old['primary'] ?? '#d42410'),
+                'secondary'  => $hex($palette['secondary'] ?? null, $old['secondary'] ?? '#6b7280'),
+                'background' => $hex($palette['background'] ?? null, $old['background'] ?? '#ffffff'),
+                'text'       => $hex($palette['text'] ?? null, $old['text'] ?? '#0b0b0b'),
+            ],
+            'font_pair'     => $pick($in['font_pair'] ?? null, array_keys(Space::FONT_PAIRS), 'Outfit_Inter'),
+            'button_style'  => $pick($in['button_style'] ?? null, Space::BUTTON_STYLES, 'filled'),
+            'corner_radius' => $pick($in['corner_radius'] ?? null, Space::RADII, '12px'),
+            'avatar_shape'  => $pick($in['avatar_shape'] ?? null, ['circle', 'squircle', 'square'], 'circle'),
+        ];
     }
 }
 

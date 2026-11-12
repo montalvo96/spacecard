@@ -7,8 +7,9 @@
  */
 
 import { useMemo, useState } from 'react';
-import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { confirmDialog } from '@/Components/Notify';
 import { TestBadge } from '@/Components/OrdersPanel';
 
 function Icon({ name, fill = false, className = '' }) {
@@ -208,7 +209,15 @@ function DesignRow({ item }) {
                     {item.stage === 'pending' && item.order_status === 'paid' && (
                         <button
                             type="button"
-                            onClick={() => confirm('¿Generar los dispositivos de este pedido? Cada tarjeta recibe su código y QR únicos.') && router.post(route('admin.orders.generate', item.order_id), {}, { preserveScroll: true })}
+                            onClick={async () => {
+                                const ok = await confirmDialog({
+                                    icon: 'qr_code_2',
+                                    title: '¿Generar los dispositivos de este pedido?',
+                                    message: 'Cada tarjeta recibe su código y QR únicos.',
+                                    confirmText: 'Generar QR',
+                                });
+                                if (ok) router.post(route('admin.orders.generate', item.order_id), {}, { preserveScroll: true });
+                            }}
                             className={`${btn} bg-neutral-900 text-white hover:bg-black`}
                         >
                             <Icon name="qr_code_2" className="text-lg" /> Generar QR reales
@@ -230,7 +239,6 @@ function DesignRow({ item }) {
 }
 
 export default function Designs({ items, users }) {
-    const { flash } = usePage().props;
     const [tab, setTab] = useState('designs');
     const [filter, setFilter] = useState('all');
     const [q, setQ] = useState('');
@@ -295,16 +303,6 @@ export default function Designs({ items, users }) {
 
             <div className="pb-20 pt-8">
                 <div className="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
-                    {flash?.success && (
-                        <div className="sc-swap flex items-center gap-2.5 rounded-2xl border border-emerald-600/20 bg-emerald-50 px-5 py-4 text-sm font-medium text-emerald-800">
-                            <Icon name="check_circle" className="text-xl text-emerald-600" /> {flash.success}
-                        </div>
-                    )}
-                    {flash?.error && (
-                        <div className="sc-swap flex items-center gap-2.5 rounded-2xl border border-[#D42410]/25 bg-[#FFF4F2] px-5 py-4 text-sm font-medium text-[#B81E0C]">
-                            <Icon name="error" className="text-xl text-[#D42410]" /> {flash.error}
-                        </div>
-                    )}
 
                     <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
                         <Stat label="Sin QR (por generar)" value={count('pending')} icon="qr_code_2" />

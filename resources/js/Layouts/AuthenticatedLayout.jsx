@@ -6,16 +6,54 @@
 
 import BrandLogo from '@/Components/BrandLogo';
 import Dropdown from '@/Components/Dropdown';
-import { Link, usePage } from '@inertiajs/react';
-import { useState } from 'react';
+import { Link, usePage, usePoll } from '@inertiajs/react';
+import { useEffect, useRef, useState } from 'react';
+import { toast } from '@/Components/Notify';
 
 function Icon({ name, fill = false, className = '' }) {
     return <span aria-hidden="true" className={`ms ${fill ? 'ms-fill' : ''} ${className}`}>{name}</span>;
 }
 
+/** Campanita con los mensajes sin leer de sus Spaces; abre la bandeja en Analíticas. */
+function MessagesBell({ count }) {
+    const label = count === 0 ? 'Mensajes: ninguno sin leer' : `Mensajes: ${count} sin leer`;
+    return (
+        <Link
+            href={route('dashboard', { tab: 'analytics' })}
+            aria-label={label}
+            title={label}
+            className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-black/10 bg-white text-neutral-700 transition hover:border-black/25 hover:text-neutral-900"
+        >
+            <Icon name="notifications" fill={count > 0} className={`text-[21px] ${count > 0 ? 'text-[#D42410]' : ''}`} />
+            {count > 0 && (
+                <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#D42410] px-1 text-[11px] font-bold leading-none text-white ring-2 ring-white">
+                    {count > 99 ? '99+' : count}
+                </span>
+            )}
+        </Link>
+    );
+}
+
 export default function AuthenticatedLayout({ header, children }) {
-    const user = usePage().props.auth.user;
+    const { auth, unreadLeads = 0 } = usePage().props;
+    const user = auth.user;
     const [menuOpen, setMenuOpen] = useState(false);
+
+    // Revisa cada minuto si llegaron mensajes (en el panel también trae la bandeja).
+    const onDashboard = route().current('dashboard');
+    usePoll(60000, { only: onDashboard ? ['unreadLeads', 'leads'] : ['unreadLeads'] });
+
+    // Aviso cuando el número de mensajes sin leer sube mientras la página está abierta.
+    const prevUnread = useRef(unreadLeads);
+    useEffect(() => {
+        const diff = unreadLeads - prevUnread.current;
+        if (diff > 0) {
+            toast.info(diff === 1 ? 'Alguien te dejó sus datos en tu Space.' : `Recibiste ${diff} mensajes en tus Spaces.`, {
+                title: diff === 1 ? 'Nuevo mensaje' : 'Nuevos mensajes',
+            });
+        }
+        prevUnread.current = unreadLeads;
+    }, [unreadLeads]);
 
     const links = [
         { href: route('dashboard'), label: 'Mi panel', icon: 'space_dashboard', active: route().current('dashboard') },
@@ -52,7 +90,8 @@ export default function AuthenticatedLayout({ header, children }) {
                         ))}
                     </div>
 
-                    <div className="hidden sm:block">
+                    <div className="hidden items-center gap-2 sm:flex">
+                        <MessagesBell count={unreadLeads} />
                         <Dropdown>
                             <Dropdown.Trigger>
                                 <button
@@ -82,15 +121,18 @@ export default function AuthenticatedLayout({ header, children }) {
                         </Dropdown>
                     </div>
 
-                    <button
-                        type="button"
-                        onClick={() => setMenuOpen((o) => !o)}
-                        aria-expanded={menuOpen}
-                        aria-label={menuOpen ? 'Cerrar menú' : 'Abrir menú'}
-                        className="flex h-11 w-11 items-center justify-center rounded-full border border-black/10 text-neutral-700 transition hover:bg-neutral-100 sm:hidden"
-                    >
-                        <Icon name={menuOpen ? 'close' : 'menu'} className="text-2xl" />
-                    </button>
+                    <div className="flex items-center gap-2 sm:hidden">
+                        <MessagesBell count={unreadLeads} />
+                        <button
+                            type="button"
+                            onClick={() => setMenuOpen((o) => !o)}
+                            aria-expanded={menuOpen}
+                            aria-label={menuOpen ? 'Cerrar menú' : 'Abrir menú'}
+                            className="flex h-11 w-11 items-center justify-center rounded-full border border-black/10 text-neutral-700 transition hover:bg-neutral-100"
+                        >
+                            <Icon name={menuOpen ? 'close' : 'menu'} className="text-2xl" />
+                        </button>
+                    </div>
                 </div>
 
                 {/* Menú móvil */}

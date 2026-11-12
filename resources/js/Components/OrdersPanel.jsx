@@ -7,6 +7,7 @@
 
 import { useMemo, useState } from 'react';
 import { router } from '@inertiajs/react';
+import { confirmDialog } from '@/Components/Notify';
 
 function Icon({ name, fill = false, className = '' }) {
     return <span aria-hidden="true" className={`ms ${fill ? 'ms-fill' : ''} ${className}`}>{name}</span>;
@@ -121,16 +122,25 @@ function OrderCard({ order }) {
     const st = STATUS[order.status] ?? { label: order.status, icon: 'help', cls: 'bg-neutral-100 text-neutral-600' };
     const units = order.items.reduce((n, i) => n + Number(i.quantity || 0), 0);
 
-    const process = () => {
-        if (confirm(`¿Fabricar el pedido #SPC-${10000 + order.id}? Se generarán ${units} dispositivo(s) con su código y QR, y el pedido pasará a «Surtido».`)) {
-            router.post(`/admin/orders/${order.id}/generate`, {}, { preserveScroll: true });
-        }
+    const process = async () => {
+        const ok = await confirmDialog({
+            icon: 'precision_manufacturing',
+            title: `¿Fabricar el pedido #SPC-${10000 + order.id}?`,
+            message: `Se generarán ${units} dispositivo(s) con su código y QR, y el pedido pasará a «Surtido».`,
+            confirmText: 'Fabricar',
+        });
+        if (ok) router.post(`/admin/orders/${order.id}/generate`, {}, { preserveScroll: true });
     };
 
-    const removeTest = () => {
-        if (confirm(`¿Borrar el pedido de prueba #SPC-${10000 + order.id}? También se borran las tarjetas que se generaron para él. No se puede deshacer.`)) {
-            router.delete(`/admin/pedidos-prueba/${order.id}`, { preserveScroll: true });
-        }
+    const removeTest = async () => {
+        const ok = await confirmDialog({
+            tone: 'danger',
+            icon: 'delete',
+            title: `¿Borrar el pedido de prueba #SPC-${10000 + order.id}?`,
+            message: 'También se borran las tarjetas que se generaron para él. No se puede deshacer.',
+            confirmText: 'Borrar',
+        });
+        if (ok) router.delete(`/admin/pedidos-prueba/${order.id}`, { preserveScroll: true });
     };
 
     return (

@@ -7,6 +7,13 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
+import { toast } from '@/Components/Notify';
+
+const ACTION_WORDS = {
+    printed: { one: 'impresa', many: 'impresas' },
+    shipped: { one: 'enviada', many: 'enviadas' },
+    used: { one: 'sellada', many: 'selladas' },
+};
 
 function Icon({ name, fill = false, className = '' }) {
     return <span aria-hidden="true" className={`ms ${fill ? 'ms-fill' : ''} ${className}`}>{name}</span>;
@@ -178,7 +185,6 @@ const FILTERS = [
 export default function BatchChecklist({ batch, onUsedChange, onChanged }) {
     const [devices, setDevices] = useState(null);
     const [error, setError] = useState(null);
-    const [notice, setNotice] = useState(null);
     const [filter, setFilter] = useState('all');
     const [q, setQ] = useState('');
     const [selected, setSelected] = useState(() => new Set());
@@ -225,7 +231,6 @@ export default function BatchChecklist({ batch, onUsedChange, onChanged }) {
     /** Aplica una acción a una o varias tarjetas. Devuelve true si se guardó. */
     const apply = async (action, ids, noteText) => {
         setError(null);
-        setNotice(null);
         try {
             const r = await window.axios.post(route('admin.batches.devices.bulk', batch.id), {
                 action,
@@ -234,14 +239,26 @@ export default function BatchChecklist({ batch, onUsedChange, onChanged }) {
             });
             const byId = new Map(r.data.devices.map((d) => [d.id, d]));
             setDevices((list) => list.map((d) => byId.get(d.id) ?? d));
-            if (ids.length > 1) {
-                const verb = { printed: 'marcada(s) como impresas', shipped: 'marcada(s) como enviadas', used: 'sellada(s)' }[action];
-                setNotice(`${r.data.done} tarjeta(s) ${verb}.${r.data.skipped ? ` ${r.data.skipped} ya estaban o no aplicaban.` : ''}`);
+
+            // Notificación de lo que se acaba de hacer: «Lote "X" · tarjeta impresa».
+            const { done, skipped } = r.data;
+            const word = ACTION_WORDS[action];
+            const lote = `Lote "${batch.name}"`;
+            if (done === 0) {
+                toast.info(ids.length === 1 ? `${lote}: esa tarjeta ya estaba ${word.one} o no aplicaba.` : `${lote}: esas tarjetas ya estaban ${word.many} o no aplicaban.`, { title: 'Sin cambios' });
+            } else if (ids.length === 1) {
+                const code = byId.get(ids[0])?.code ?? '';
+                toast.success(`${lote} · ${code}`, { title: `Tarjeta ${word.one}` });
+            } else {
+                toast.success(
+                    `${lote}${skipped ? ` · ${skipped} ya estaban ${word.many} o no aplicaban` : ''}`,
+                    { title: `${done} tarjeta${done === 1 ? '' : 's'} ${done === 1 ? word.one : word.many}` },
+                );
             }
             onChanged?.();
             return true;
         } catch {
-            setError('No se pudo guardar. Intenta de nuevo.');
+            toast.error(`Lote "${batch.name}": intenta de nuevo.`, { title: 'No se pudo guardar' });
             return false;
         }
     };
@@ -361,7 +378,6 @@ export default function BatchChecklist({ batch, onUsedChange, onChanged }) {
                 )}
             </div>
 
-            {notice && <p className="flex items-center gap-1.5 rounded-xl bg-emerald-50 px-3 py-2 text-xs font-medium text-emerald-700"><Icon name="check_circle" className="text-sm" /> {notice}</p>}
             {error && <p className="rounded-xl bg-[#FFF4F2] px-3 py-2 text-xs font-medium text-[#B81E0C]">{error}</p>}
 
             <ul className="max-h-[560px] space-y-2 overflow-y-auto pr-1">

@@ -40,6 +40,9 @@ class User extends Authenticatable
     public const MAX_SPACES_FREE = 1;
     public const MAX_SPACES_PRO  = 3;
 
+    /** Meses de plan Pro que da cada compra pagada en SpaceShop. */
+    public const PRO_MONTHS_PER_PURCHASE = 12;
+
     /**
      * Get the attributes that should be cast.
      *
@@ -152,6 +155,27 @@ class User extends Authenticatable
         }
 
         return true;
+    }
+
+    /**
+     * Activa (o extiende) el plan Pro por una compra pagada en SpaceShop:
+     * tarjeta, pulsera o placa de reseñas. Dura PRO_MONTHS_PER_PURCHASE meses
+     * desde el pago; si ya tenía Pro con una fecha más lejana, se respeta.
+     * Un Pro sin vencimiento (asignado por un admin) no se toca.
+     */
+    public function grantProFromPurchase(?\DateTimeInterface $paidAt = null): void
+    {
+        if ($this->plan === 'pro' && $this->plan_expires_at === null) {
+            return;
+        }
+
+        $until = \Illuminate\Support\Carbon::instance($paidAt ?? now())->addMonths(self::PRO_MONTHS_PER_PURCHASE);
+
+        if ($this->isPro() && $this->plan_expires_at->gte($until)) {
+            return;
+        }
+
+        $this->forceFill(['plan' => 'pro', 'plan_expires_at' => $until])->save();
     }
 
     /**

@@ -42,4 +42,32 @@ class Order extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+
+    /**
+     * Cuenta del comprador: la que tenía sesión al comprar o, si compró como
+     * invitado, la que tiene el mismo correo que puso en el pedido.
+     */
+    public function buyer(): ?User
+    {
+        if ($this->user_id) {
+            return $this->user;
+        }
+
+        $email = strtolower(trim((string) $this->customer_email));
+
+        return $email === '' ? null : User::whereRaw('LOWER(email) = ?', [$email])->first();
+    }
+
+    /**
+     * Una compra real ya cobrada activa el plan Pro del comprador.
+     * Los pedidos de prueba de admin no cuentan.
+     */
+    public function grantBuyerPro(): void
+    {
+        if ($this->is_test || !in_array($this->status, self::PAID_STATUSES, true)) {
+            return;
+        }
+
+        $this->buyer()?->grantProFromPurchase($this->paid_at ?? now());
+    }
 }

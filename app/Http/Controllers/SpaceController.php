@@ -133,7 +133,7 @@ class SpaceController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255',
             'phone' => 'nullable|string|max:30',
-            'note' => 'nullable|string',
+            'note' => 'nullable|string|max:2000',
         ]);
 
         if ($validator->fails()) {

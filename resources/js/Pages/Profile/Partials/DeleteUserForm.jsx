@@ -2,7 +2,6 @@ import DangerButton from '@/Components/DangerButton';
 import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
 import Modal from '@/Components/Modal';
-import SecondaryButton from '@/Components/SecondaryButton';
 import TextInput from '@/Components/TextInput';
 import { useForm } from '@inertiajs/react';
 import { useRef, useState } from 'react';
@@ -64,23 +63,29 @@ export default function DeleteUserForm({ className = '' }) {
                 Delete Account
             </DangerButton>
 
-            <Modal show={confirmingUserDeletion} onClose={closeModal}>
-                <form onSubmit={deleteUser} className="p-6">
-                    <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100">
-                        Are you sure you want to delete your account?
-                    </h2>
+            <Modal show={confirmingUserDeletion} onClose={closeModal} maxWidth="md">
+                <form onSubmit={deleteUser} className="relative p-6 sm:p-7">
+                    <span className="absolute inset-x-0 top-0 h-1 bg-[#D42410]" />
+                    <div className="flex items-start gap-4">
+                        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#FFF4F2] text-[#D42410]">
+                            <span aria-hidden="true" className="ms text-2xl">delete</span>
+                        </span>
+                        <div className="min-w-0 pt-1">
+                            <h2 className="font-display text-lg font-bold leading-tight text-neutral-900">
+                                ¿Eliminar tu cuenta?
+                            </h2>
+                            <p className="mt-2 text-sm leading-relaxed text-neutral-600">
+                                Se borrarán para siempre tu cuenta, tus Spaces y la
+                                configuración de tus tarjetas. Escribe tu contraseña
+                                para confirmar.
+                            </p>
+                        </div>
+                    </div>
 
-                    <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                        Once your account is deleted, all of its resources and
-                        data will be permanently deleted. Please enter your
-                        password to confirm you would like to permanently delete
-                        your account.
-                    </p>
-
-                    <div className="mt-6">
+                    <div className="mt-5">
                         <InputLabel
                             htmlFor="password"
-                            value="Password"
+                            value="Contraseña"
                             className="sr-only"
                         />
 
@@ -93,9 +98,9 @@ export default function DeleteUserForm({ className = '' }) {
                             onChange={(e) =>
                                 setData('password', e.target.value)
                             }
-                            className="mt-1 block w-3/4"
+                            className="block w-full rounded-xl border-black/15 focus:border-[#D42410] focus:ring-[#D42410]/20"
                             isFocused
-                            placeholder="Password"
+                            placeholder="Contraseña"
                         />
 
                         <InputError
@@ -104,14 +109,22 @@ export default function DeleteUserForm({ className = '' }) {
                         />
                     </div>
 
-                    <div className="mt-6 flex justify-end">
-                        <SecondaryButton onClick={closeModal}>
-                            Cancel
-                        </SecondaryButton>
-
-                        <DangerButton className="ms-3" disabled={processing}>
-                            Delete Account
-                        </DangerButton>
+                    <div className="mt-6 flex flex-col-reverse gap-2.5 sm:flex-row sm:justify-end">
+                        <button
+                            type="button"
+                            onClick={closeModal}
+                            className="inline-flex items-center justify-center rounded-full border border-black/15 bg-white px-5 py-2.5 text-sm font-semibold text-neutral-900 transition hover:border-neutral-900"
+                        >
+                            Cancelar
+                        </button>
+                        <button
+                            type="submit"
+                            disabled={processing}
+                            className="inline-flex items-center justify-center gap-1.5 rounded-full bg-[#D42410] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_8px_20px_rgba(212,36,16,0.3)] transition hover:-translate-y-0.5 hover:bg-[#B81E0C] disabled:opacity-60"
+                        >
+                            <span aria-hidden="true" className="ms text-lg">delete</span>
+                            Eliminar cuenta
+                        </button>
                     </div>
                 </form>
             </Modal>
