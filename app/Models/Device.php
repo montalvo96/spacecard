@@ -123,6 +123,37 @@ class Device extends Model
     }
 
     /**
+     * ¿Reclamar esta tarjeta activa el plan Pro de quien la reclama?
+     * Solo las de lotes genéricos creados por el admin (encargos que se
+     * reparten, p. ej. en un evento). Las que salen de un pedido de la tienda
+     * no: ahí el Pro lo recibe el comprador por su compra.
+     */
+    public function grantsProOnClaim(): bool
+    {
+        return $this->order_item_id === null;
+    }
+
+    /**
+     * Vincula esta tarjeta (en stock) a un usuario y, si es de un lote
+     * genérico, le activa el plan Pro aunque la haya pagado otra persona
+     * (p. ej. tarjetas regaladas en un evento).
+     * Debe llamarse dentro de una transacción con el registro bloqueado.
+     */
+    public function claimFor(User $user): void
+    {
+        $this->update([
+            'owner_id' => $user->id,
+            'status' => 'claimed',
+            'claimed_at' => now(),
+            'destination_type' => 'none', // Sin destino inicial (desata onboarding)
+        ]);
+
+        if ($this->grantsProOnClaim()) {
+            $user->grantProFromPurchase(now());
+        }
+    }
+
+    /**
      * URL pública de resolución (lo que se graba en el NFC y codifica el QR).
      */
     public function resolveUrl(): string

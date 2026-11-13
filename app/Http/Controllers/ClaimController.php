@@ -56,12 +56,7 @@ class ClaimController extends Controller
                     throw new \Exception("El dispositivo ya ha sido reclamado o no está disponible.");
                 }
 
-                $device->update([
-                    'owner_id' => Auth::id(),
-                    'status' => 'claimed',
-                    'claimed_at' => now(),
-                    'destination_type' => 'none', // Sin destino inicial (desata onboarding)
-                ]);
+                $device->claimFor(Auth::user());
             });
 
             // Limpiar código de la sesión si existiera
