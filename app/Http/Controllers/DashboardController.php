@@ -48,12 +48,7 @@ class DashboardController extends Controller
                         ->first();
 
                     if ($device) {
-                        $device->update([
-                            'owner_id' => $user->id,
-                            'status' => 'claimed',
-                            'claimed_at' => now(),
-                            'destination_type' => 'none',
-                        ]);
+                        $device->claimFor($user);
                         Log::info("Dispositivo {$code} reclamado automáticamente por el usuario {$user->id} tras autenticación.");
                     } else {
                         throw new \Exception("El dispositivo ya no está disponible.");

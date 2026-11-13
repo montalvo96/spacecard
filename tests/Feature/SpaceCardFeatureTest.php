@@ -135,6 +135,75 @@ class SpaceCardFeatureTest extends TestCase
         $device->refresh();
         $this->assertEquals('claimed', $device->status);
         $this->assertEquals($this->user->id, $device->owner_id);
+
+        // Reclamar una tarjeta del lote genérico activa Pro por 12 meses.
+        $this->user->refresh();
+        $this->assertTrue($this->user->isPro());
+        $this->assertTrue($this->user->plan_expires_at->greaterThan(now()->addMonths(11)));
+    }
+
+    /**
+     * Tarjeta regalada: alguien sin cuenta la escanea, se registra y queda
+     * vinculada a su panel con el plan Pro activo.
+     */
+    public function test_new_user_claiming_gifted_card_gets_pro(): void
+    {
+        $device = Device::create([
+            'code' => 'SPC-TEST-GIFT',
+            'type' => 'card',
+            'status' => 'stock',
+            'batch_id' => $this->batch->id,
+        ]);
+
+        $this->get(route('devices.resolve', ['code' => $device->code]));
+
+        $this->post(route('register'), [
+            'name' => 'Persona Regalada',
+            'email' => 'regalo@example.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+        ]);
+
+        $this->get(route('dashboard'))->assertOk();
+
+        $newUser = User::where('email', 'regalo@example.com')->firstOrFail();
+        $device->refresh();
+        $this->assertEquals($newUser->id, $device->owner_id);
+        $this->assertTrue($newUser->isPro());
+    }
+
+    /**
+     * Solo los lotes genéricos dan Pro al reclamar: una tarjeta que salió de
+     * un pedido de la tienda no lo activa.
+     */
+    public function test_claiming_shop_order_card_does_not_grant_pro(): void
+    {
+        $order = \App\Models\Order::create([
+            'status' => 'completed',
+            'is_test' => false,
+            'customer_name' => 'Prueba',
+            'customer_email' => 'prueba@example.com',
+            'shipping_address' => 'N/A',
+            'total' => 0,
+        ]);
+        $item = $order->items()->create([
+            'product_type' => 'card',
+            'quantity' => 1,
+            'price' => 0,
+        ]);
+        $device = Device::create([
+            'code' => 'SPC-TEST-FAKE',
+            'type' => 'card',
+            'status' => 'stock',
+            'batch_id' => $this->batch->id,
+            'order_item_id' => $item->id,
+        ]);
+
+        $this->actingAs($this->user)
+            ->post(route('devices.claim.confirm', ['code' => $device->code]));
+
+        $this->assertEquals($this->user->id, $device->refresh()->owner_id);
+        $this->assertFalse($this->user->refresh()->isPro());
     }
 
     /**
